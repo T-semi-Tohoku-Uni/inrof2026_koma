@@ -27,4 +27,5 @@ jobs:
 
       - name: format test
         run: |
+            source /opt/ros/humble/setup.bash
             ament_clang_format ./src
