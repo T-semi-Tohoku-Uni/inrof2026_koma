@@ -1,0 +1,29 @@
+name: ROS2 code format test
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    name: format
+    runs-on: ubuntu-22.04
+    container: ros:humble-ros-base
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: install dependency
+        run: |
+            sudo apt install -y clang-format
+            sudo apt install -y ros-humble-ament-cmake-clang-format ros-humble-ament-clang-format
+
+      - name: format test
+        run: |
+            ament_clang_format ./src
