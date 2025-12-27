@@ -1,0 +1,31 @@
+#!/bin/sh
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG="$(cat "$COMMIT_MSG_FILE")"
+
+# Conventional Commits pattern
+PATTERN="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([a-zA-Z0-9_-]+\))?: .{1,72}$"
+
+# マージコミットは許可
+if echo "$COMMIT_MSG" | grep -qE "^Merge "; then
+  exit 0
+fi
+
+# チェック
+if ! echo "$COMMIT_MSG" | grep -qE "$PATTERN"; then
+  echo "❌ Commit message does NOT follow Conventional Commits."
+  echo ""
+  echo "Expected format:"
+  echo "  <type>(<scope>): <subject>"
+  echo ""
+  echo "Allowed types:"
+  echo "  feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+  echo ""
+  echo "Examples:"
+  echo "  feat(auth): add login API"
+  echo "  fix(ui): button alignment"
+  echo "  docs: update README"
+  exit 1
+fi
+
+exit 0
