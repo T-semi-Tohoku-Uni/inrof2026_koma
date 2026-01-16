@@ -106,5 +106,7 @@
         "valarray": "cpp",
         "dense": "cpp",
         "splines": "cpp"
-    }
+    },
+    "ROS2.distro": "humble",
+    "cmake.sourceDirectory": "${workspaceFolder}/src/inrof2026_koma"
 }
