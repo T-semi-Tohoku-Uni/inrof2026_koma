@@ -15,3 +15,8 @@ commitメッセージのフォーマット設定
 chmod a+x .githooks/*
 git config --local core.hooksPath .githooks
 ```
+
+## プログラムのフォーマット
+```bash
+find ./src -path './src/**/src/*.cpp' | xargs ament_clang_format --reformat
+```
