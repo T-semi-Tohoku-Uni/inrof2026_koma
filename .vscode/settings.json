@@ -9,7 +9,7 @@
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
     ],
     "cmake.configureEnvironment": {
-        "CMAKE_PREFIX_PATH": "${env:HOME}/ros_ws/install"
+        "CMAKE_PREFIX_PATH": "${workspaceFolder}/install"
     },
     "files.associations": {
         "functional": "cpp",
@@ -106,5 +106,12 @@
         "valarray": "cpp",
         "dense": "cpp",
         "splines": "cpp"
-    }
+    },
+    "ROS2.distro": "humble",
+    "cmake.sourceDirectory": [
+        "${workspaceFolder}/src/inrof2026_koma/CMakeLists.txt",
+        "${workspaceFolder}/src/localization/CMakeLists.txt",
+        "${workspaceFolder}/src/planning/CMakeLists.txt",
+        "${workspaceFolder}/src/simulation/CMakeLists.txt",
+    ]
 }
