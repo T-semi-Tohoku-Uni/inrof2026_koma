@@ -13,6 +13,7 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libtorch")
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Torch REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 add_executable(catch_influence src/catch_influence.cpp)
 ament_target_dependencies(catch_influence rclcpp)
@@ -22,6 +23,25 @@ target_compile_options(catch_influence PRIVATE "${TORCH_CXX_FLAGS}")
 install(TARGETS
   catch_influence
   DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(dummy_joint src/dummy_joint.cpp)
+ament_target_dependencies(dummy_joint 
+  rclcpp 
+  sensor_msgs
+)
+target_include_directories(dummy_joint
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  dummy_joint
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch urdf meshes include
+  DESTINATION share/${PROJECT_NAME}
 )
 
 
