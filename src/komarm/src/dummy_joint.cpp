@@ -9,11 +9,11 @@ koma::JointManager::JointManager(
     );
 
     joint_names_ = {
-        "Revolute_12",
-        "Revolute_11",
-        "Revolute_7",
-        "Revolute_8",
-        "Revolute_9",
+        "Revolute 12",
+        "Revolute 11",
+        "Revolute 7",
+        "Revolute 8",
+        "Revolute 9",
     };
     joint_positions_ = {
         0.0,
