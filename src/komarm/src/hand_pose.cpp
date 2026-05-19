@@ -1,15 +1,18 @@
 #include <komarm/hand_pose.hpp>
 
-koma::HandPose::HandPose(const rclcpp::NodeOptions & options): Node("hand_pose") {
-    // declare parameter
-    target_frame_ = this->declare_parameter<std::string>("target_frame", "base_link");
-    source_frame_ = this->declare_parameter<std::string>("source_frame", "hand_v17_1");
+koma::HandPose::HandPose(const rclcpp::NodeOptions & options) : Node("hand_pose")
+{
+  // declare parameter
+  target_frame_ = this->declare_parameter<std::string>("target_frame", "base_link");
+  source_frame_ = this->declare_parameter<std::string>("source_frame", "hand_v17_1");
 
-    tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+  tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
-    hand_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("hand_pose", rclcpp::SensorDataQoS());
-    hand_pose_timer_ = this->create_wall_timer(50ms, std::bind(&koma::HandPose::handPoseCallback, this));
+  hand_pose_pub_ =
+    this->create_publisher<geometry_msgs::msg::PoseStamped>("hand_pose", rclcpp::SensorDataQoS());
+  hand_pose_timer_ =
+    this->create_wall_timer(50ms, std::bind(&koma::HandPose::handPoseCallback, this));
 }
 
 void koma::HandPose::handPoseCallback()
