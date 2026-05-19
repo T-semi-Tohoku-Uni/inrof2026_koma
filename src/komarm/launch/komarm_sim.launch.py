@@ -75,6 +75,64 @@ def generate_launch_description():
         joint_state_plugin + "\n</robot>",
     )
 
+    joint_position_controller_plugin = """
+    <gazebo>
+        <plugin
+        filename="ignition-gazebo-joint-position-controller-system"
+        name="ignition::gazebo::systems::JointPositionController">
+        <joint_name>Revolute 12</joint_name>
+        <topic>/komarm/revolute_12/cmd_pos</topic>
+        <p_gain>10.0</p_gain>
+        <i_gain>0.0</i_gain>
+        <d_gain>0.1</d_gain>
+        </plugin>
+
+        <plugin
+        filename="ignition-gazebo-joint-position-controller-system"
+        name="ignition::gazebo::systems::JointPositionController">
+        <joint_name>Revolute 11</joint_name>
+        <topic>/komarm/revolute_11/cmd_pos</topic>
+        <p_gain>10.0</p_gain>
+        <i_gain>0.0</i_gain>
+        <d_gain>0.1</d_gain>
+        </plugin>
+
+        <plugin
+        filename="ignition-gazebo-joint-position-controller-system"
+        name="ignition::gazebo::systems::JointPositionController">
+        <joint_name>Revolute 7</joint_name>
+        <topic>/komarm/revolute_7/cmd_pos</topic>
+        <p_gain>10.0</p_gain>
+        <i_gain>0.0</i_gain>
+        <d_gain>0.1</d_gain>
+        </plugin>
+
+        <plugin
+        filename="ignition-gazebo-joint-position-controller-system"
+        name="ignition::gazebo::systems::JointPositionController">
+        <joint_name>Revolute 8</joint_name>
+        <topic>/komarm/revolute_8/cmd_pos</topic>
+        <p_gain>10.0</p_gain>
+        <i_gain>0.0</i_gain>
+        <d_gain>0.1</d_gain>
+        </plugin>
+
+        <plugin
+        filename="ignition-gazebo-joint-position-controller-system"
+        name="ignition::gazebo::systems::JointPositionController">
+        <joint_name>Revolute 9</joint_name>
+        <topic>/komarm/revolute_9/cmd_pos</topic>
+        <p_gain>10.0</p_gain>
+        <i_gain>0.0</i_gain>
+        <d_gain>0.1</d_gain>
+        </plugin>
+    </gazebo>
+    """
+    robot_desc = robot_desc.replace(
+        "</robot>",
+        joint_position_controller_plugin + "\n</robot>",
+    )
+
     params = {"robot_description": robot_desc}
 
     robot_state_publisher_node = Node(
@@ -111,7 +169,13 @@ def generate_launch_description():
             '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/world/inrof/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
             
-            "/komarm/gazebo_joint_states@sensor_msgs/msg/JointState@gz.msgs.Model"
+            "/komarm/gazebo_joint_states@sensor_msgs/msg/JointState@gz.msgs.Model",
+            
+            "/komarm/revolute_12/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_11/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_7/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_8/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_9/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
             ],
         output='screen'
     )
@@ -140,6 +204,59 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    # TODO: delete
+    from launch.actions import ExecuteProcess, TimerAction
+    send_zero_joint_commands = TimerAction(
+        period=3.0,
+        actions=[
+            ExecuteProcess(
+                cmd=[
+                    "ros2", "topic", "pub", "--once",
+                    "/komarm/revolute_12/cmd_pos",
+                    "std_msgs/msg/Float64",
+                    "{data: 0.0}",
+                ],
+                output="screen",
+            ),
+            ExecuteProcess(
+                cmd=[
+                    "ros2", "topic", "pub", "--once",
+                    "/komarm/revolute_11/cmd_pos",
+                    "std_msgs/msg/Float64",
+                    "{data: 0.0}",
+                ],
+                output="screen",
+            ),
+            ExecuteProcess(
+                cmd=[
+                    "ros2", "topic", "pub", "--once",
+                    "/komarm/revolute_7/cmd_pos",
+                    "std_msgs/msg/Float64",
+                    "{data: 0.0}",
+                ],
+                output="screen",
+            ),
+            ExecuteProcess(
+                cmd=[
+                    "ros2", "topic", "pub", "--once",
+                    "/komarm/revolute_8/cmd_pos",
+                    "std_msgs/msg/Float64",
+                    "{data: 0.0}",
+                ],
+                output="screen",
+            ),
+            ExecuteProcess(
+                cmd=[
+                    "ros2", "topic", "pub", "--once",
+                    "/komarm/revolute_9/cmd_pos",
+                    "std_msgs/msg/Float64",
+                    "{data: 0.0}",
+                ],
+                output="screen",
+            ),
+        ],
+    )
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         gazebo_node,
@@ -149,5 +266,7 @@ def generate_launch_description():
         joint_manager,
         bridge,
         static_from_map_to_odom,
-        # static_from_odom_to_baseline
+
+        # TODO: delete
+        # send_zero_joint_commands,
     ]) 
