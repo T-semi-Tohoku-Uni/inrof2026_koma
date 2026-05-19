@@ -18,7 +18,7 @@ git config --local core.hooksPath .githooks
 
 ## プログラムのフォーマット
 ```bash
-find ./src -path './src/**/src/*.cpp' | xargs ament_clang_format --reformat
+find ./src \( -path './src/*/include/*.hpp' -o -path './src/*/src/*.cpp' \) -print0 | xargs -0 ament_clang_format --reformat
 ```
 libtorchのダウンロード
 ```bash
