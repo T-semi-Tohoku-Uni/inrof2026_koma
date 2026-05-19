@@ -7,38 +7,19 @@ koma::JointManager::JointManager(
         "joint_states",
         10
     );
-
-    joint_names_ = {
-        "Revolute 12",
-        "Revolute 11",
-        "Revolute 7",
-        "Revolute 8",
-        "Revolute 9",
-    };
-    joint_positions_ = {
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-    };
-
-    timer_ = this->create_wall_timer(
-        50ms,
-        std::bind(&koma::JointManager::timerCallback, this)
+    gazebo_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState> (
+        "/komarm/gazebo_joint_states",
+        10,
+        std::bind(&koma::JointManager::gazeboJointStatesCallback, this, std::placeholders::_1)
     );
 
     RCLCPP_INFO(this->get_logger(), "Success initialize JointManager");
 }
 
-void koma::JointManager::timerCallback() {
-    sensor_msgs::msg::JointState msg;
-
-    msg.header.stamp = this->get_clock()->now();
-    msg.name = joint_names_;
-    msg.position = joint_positions_;
-
-    joint_state_pub_->publish(msg);
+void koma::JointManager::gazeboJointStatesCallback(
+    const sensor_msgs::msg::JointState::SharedPtr msg
+) {
+    this->joint_state_pub_->publish(*msg);
 }
 
 int main(int argc, char **argv) {

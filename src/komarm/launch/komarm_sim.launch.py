@@ -42,6 +42,8 @@ def generate_launch_description():
         "../meshes/",
         f"file://{komarm_package_dir}/meshes/",
     )
+
+    # TODO: delete
     fixed_base_joint = f"""
     <link name="world"/>
 
@@ -52,6 +54,26 @@ def generate_launch_description():
     </joint>
     """
     robot_desc = robot_desc.replace("</robot>", fixed_base_joint + "\n</robot>")
+
+    # Add gazebo joint plugin
+    joint_state_plugin = """
+    <gazebo>
+        <plugin
+        filename="ignition-gazebo-joint-state-publisher-system"
+        name="ignition::gazebo::systems::JointStatePublisher">
+        <topic>/komarm/gazebo_joint_states</topic>
+        <joint_name>Revolute 12</joint_name>
+        <joint_name>Revolute 11</joint_name>
+        <joint_name>Revolute 7</joint_name>
+        <joint_name>Revolute 8</joint_name>
+        <joint_name>Revolute 9</joint_name>
+        </plugin>
+    </gazebo>
+    """
+    robot_desc = robot_desc.replace(
+        "</robot>",
+        joint_state_plugin + "\n</robot>",
+    )
 
     params = {"robot_description": robot_desc}
 
@@ -87,7 +109,10 @@ def generate_launch_description():
             '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
-            '/world/inrof/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock'],
+            '/world/inrof/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
+            
+            "/komarm/gazebo_joint_states@sensor_msgs/msg/JointState@gz.msgs.Model"
+            ],
         output='screen'
     )
 

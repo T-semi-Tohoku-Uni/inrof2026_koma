@@ -10,12 +10,11 @@ namespace koma {
         public:
             JointManager(const rclcpp::NodeOptions & options=rclcpp::NodeOptions());
         private:
-            rclcpp::TimerBase::SharedPtr timer_;
-
             rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
-            std::vector<std::string> joint_names_;
-            std::vector<double> joint_positions_;
+            rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr gazebo_joint_state_sub_;
 
-            void timerCallback();
+            void gazeboJointStatesCallback(
+                const sensor_msgs::msg::JointState::SharedPtr msg
+            );
     };
 }
