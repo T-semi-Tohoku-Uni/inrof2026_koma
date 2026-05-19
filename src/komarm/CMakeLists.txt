@@ -15,9 +15,11 @@ find_package(rclcpp REQUIRED)
 find_package(Torch REQUIRED)
 
 add_executable(catch_influence src/catch_influence.cpp)
+target_include_directories(catch_influence PUBLIC include)
 ament_target_dependencies(catch_influence rclcpp)
 target_link_libraries(catch_influence "${TORCH_LIBRARIES}")
 target_compile_options(catch_influence PRIVATE "${TORCH_CXX_FLAGS}")
+
 
 install(TARGETS
   catch_influence
