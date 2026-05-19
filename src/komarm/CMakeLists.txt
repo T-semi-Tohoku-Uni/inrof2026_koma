@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Torch REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 add_executable(catch_influence src/catch_influence.cpp)
 ament_target_dependencies(catch_influence rclcpp)
@@ -29,6 +30,7 @@ add_executable(dummy_joint src/dummy_joint.cpp)
 ament_target_dependencies(dummy_joint 
   rclcpp 
   sensor_msgs
+  tf2_ros
 )
 target_include_directories(dummy_joint
   PUBLIC
