@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(Torch REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 add_executable(catch_influence src/catch_influence.cpp)
 ament_target_dependencies(catch_influence rclcpp)
@@ -39,6 +40,22 @@ target_include_directories(dummy_joint
 )
 install(TARGETS
   dummy_joint
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(hand_pose src/hand_pose.cpp)
+ament_target_dependencies(hand_pose 
+  rclcpp 
+  tf2_ros
+  geometry_msgs
+)
+target_include_directories(hand_pose
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  hand_pose
   DESTINATION lib/${PROJECT_NAME}
 )
 

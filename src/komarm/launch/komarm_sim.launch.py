@@ -195,6 +195,13 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    hand_pose = Node(
+        package="komarm",
+        executable="hand_pose",
+        output="screen",
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     static_from_map_to_odom = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
@@ -211,6 +218,7 @@ def generate_launch_description():
         gz_spawn_entity,
         rviz,
         joint_manager,
+        hand_pose,
         bridge,
         static_from_map_to_odom,
     ]) 
