@@ -17,9 +17,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
+
 add_executable(catch_influence src/catch_influence.cpp)
 target_include_directories(catch_influence PUBLIC include)
-ament_target_dependencies(catch_influence rclcpp)
+ament_target_dependencies(catch_influence rclcpp sensor_msgs geometry_msgs)
 target_link_libraries(catch_influence "${TORCH_LIBRARIES}")
 target_compile_options(catch_influence PRIVATE "${TORCH_CXX_FLAGS}")
 

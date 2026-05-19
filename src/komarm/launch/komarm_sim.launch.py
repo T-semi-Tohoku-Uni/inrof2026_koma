@@ -211,6 +211,13 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    catch_influence = Node(
+        package="komarm",
+        executable="catch_influence",
+        output="screen",
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         gazebo_node,
@@ -221,4 +228,5 @@ def generate_launch_description():
         hand_pose,
         bridge,
         static_from_map_to_odom,
+        catch_influence,
     ]) 
