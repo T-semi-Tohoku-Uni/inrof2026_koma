@@ -8,7 +8,7 @@ koma::HandPose::HandPose(const rclcpp::NodeOptions & options): Node("hand_pose")
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
-    hand_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("hand_pose", 10);
+    hand_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("hand_pose", rclcpp::SensorDataQoS());
     hand_pose_timer_ = this->create_wall_timer(50ms, std::bind(&koma::HandPose::handPoseCallback, this));
 }
 

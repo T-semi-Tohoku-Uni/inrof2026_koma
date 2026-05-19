@@ -2,7 +2,7 @@
 
 koma::JointManager::JointManager(const rclcpp::NodeOptions & options) : Node("joint_manager")
 {
-  joint_state_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
+  joint_state_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", rclcpp::SensorDataQoS());
   gazebo_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
     "/komarm/gazebo_joint_states", 10,
     std::bind(&koma::JointManager::gazeboJointStatesCallback, this, std::placeholders::_1));
