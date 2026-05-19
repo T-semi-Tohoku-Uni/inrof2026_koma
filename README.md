@@ -16,6 +16,10 @@ chmod a+x .githooks/*
 git config --local core.hooksPath .githooks
 ```
 
+## プログラムのフォーマット
+```bash
+find ./src \( -path './src/*/include/*.hpp' -o -path './src/*/src/*.cpp' \) -print0 | xargs -0 ament_clang_format --reformat
+```
 libtorchのダウンロード
 ```bash
 cd inrof2026_koma/src/komarm
