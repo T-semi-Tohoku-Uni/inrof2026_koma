@@ -204,59 +204,6 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
-    # TODO: delete
-    from launch.actions import ExecuteProcess, TimerAction
-    send_zero_joint_commands = TimerAction(
-        period=3.0,
-        actions=[
-            ExecuteProcess(
-                cmd=[
-                    "ros2", "topic", "pub", "--once",
-                    "/komarm/revolute_12/cmd_pos",
-                    "std_msgs/msg/Float64",
-                    "{data: 0.0}",
-                ],
-                output="screen",
-            ),
-            ExecuteProcess(
-                cmd=[
-                    "ros2", "topic", "pub", "--once",
-                    "/komarm/revolute_11/cmd_pos",
-                    "std_msgs/msg/Float64",
-                    "{data: 0.0}",
-                ],
-                output="screen",
-            ),
-            ExecuteProcess(
-                cmd=[
-                    "ros2", "topic", "pub", "--once",
-                    "/komarm/revolute_7/cmd_pos",
-                    "std_msgs/msg/Float64",
-                    "{data: 0.0}",
-                ],
-                output="screen",
-            ),
-            ExecuteProcess(
-                cmd=[
-                    "ros2", "topic", "pub", "--once",
-                    "/komarm/revolute_8/cmd_pos",
-                    "std_msgs/msg/Float64",
-                    "{data: 0.0}",
-                ],
-                output="screen",
-            ),
-            ExecuteProcess(
-                cmd=[
-                    "ros2", "topic", "pub", "--once",
-                    "/komarm/revolute_9/cmd_pos",
-                    "std_msgs/msg/Float64",
-                    "{data: 0.0}",
-                ],
-                output="screen",
-            ),
-        ],
-    )
-
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         gazebo_node,
@@ -266,7 +213,4 @@ def generate_launch_description():
         joint_manager,
         bridge,
         static_from_map_to_odom,
-
-        # TODO: delete
-        # send_zero_joint_commands,
     ]) 
