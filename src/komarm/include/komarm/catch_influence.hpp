@@ -3,7 +3,7 @@
 #include <torch/torch.h>
 #include <torch/script.h>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <inrof2026_koma_type/srv/pose_stamped.hpp>
 #include <chrono>
 
 using namespace std::chrono_literals;
@@ -20,7 +20,9 @@ namespace koma{
             torch::jit::script::Module module_;
             std::string model_path_;
             sensor_msgs::msg::JointState cur_joint_state_;
+            bool has_cur_joint_state_=false;
             geometry_msgs::msg::PoseStamped cur_hand_pose_;
+            bool has_cur_hand_pose_=false;
             sensor_msgs::msg::JointState pre_action_;
             rclcpp::TimerBase::SharedPtr control_timer_;
 
@@ -35,11 +37,16 @@ namespace koma{
 
             //subscribers
             rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_sub_;
-            rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr hand_sub_;
+
+            //server
+            rclcpp::Service<inrof2026_koma_type::srv::PoseStamped>::SharedPtr hand_srv_;
 
             //callback function
             void joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
-            void hand_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+            void hand_callback(
+                const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Request> request,
+                const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Response> Response
+            );
 
     };
 

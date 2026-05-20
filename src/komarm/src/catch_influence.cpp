@@ -10,7 +10,7 @@ namespace koma{
         RCLCPP_INFO(this->get_logger(), "CatchInfluence node has been started.");
         
         // create a timer for the control loop
-        control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
+        control_timer_ = this->create_wall_timer(33ms, std::bind(&CatchInfluence::control_loop, this));
 
         // Initialize publishers and subscribers
         target_joint_pub_ = this->create_publisher<sensor_msgs::msg::JointState>(
@@ -21,8 +21,17 @@ namespace koma{
             "joint_states", rclcpp::SensorDataQoS(), std::bind(&CatchInfluence::joint_callback, this, std::placeholders::_1)
         );
 
-        hand_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
-            "hand_pose", rclcpp::SensorDataQoS(), std::bind(&CatchInfluence::hand_callback, this, std::placeholders::_1)
+        // hand_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+        //     "hand_pose", rclcpp::SensorDataQoS(), std::bind(&CatchInfluence::hand_callback, this, std::placeholders::_1)
+        // );
+        hand_srv_ = this->create_service<inrof2026_koma_type::srv::PoseStamped>(
+            "hand_pose",
+            std::bind(
+                &CatchInfluence::hand_callback,
+                this,
+                std::placeholders::_1, 
+                std::placeholders::_2
+            )
         );
 
         // Initialize previous action
@@ -31,7 +40,7 @@ namespace koma{
         pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0};
 
         // Load the model
-        model_path_ = "/home/daikou/komarm/logs/rsl_rl/reach/2026-05-16_16-41-15/exported/policy.pt";
+        model_path_ = "/home/keigo/komarm/logs/rsl_rl/reach/2026-05-20_05-43-29/exported/policy.pt";
         module_ = load_model(model_path_);
         //inference mode
         module_.eval();
@@ -41,10 +50,16 @@ namespace koma{
 
     void CatchInfluence::joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg){
         cur_joint_state_ = *msg;
+        has_cur_joint_state_ = true;
     }
 
-    void CatchInfluence::hand_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
-        cur_hand_pose_ = *msg;
+    void CatchInfluence::hand_callback(
+        const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Request> request,
+        const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Response> Response
+    ){
+        RCLCPP_INFO(this->get_logger(), "Change hand pose");
+        cur_hand_pose_ = request->pose_stamped;
+        has_cur_hand_pose_ = true;
     }
 
     //define the function that loads the parameters of the model
@@ -84,22 +99,69 @@ namespace koma{
         //publish action
         //pre action = action
 
-
+        if (!has_cur_joint_state_) {
+            RCLCPP_WARN(this->get_logger(), "cur_joint_state is empty");
+            return;
+        }
+        if (!has_cur_hand_pose_) {
+            RCLCPP_WARN(this->get_logger(), "cur_hand_pose is empty");
+            return;
+        }
          
         //create states
-        torch::Tensor obs = torch::zeros({22}); 
+        torch::Tensor obs = torch::tensor(
+            {
+                /* joint position */
+                cur_joint_state_.position[0],
+                cur_joint_state_.position[1],
+                cur_joint_state_.position[2],
+                cur_joint_state_.position[3],
+                cur_joint_state_.position[4],
+
+                /* joint vel */
+                cur_joint_state_.velocity[0],
+                cur_joint_state_.velocity[1],
+                cur_joint_state_.velocity[2],
+                cur_joint_state_.velocity[3],
+                cur_joint_state_.velocity[4],
+
+                /* target arm position */
+                cur_hand_pose_.pose.position.x,
+                cur_hand_pose_.pose.position.y,
+                cur_hand_pose_.pose.position.z,
+                cur_hand_pose_.pose.orientation.w,
+                cur_hand_pose_.pose.orientation.x,
+                cur_hand_pose_.pose.orientation.y,
+                cur_hand_pose_.pose.orientation.z,
+
+                /* pre action */
+                pre_action_.position[0],
+                pre_action_.position[1],
+                pre_action_.position[2],
+                pre_action_.position[3],
+                pre_action_.position[4],
+            },
+            torch::TensorOptions().dtype(torch::kFloat32)
+        ).unsqueeze(0);
 
         //influence
-        torch::Tensor action = inference(obs);
+        torch::Tensor action = inference(obs).squeeze(0);
+
+        
+        // post compute
+        sensor_msgs::msg::JointState target_joint;
+        target_joint.header.stamp = this->get_clock()->now();
+        target_joint.name = {"Revolute 12", "Revolute 11", "Revolute 7", "Revolute 8", "Revolute 9"};
+        target_joint.position.resize(5);
+        // TODO
+        for (size_t i=0; i<5; i++ ) {
+            double raw = action[i].item<double>();
+            target_joint.position[i] = 0.5 * raw;
+            pre_action_.position[i] = raw;
+        }
 
         //publish action
-        pre_action_.header.stamp = this->get_clock()->now();
-        pre_action_.position = {action[0].item<double>(), action[1].item<double>(), action[2].item<double>(), action[3].item<double>(), action[4].item<double>()};
-        target_joint_pub_->publish(pre_action_);
-        
-        
-        
-
+        target_joint_pub_->publish(target_joint);
     }
 }
 

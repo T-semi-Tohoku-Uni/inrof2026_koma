@@ -82,9 +82,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 12</joint_name>
         <topic>/komarm/revolute_12/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>30.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>2.0</d_gain>
         </plugin>
 
         <plugin
@@ -92,9 +92,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 11</joint_name>
         <topic>/komarm/revolute_11/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>2.0</d_gain>
         </plugin>
 
         <plugin
@@ -104,7 +104,7 @@ def generate_launch_description():
         <topic>/komarm/revolute_7/cmd_pos</topic>
         <p_gain>10.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>0.5</d_gain>
         </plugin>
 
         <plugin
@@ -112,9 +112,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 8</joint_name>
         <topic>/komarm/revolute_8/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>15.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>0.5</d_gain>
         </plugin>
 
         <plugin
@@ -122,9 +122,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 9</joint_name>
         <topic>/komarm/revolute_9/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>0.001</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>1.0</d_gain>
         </plugin>
     </gazebo>
     """

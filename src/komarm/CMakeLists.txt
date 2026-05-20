@@ -16,11 +16,18 @@ find_package(Torch REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(inrof2026_koma_type REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 
 add_executable(catch_influence src/catch_influence.cpp)
 target_include_directories(catch_influence PUBLIC include)
-ament_target_dependencies(catch_influence rclcpp sensor_msgs geometry_msgs)
+ament_target_dependencies(catch_influence 
+  rclcpp 
+  sensor_msgs 
+  geometry_msgs
+  inrof2026_koma_type  
+)
 target_link_libraries(catch_influence "${TORCH_LIBRARIES}")
 target_compile_options(catch_influence PRIVATE "${TORCH_CXX_FLAGS}")
 
@@ -51,6 +58,8 @@ ament_target_dependencies(hand_pose
   rclcpp 
   tf2_ros
   geometry_msgs
+  inrof2026_koma_type
+  visualization_msgs
 )
 target_include_directories(hand_pose
   PUBLIC
