@@ -60,8 +60,8 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command() {
     buf[2] = 0x01; // servo id. TODO
     buf[3] = 0x04;
     buf[4] = 0x02; // read command
-    buf[5] = 0xFF;
-    buf[6] = 0xFF;
+    buf[5] = 0x00;
+    buf[6] = 0x47;
 
     uint8_t sum = buf[2] + buf[3] + buf[4] + buf[5] + buf[6];
     buf[7] = ~sum;
