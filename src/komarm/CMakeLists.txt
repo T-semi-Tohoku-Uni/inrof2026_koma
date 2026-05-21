@@ -43,6 +43,22 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+add_executable(feetech_joint src/feetech_joint.cpp)
+ament_target_dependencies(feetech_joint 
+  rclcpp 
+  sensor_msgs
+)
+target_include_directories(feetech_joint
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  feetech_joint
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
 add_executable(hand_pose src/hand_pose.cpp)
 ament_target_dependencies(hand_pose 
   rclcpp 
