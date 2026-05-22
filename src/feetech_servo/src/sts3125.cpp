@@ -388,7 +388,6 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
         );
     };
 
-    state = koma::FeetechState();
     state.id = rx_id;
     state.present_position = u16_from_data(0);
     state.present_speed = u16_from_data(2);
