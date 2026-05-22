@@ -674,10 +674,8 @@ int main(int argc, char ** argv)
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         koma::FeetechState state;
-        if(!serial.send_read_state_command()) {}
-        while(serial.try_read_state_response(state)) {
-            state.print();
-        }
+        if (!serial.read_all_state(state)) {}
+        state.print();
     }
 
     return 0;
