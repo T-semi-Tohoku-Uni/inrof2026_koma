@@ -330,6 +330,39 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
         return false;
     }
 
+    if (length == 0x02) {
+        const uint8_t error = rx_buffer_[4];
+        const uint8_t received_checksum = rx_buffer_[packet_size - 1];
+
+        uint16_t checksum_sum = 0;
+        for (size_t i = 2; i < packet_size - 1; ++i) {
+            checksum_sum += rx_buffer_[i];
+        }
+
+        const uint8_t expected_checksum =
+            static_cast<uint8_t>(~static_cast<uint8_t>(checksum_sum & 0xFF));
+
+        if (received_checksum != expected_checksum) {
+            RCLCPP_WARN(
+                logger,
+                "WRITE ACK checksum mismatch: received=0x%02X expected=0x%02X",
+                received_checksum,
+                expected_checksum
+            );
+        } else if (error != 0x00) {
+            RCLCPP_WARN(
+                logger,
+                "WRITE ACK returned error: 0x%02X",
+                error
+            );
+        } else {
+            RCLCPP_DEBUG(logger, "Ignored WRITE ACK packet");
+        }
+
+        rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+        return false;
+    }
+
     constexpr uint8_t read_size = 0x06;
 
     if (length != read_size + 2) {
