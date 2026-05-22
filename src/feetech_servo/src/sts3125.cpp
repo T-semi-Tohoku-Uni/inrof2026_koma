@@ -658,22 +658,22 @@ int main(int argc, char ** argv)
 
     size_t index = 0;
 
+    koma::FeetechState state;
     while (true) {
-        double position = positions[index];
+        // double position = positions[index];
 
-        bool ok = serial.send_write_state_command(position);
+        // bool ok = serial.send_write_state_command(position);
 
-        if (ok) {
-            std::cout << "sent position: " << position << std::endl;
-        } else {
-            std::cerr << "failed to send position: " << position << std::endl;
-        }
+        // if (ok) {
+        //     std::cout << "sent position: " << position << std::endl;
+        // } else {
+        //     std::cerr << "failed to send position: " << position << std::endl;
+        // }
 
-        koma::FeetechState state;
         if (!serial.read_all_state(state)) {}
         state.print();
 
-        index = (index + 1) % positions.size();
+        // index = (index + 1) % positions.size();
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
