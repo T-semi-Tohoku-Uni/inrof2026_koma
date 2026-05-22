@@ -126,7 +126,7 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
 
     const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
 
-    constexpr uint8_t instruction = 0x03;      // WRITE
+    constexpr uint8_t instruction = 0x04;      // WRITE
     constexpr uint8_t goal_position_addr = 42; // Goal Position L
 
     // position は raw tick として扱う
@@ -166,6 +166,7 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
     tx[11] = 0x00;             // speed high
     tx[12] = make_checksum(&tx[2], 10); // IDからspeed highまで
 
+    rx_buffer_.clear();
     tcflush(serial_fd_, TCIFLUSH);
 
     if (!write_packet(tx, sizeof(tx))) return false;
@@ -176,8 +177,6 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
         static_cast<unsigned>(servo_id),
         static_cast<unsigned>(goal_position)
     );
-
-    std::this_thread::sleep_for(std::chrono::microseconds(2));
 
     return true;
 }
@@ -213,6 +212,126 @@ bool koma::FeetechSerial::send_read_state_command()
 
     if (!write_packet(tx, 8)) return false;
 
+    return true;
+}
+
+bool koma::FeetechSerial::try_read_write_ack()
+{
+    auto logger = rclcpp::get_logger("rclcpp");
+
+    if (serial_fd_ < 0) {
+        RCLCPP_ERROR(logger, "Serial port is not open");
+        return false;
+    }
+
+    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+
+    uint8_t tmp[64];
+    const ssize_t n = ::read(serial_fd_, tmp, sizeof(tmp));
+
+    if (n > 0) {
+        rx_buffer_.insert(rx_buffer_.end(), tmp, tmp + n);
+    } else if (n < 0) {
+        if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
+            return false;
+        }
+
+        RCLCPP_ERROR(
+            logger,
+            "Serial read failed while reading WRITE ACK: %s",
+            std::strerror(errno)
+        );
+        rx_buffer_.clear();
+        return false;
+    }
+
+    const uint8_t header[] = {0xFF, 0xFF};
+
+    auto header_it = std::search(
+        rx_buffer_.begin(),
+        rx_buffer_.end(),
+        std::begin(header),
+        std::end(header)
+    );
+
+    if (header_it == rx_buffer_.end()) {
+        rx_buffer_.clear();
+        return false;
+    }
+
+    if (header_it != rx_buffer_.begin()) {
+        rx_buffer_.erase(rx_buffer_.begin(), header_it);
+    }
+
+    if (rx_buffer_.size() < 4) {
+        return false;
+    }
+
+    const uint8_t rx_id = rx_buffer_[2];
+    const uint8_t length = rx_buffer_[3];
+    const size_t packet_size = static_cast<size_t>(length) + 4;
+
+    if (rx_buffer_.size() < packet_size) {
+        return false;
+    }
+
+    if (rx_id != servo_id) {
+        RCLCPP_WARN(
+            logger,
+            "Unexpected ACK servo id: received=%u expected=%u",
+            static_cast<unsigned>(rx_id),
+            static_cast<unsigned>(servo_id)
+        );
+
+        rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+        return false;
+    }
+
+    if (length != 0x02) {
+        RCLCPP_WARN(
+            logger,
+            "Unexpected packet while waiting WRITE ACK: length=%u head=%s",
+            static_cast<unsigned>(length),
+            bytes_to_hex(rx_buffer_, std::min<size_t>(rx_buffer_.size(), 32)).c_str()
+        );
+
+        rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+        return false;
+    }
+
+    const uint8_t error = rx_buffer_[4];
+    const uint8_t received_checksum = rx_buffer_[packet_size - 1];
+
+    uint16_t checksum_sum = 0;
+    for (size_t i = 2; i < packet_size - 1; ++i) {
+        checksum_sum += rx_buffer_[i];
+    }
+
+    const uint8_t expected_checksum =
+        static_cast<uint8_t>(~static_cast<uint8_t>(checksum_sum & 0xFF));
+
+    rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+
+    if (received_checksum != expected_checksum) {
+        RCLCPP_WARN(
+            logger,
+            "WRITE ACK checksum mismatch: received=0x%02X expected=0x%02X",
+            received_checksum,
+            expected_checksum
+        );
+        return false;
+    }
+
+    if (error != 0x00) {
+        RCLCPP_WARN(
+            logger,
+            "WRITE ACK returned error: 0x%02X",
+            error
+        );
+        return false;
+    }
+
+    RCLCPP_DEBUG(logger, "WRITE ACK received");
     return true;
 }
 
@@ -666,10 +785,50 @@ std::string koma::FeetechSerial::bytes_to_hex(const std::vector<uint8_t>& buffer
     return oss.str();
 }
 
+bool koma::FeetechSerial::send_action_command()
+{
+    auto logger = rclcpp::get_logger("rclcpp");
+
+    if (serial_fd_ < 0) {
+        RCLCPP_ERROR(logger, "Serial port is not open");
+        return false;
+    }
+
+    constexpr uint8_t broadcast_id = 0xFE;
+    constexpr uint8_t instruction = 0x05; // ACTION
+
+    uint8_t tx[6];
+    std::memset(tx, 0x00, sizeof(tx));
+
+    tx[0] = 0xFF;
+    tx[1] = 0xFF;
+    tx[2] = broadcast_id;
+    tx[3] = 0x02;        // length = instruction + checksum
+    tx[4] = instruction; // ACTION
+    tx[5] = make_checksum(&tx[2], 3);
+
+    if (!write_packet(tx, sizeof(tx))) {
+        return false;
+    }
+
+    if (tcdrain(serial_fd_) != 0) {
+        RCLCPP_ERROR(
+            logger,
+            "tcdrain failed after ACTION: %s",
+            std::strerror(errno)
+        );
+        return false;
+    }
+
+    RCLCPP_INFO(logger, "ACTION command sent");
+
+    return true;
+}
+
 int main(int argc, char ** argv)
 {
     koma::FeetechSerial serial(
-        "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0",
+        "/dev/serial/by-path/pci-0000:00:14.0-usb-0:6:1.0",
         1
     );
 
@@ -688,7 +847,13 @@ int main(int argc, char ** argv)
 
     while (true) {
         double position = positions[index];
+
+        // set all motor position
         bool ok = serial.send_write_state_command(position);
+        while (!serial.try_read_write_ack()) {}
+
+        // sent action to all motor
+        if (!serial.send_action_command()) {}
 
         if (!serial.send_read_state_command()){}
         while (!serial.try_read_state_response(state)) {}

@@ -111,9 +111,11 @@ namespace koma {
         public:
             FeetechSerial(const char* device_name, int servo_id);
             bool send_write_state_command(double position);
+            bool send_action_command();
             bool send_read_state_command();
             bool try_read_state_response(koma::FeetechState& state);
             bool read_all_state(koma::FeetechState& state);
+            bool try_read_write_ack();
         private:
             int serial_fd_;
             int servo_id_;
