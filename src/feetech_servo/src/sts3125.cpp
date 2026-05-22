@@ -149,19 +149,19 @@ bool koma::FeetechSerial::read_exact(uint8_t* buffer, size_t size) {
     return true;
 }
 
-koma::FeetechState koma::FeetechSerial::send_read_state_command()
+bool koma::FeetechSerial::send_read_state_command()
 {
     auto logger = rclcpp::get_logger("rclcpp");
 
     if (serial_fd_ < 0) {
         RCLCPP_ERROR(logger, "Serial port is not open");
-        return koma::FeetechState();
+        return false;
     }
 
     const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
     constexpr uint8_t instruction = 0x02;     // READ
     constexpr uint8_t start_address = 0x38;   // 56: Present Position
-    constexpr uint8_t read_size = 0x06;       // 56-61: position, speed, load
+    constexpr uint8_t read_size = 0x06;       // position, speed, load
 
     uint8_t tx[8];
     std::memset(tx, 0x00, sizeof(tx));
@@ -169,24 +169,31 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
     tx[0] = 0xFF;
     tx[1] = 0xFF;
     tx[2] = servo_id;
-    tx[3] = 0x04;  // length = instruction + params + checksum
+    tx[3] = 0x04;
     tx[4] = instruction;
     tx[5] = start_address;
     tx[6] = read_size;
 
-    uint8_t sum = tx[2] + tx[3] + tx[4] + tx[5] + tx[6];
+    const uint8_t sum = tx[2] + tx[3] + tx[4] + tx[5] + tx[6];
     tx[7] = static_cast<uint8_t>(~sum);
 
+    rx_buffer_.clear();
     tcflush(serial_fd_, TCIFLUSH);
 
-    ssize_t written = ::write(serial_fd_, tx, sizeof(tx));
+    const ssize_t written = ::write(serial_fd_, tx, sizeof(tx));
+
     if (written < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            RCLCPP_WARN(logger, "Serial write would block");
+            return false;
+        }
+
         RCLCPP_ERROR(
             logger,
             "Serial write failed: %s",
             std::strerror(errno)
         );
-        return koma::FeetechState();
+        return false;
     }
 
     if (written != static_cast<ssize_t>(sizeof(tx))) {
@@ -196,84 +203,94 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
             written,
             sizeof(tx)
         );
-        return koma::FeetechState();
+        return false;
     }
 
-    // Response:
-    // FF FF ID LENGTH ERROR DATA... CHECKSUM
-    constexpr size_t expected_rx_size = 6 + read_size;
+    return true;
+}
 
-    uint8_t rx[32];
-    std::memset(rx, 0x00, sizeof(rx));
+bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
+{
+    auto logger = rclcpp::get_logger("rclcpp");
 
-    size_t received = 0;
+    if (serial_fd_ < 0) {
+        RCLCPP_ERROR(logger, "Serial port is not open");
+        return false;
+    }
 
-    auto start_time = std::chrono::steady_clock::now();
-    constexpr auto timeout = std::chrono::milliseconds(20);
+    uint8_t tmp[64];
 
-    while (received < expected_rx_size) {
-        ssize_t n = ::read(
-            serial_fd_,
-            rx + received,
-            expected_rx_size - received
-        );
+    while (true) {
+        const ssize_t n = ::read(serial_fd_, tmp, sizeof(tmp));
 
         if (n > 0) {
-            received += static_cast<size_t>(n);
-        } else if (n < 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-
-            if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                RCLCPP_ERROR(
-                    logger,
-                    "Serial read failed: %s",
-                    std::strerror(errno)
-                );
-                return koma::FeetechState();
-            }
+            rx_buffer_.insert(
+                rx_buffer_.end(),
+                tmp,
+                tmp + n
+            );
+            continue;
         }
 
-        if (std::chrono::steady_clock::now() - start_time > timeout) {
+        if (n == 0) {
             break;
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(100));
-    }
+        if (errno == EINTR) {
+            continue;
+        }
 
-    if (received < expected_rx_size) {
-        RCLCPP_WARN(
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            break;
+        }
+
+        RCLCPP_ERROR(
             logger,
-            "RX timeout/incomplete: %zu / %zu bytes",
-            received,
-            expected_rx_size
+            "Serial read failed: %s",
+            std::strerror(errno)
         );
-        return koma::FeetechState();
+        rx_buffer_.clear();
+        return false;
     }
 
-    if (rx[0] != 0xFF || rx[1] != 0xFF) {
-        RCLCPP_WARN(
-            logger,
-            "Invalid response header: %02X %02X",
-            rx[0],
-            rx[1]
-        );
-        return koma::FeetechState();
+    // header FF FF を探す
+    while (rx_buffer_.size() >= 2) {
+        if (rx_buffer_[0] == 0xFF && rx_buffer_[1] == 0xFF) {
+            break;
+        }
+
+        rx_buffer_.erase(rx_buffer_.begin());
     }
 
-    if (rx[2] != servo_id) {
+    if (rx_buffer_.size() < 4) {
+        return false;
+    }
+
+    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+    const uint8_t rx_id = rx_buffer_[2];
+    const uint8_t length = rx_buffer_[3];
+
+    // total packet:
+    // FF FF ID LENGTH ERROR PARAMS... CHECKSUM
+    const size_t packet_size = static_cast<size_t>(length) + 4;
+
+    if (rx_buffer_.size() < packet_size) {
+        return false;
+    }
+
+    if (rx_id != servo_id) {
         RCLCPP_WARN(
             logger,
             "Unexpected servo id: received=%u expected=%u",
-            rx[2],
+            rx_id,
             servo_id
         );
-        return koma::FeetechState();
+
+        rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+        return false;
     }
 
-    const uint8_t length = rx[3];
-    const uint8_t error = rx[4];
+    constexpr uint8_t read_size = 0x06;
 
     if (length != read_size + 2) {
         RCLCPP_WARN(
@@ -282,8 +299,12 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
             length,
             static_cast<unsigned>(read_size + 2)
         );
-        return koma::FeetechState();
+
+        rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+        return false;
     }
+
+    const uint8_t error = rx_buffer_[4];
 
     if (error != 0x00) {
         RCLCPP_WARN(
@@ -291,14 +312,16 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
             "Servo returned error: 0x%02X",
             error
         );
-        return koma::FeetechState();
+
+        rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+        return false;
     }
 
-    const uint8_t received_checksum = rx[expected_rx_size - 1];
+    const uint8_t received_checksum = rx_buffer_[packet_size - 1];
 
     uint16_t checksum_sum = 0;
-    for (size_t i = 2; i < expected_rx_size - 1; ++i) {
-        checksum_sum += rx[i];
+    for (size_t i = 2; i < packet_size - 1; ++i) {
+        checksum_sum += rx_buffer_[i];
     }
 
     const uint8_t expected_checksum =
@@ -311,30 +334,29 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
             received_checksum,
             expected_checksum
         );
-        return koma::FeetechState();
+
+        rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+        return false;
     }
 
-    // DATA は rx[5] から始まる。
-    // 今回は start_address=56 なので:
-    // rx[5 + 0], rx[5 + 1] = present_position
-    // rx[5 + 2], rx[5 + 3] = present_speed
-    // rx[5 + 4], rx[5 + 5] = present_load
-
     auto u16_from_data = [&](size_t offset) -> uint16_t {
+        constexpr size_t data_start = 5;
+
         return static_cast<uint16_t>(
-            static_cast<uint16_t>(rx[5 + offset]) |
-            (static_cast<uint16_t>(rx[5 + offset + 1]) << 8)
+            static_cast<uint16_t>(rx_buffer_[data_start + offset]) |
+            (static_cast<uint16_t>(rx_buffer_[data_start + offset + 1]) << 8)
         );
     };
 
-    koma::FeetechState state;
-
-    state.id = servo_id;
+    state = koma::FeetechState();
+    state.id = rx_id;
     state.present_position = u16_from_data(0);
     state.present_speed = u16_from_data(2);
     state.present_load = u16_from_data(4);
 
-    return state;
+    rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
+
+    return true;
 }
 
 koma::FeetechState koma::FeetechSerial::send_ping_command()

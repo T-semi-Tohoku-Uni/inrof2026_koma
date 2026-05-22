@@ -110,11 +110,13 @@ namespace koma {
     class FeetechSerial {
         public:
             FeetechSerial(const char* device_name, int servo_id);
-            koma::FeetechState send_read_state_command();
-            koma::FeetechState send_ping_command(); // async?
+            bool koma::FeetechSerial::send_read_state_command();
+            bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state);
+            koma::FeetechState send_ping_command();
         private:
             int serial_fd_;
             int servo_id_;
+            std::vector<uint8_t> rx_buffer_;
 
             int open_serial(const char* device_name);
             uint8_t make_checksum(uint8_t buf[]);
