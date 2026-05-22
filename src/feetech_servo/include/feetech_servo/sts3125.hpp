@@ -59,6 +59,7 @@ namespace koma {
     class FeetechState {
     public:
         FeetechState() = default;
+        void print();
 
         uint8_t model_l = 0;
         uint8_t model_h = 0;
@@ -108,16 +109,19 @@ namespace koma {
 
     class FeetechSerial {
         public:
-            FeetechSerial(const char* device_name);
+            FeetechSerial(const char* device_name, int servo_id);
             koma::FeetechState send_read_state_command();
+            koma::FeetechState send_ping_command(); // async?
         private:
             int serial_fd_;
+            int servo_id_;
 
             int open_serial(const char* device_name);
             uint8_t make_checksum(uint8_t buf[]);
             uint16_t make_u16(uint8_t low, uint8_t high) {
                 return static_cast<uint16_t>(low) | (static_cast<uint16_t>(high) << 8);
             }
+            uint8_t* read_exact(uint8_t* buffer, size_t size);
             
             // bool write();
             // FeetechJointState read();
