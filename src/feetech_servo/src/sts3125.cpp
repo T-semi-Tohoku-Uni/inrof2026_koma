@@ -217,6 +217,14 @@ bool koma::FeetechSerial::send_read_state_command()
 bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
 {
     auto logger = rclcpp::get_logger("rclcpp");
+    if (!rx_buffer_.empty()) {
+        RCLCPP_INFO(
+            logger,
+            "RX buffer size=%zu head=%s",
+            rx_buffer_.size(),
+            bytes_to_hex(rx_buffer_, std::min<size_t>(rx_buffer_.size(), 32)).c_str()
+        );
+    }
 
     if (serial_fd_ < 0) {
         RCLCPP_ERROR(logger, "Serial port is not open");
