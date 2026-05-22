@@ -658,7 +658,6 @@ int main(int argc, char ** argv)
 
     size_t index = 0;
 
-    koma::FeetechState state;
     while (true) {
         // double position = positions[index];
 
