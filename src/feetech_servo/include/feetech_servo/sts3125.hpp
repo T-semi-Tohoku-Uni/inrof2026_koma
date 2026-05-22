@@ -120,7 +120,7 @@ namespace koma {
             std::vector<uint8_t> rx_buffer_;
 
             int open_serial(const char* device_name);
-            uint8_t make_checksum(uint8_t buf[]);
+            uint8_t make_checksum(uint8_t tx[]);
             uint16_t make_u16(uint8_t low, uint8_t high) {
                 return static_cast<uint16_t>(low) | (static_cast<uint16_t>(high) << 8);
             }

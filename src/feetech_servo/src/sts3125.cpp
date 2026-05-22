@@ -263,9 +263,7 @@ bool koma::FeetechSerial::send_read_state_command()
     tx[4] = instruction;
     tx[5] = start_address;
     tx[6] = read_size;
-
-    const uint8_t sum = tx[2] + tx[3] + tx[4] + tx[5] + tx[6];
-    tx[7] = static_cast<uint8_t>(~sum);
+    tx[7] = make_checksum(tx);
 
     rx_buffer_.clear();
     tcflush(serial_fd_, TCIFLUSH);
@@ -471,9 +469,7 @@ bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
     tx[4] = instruction;
     tx[5] = start_address;
     tx[6] = read_size;
-
-    uint8_t sum = tx[2] + tx[3] + tx[4] + tx[5] + tx[6];
-    tx[7] = static_cast<uint8_t>(~sum);
+    tx[7] = make_checksum(tx);
 
     RCLCPP_INFO(
         rclcpp::get_logger("rclcpp"),
@@ -672,6 +668,11 @@ bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
     state.present_current = u16(69);
 
     return true;
+}
+
+uint8_t koma::FeetechSerial::make_checksum(uint8_t tx[]) {
+    uint8_t sum = tx[2] + tx[3] + tx[4] + tx[5] + tx[6];
+    return static_cast<uint8_t>(~sum);
 }
 
 uint8_t koma::FeetechSerial::make_checksum(uint8_t buf[8]) {}
