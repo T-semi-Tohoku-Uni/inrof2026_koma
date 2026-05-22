@@ -177,6 +177,8 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
         static_cast<unsigned>(goal_position)
     );
 
+    std::this_thread::sleep_for(std::chrono::microseconds(2));
+
     return true;
 }
 
