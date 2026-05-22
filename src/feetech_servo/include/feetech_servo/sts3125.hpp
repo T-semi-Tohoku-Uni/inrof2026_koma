@@ -125,6 +125,7 @@ namespace koma {
                 return static_cast<uint16_t>(low) | (static_cast<uint16_t>(high) << 8);
             }
             bool write_packet(uint8_t tx[], size_t size);
+            std::string koma::FeetechSerial::bytes_to_hex(const std::vector<uint8_t>& buffer, size_t size);
             
             // bool write();
             // FeetechJointState read();

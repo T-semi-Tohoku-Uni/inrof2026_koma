@@ -326,14 +326,11 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
             RCLCPP_DEBUG(logger, "Ignored WRITE ACK packet");
         }
         
-        std::ostringstream oss;
-        for (size_t i = 0; i < packet_size; ++i) {
-            oss << std::hex << std::uppercase
-                << std::setw(2) << std::setfill('0')
-                << static_cast<int>(rx_buffer_[i]) << " ";
-        }
-
-        RCLCPP_WARN(logger, "Dropping packet: %s", oss.str().c_str());
+        RCLCPP_WARN(
+            logger,
+            "RX buffer head: %s",
+            bytes_to_hex(rx_buffer_, std::min<size_t>(rx_buffer_.size(), 32)).c_str()
+        );
 
         rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
         return false;
@@ -645,6 +642,20 @@ bool koma::FeetechSerial::write_packet(uint8_t tx[], size_t size) {
     }
 
     return true;
+}
+
+std::string koma::FeetechSerial::bytes_to_hex(const std::vector<uint8_t>& buffer, size_t size)
+{
+    std::ostringstream oss;
+
+    const size_t n = std::min(size, buffer.size());
+    for (size_t i = 0; i < n; ++i) {
+        oss << std::hex << std::uppercase
+            << std::setw(2) << std::setfill('0')
+            << static_cast<int>(buffer[i]) << " ";
+    }
+
+    return oss.str();
 }
 
 int main(int argc, char ** argv)
