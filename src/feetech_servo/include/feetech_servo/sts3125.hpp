@@ -9,6 +9,9 @@
 #include <chrono>
 #include <functional>
 #include <rclcpp/rclcpp.hpp>
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 namespace koma {
     struct FeetechAddr {
@@ -109,16 +112,21 @@ namespace koma {
 
     class FeetechSerial {
         public:
-            FeetechSerial(const char* device_name, int servo_id);
-            bool send_write_state_command(double position);
+            FeetechSerial(const char* device_name);
+            bool send_write_state_command(int servo_id, double position);
             bool send_action_command();
-            bool send_read_state_command();
-            bool try_read_state_response(koma::FeetechState& state);
-            bool read_all_state(koma::FeetechState& state);
-            bool try_read_write_ack();
+            bool send_read_state_command(int servo_id);
+            bool try_read_state_response(int servo_id, koma::FeetechState& state);
+            bool wait_read_state_response(
+                int servo_id,
+                koma::FeetechState& state,
+                std::chrono::milliseconds timeout
+            );
+            bool read_all_state(int servo_id, koma::FeetechState& state);
+            bool wait_write_ack(int servo_id, std::chrono::milliseconds timeout);
+            bool try_read_write_ack(int servo_id);
         private:
             int serial_fd_;
-            int servo_id_;
             std::vector<uint8_t> rx_buffer_;
 
             int open_serial(const char* device_name);

@@ -67,9 +67,8 @@ void koma::FeetechState::print() {
     RCLCPP_INFO(logger, "=========================");
 }
 
-koma::FeetechSerial::FeetechSerial(const char* device_name, int servo_id) {
+koma::FeetechSerial::FeetechSerial(const char* device_name) {
     serial_fd_ = open_serial(device_name);
-    servo_id_ = servo_id;
 }
 
 int koma::FeetechSerial::open_serial(const char* device_name) {
@@ -116,7 +115,7 @@ int koma::FeetechSerial::open_serial(const char* device_name) {
     return fd;
 }
 
-bool koma::FeetechSerial::send_write_state_command(double position) {
+bool koma::FeetechSerial::send_write_state_command(int servo_id, double position) {
     auto logger = rclcpp::get_logger("rclcpp");
 
     if (serial_fd_ < 0) {
@@ -124,7 +123,7 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
         return false;
     }
 
-    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+    const uint8_t servo_id_uint8_t = static_cast<uint8_t>(servo_id);
 
     constexpr uint8_t instruction = 0x04;      // WRITE
     constexpr uint8_t goal_position_addr = 42; // Goal Position L
@@ -154,7 +153,7 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
 
     tx[0] = 0xFF;
     tx[1] = 0xFF;
-    tx[2] = servo_id;
+    tx[2] = servo_id_uint8_t;
     tx[3] = 0x09;              // length
     tx[4] = instruction;       // 0x03 WRITE
     tx[5] = goal_position_addr; // 42
@@ -174,14 +173,14 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
     RCLCPP_INFO(
         logger,
         "WRITE position command sent: id=%u position=%u",
-        static_cast<unsigned>(servo_id),
+        static_cast<unsigned>(servo_id_uint8_t),
         static_cast<unsigned>(goal_position)
     );
 
     return true;
 }
 
-bool koma::FeetechSerial::send_read_state_command()
+bool koma::FeetechSerial::send_read_state_command(int servo_id)
 {
     auto logger = rclcpp::get_logger("rclcpp");
 
@@ -190,7 +189,7 @@ bool koma::FeetechSerial::send_read_state_command()
         return false;
     }
 
-    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+    const uint8_t servo_id_uint8_t = static_cast<uint8_t>(servo_id);
     constexpr uint8_t instruction = 0x02;     // READ
     constexpr uint8_t start_address = 0x38;   // 56: Present Position
     constexpr uint8_t read_size = 0x06;       // position, speed, load
@@ -200,7 +199,7 @@ bool koma::FeetechSerial::send_read_state_command()
 
     tx[0] = 0xFF;
     tx[1] = 0xFF;
-    tx[2] = servo_id;
+    tx[2] = servo_id_uint8_t;
     tx[3] = 0x04;
     tx[4] = instruction;
     tx[5] = start_address;
@@ -215,7 +214,7 @@ bool koma::FeetechSerial::send_read_state_command()
     return true;
 }
 
-bool koma::FeetechSerial::try_read_write_ack()
+bool koma::FeetechSerial::try_read_write_ack(int servo_id)
 {
     auto logger = rclcpp::get_logger("rclcpp");
 
@@ -224,7 +223,7 @@ bool koma::FeetechSerial::try_read_write_ack()
         return false;
     }
 
-    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+    const uint8_t servo_id_uint8_t = static_cast<uint8_t>(servo_id);
 
     uint8_t tmp[64];
     const ssize_t n = ::read(serial_fd_, tmp, sizeof(tmp));
@@ -275,12 +274,12 @@ bool koma::FeetechSerial::try_read_write_ack()
         return false;
     }
 
-    if (rx_id != servo_id) {
+    if (rx_id != servo_id_uint8_t) {
         RCLCPP_WARN(
             logger,
             "Unexpected ACK servo id: received=%u expected=%u",
             static_cast<unsigned>(rx_id),
-            static_cast<unsigned>(servo_id)
+            static_cast<unsigned>(servo_id_uint8_t)
         );
 
         rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
@@ -335,7 +334,7 @@ bool koma::FeetechSerial::try_read_write_ack()
     return true;
 }
 
-bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
+bool koma::FeetechSerial::try_read_state_response(int servo_id, koma::FeetechState& state)
 {
     auto logger = rclcpp::get_logger("rclcpp");
     if (!rx_buffer_.empty()) {
@@ -400,7 +399,7 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
         return false;
     }
 
-    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+    const uint8_t servo_id_uint8_t = static_cast<uint8_t>(servo_id);
     const uint8_t rx_id = rx_buffer_[2];
     const uint8_t length = rx_buffer_[3];
 
@@ -412,7 +411,7 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
         return false;
     }
 
-    if (rx_id != servo_id) {
+    if (rx_id != servo_id_uint8_t) {
         RCLCPP_WARN(
             logger,
             "Unexpected servo id: received=%u expected=%u",
@@ -531,14 +530,14 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
     return true;
 }
 
-bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
+bool koma::FeetechSerial::read_all_state(int servo_id, koma::FeetechState& state)
 {
     if (serial_fd_ < 0) {
         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Serial port is not open");
         return false;
     }
 
-    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+    const uint8_t servo_id_uint8_t = static_cast<uint8_t>(servo_id);
     constexpr uint8_t instruction = 0x02;   // READ
     constexpr uint8_t start_address = 0x00;
     constexpr uint8_t read_size = 0x47;     // 71 bytes: addr 0〜70
@@ -548,7 +547,7 @@ bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
 
     tx[0] = 0xFF;
     tx[1] = 0xFF;
-    tx[2] = servo_id;
+    tx[2] = servo_id_uint8_t;
     tx[3] = 0x04;
     tx[4] = instruction;
     tx[5] = start_address;
@@ -825,16 +824,61 @@ bool koma::FeetechSerial::send_action_command()
     return true;
 }
 
+bool koma::FeetechSerial::wait_read_state_response(
+    int servo_id,
+    koma::FeetechState& state,
+    std::chrono::milliseconds timeout
+)
+{
+    const auto start = std::chrono::steady_clock::now();
+
+    while (std::chrono::steady_clock::now() - start < timeout) {
+        if (this->try_read_state_response(servo_id, state)) {
+            return true;
+        }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
+
+    return false;
+}
+
+bool koma::FeetechSerial::wait_write_ack(int servo_id, std::chrono::milliseconds timeout)
+{
+    auto logger = rclcpp::get_logger("rclcpp");
+
+    const auto start = std::chrono::steady_clock::now();
+
+    while (std::chrono::steady_clock::now() - start < timeout) {
+        if (try_read_write_ack(servo_id)) {
+            return true;
+        }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
+
+    RCLCPP_WARN(logger, "WRITE ACK timeout");
+
+    rx_buffer_.clear();
+    if (serial_fd_ >= 0) {
+        tcflush(serial_fd_, TCIFLUSH);
+    }
+
+    return false;
+}
+
 int main(int argc, char ** argv)
 {
     koma::FeetechSerial serial(
-        "/dev/serial/by-path/pci-0000:00:14.0-usb-0:6:1.0",
-        1
+        "/dev/serial/by-path/pci-0000:00:14.0-usb-0:6:1.0"
     );
 
-    koma::FeetechState state;
-    if (!serial.read_all_state(state)) {}
-    state.print();
+    koma::FeetechState state_id_1;
+    koma::FeetechState state_id_2;
+    if (!serial.read_all_state(1, state_id_1)) {}
+    state_id_1.print();
+    if (!serial.read_all_state(2, state_id_2)) {}
+    state_id_2.print();
 
     std::vector<double> positions = {
         1000.0,
@@ -849,15 +893,20 @@ int main(int argc, char ** argv)
         double position = positions[index];
 
         // set all motor position
-        bool ok = serial.send_write_state_command(position);
-        while (!serial.try_read_write_ack()) {}
+        if (!serial.send_write_state_command(1, position)) {}
+        if (!serial.wait_write_ack(1, 2ms)) {}
+        if (!serial.send_write_state_command(2, position)) {}
+        if (!serial.wait_write_ack(2, 2ms)) {}
 
         // sent action to all motor
         if (!serial.send_action_command()) {}
 
-        if (!serial.send_read_state_command()){}
-        while (!serial.try_read_state_response(state)) {}
-        state.print();
+        if (!serial.send_read_state_command(1)){}
+        if (!serial.wait_read_state_response(1, state_id_1, 2ms)) {}
+        if (!serial.send_read_state_command(2)){}
+        if (!serial.wait_read_state_response(2, state_id_2, 2ms)) {}
+        state_id_1.print();
+        state_id_2.print();
 
         index = (index + 1) % positions.size();
 
