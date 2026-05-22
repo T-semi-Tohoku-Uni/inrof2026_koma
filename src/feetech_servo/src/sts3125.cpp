@@ -168,7 +168,7 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
 
     tcflush(serial_fd_, TCIFLUSH);
 
-    if (!write_packet(tx, 9)) return false;
+    if (!write_packet(tx, sizeof(tx))) return false;
 
     RCLCPP_INFO(
         logger,
