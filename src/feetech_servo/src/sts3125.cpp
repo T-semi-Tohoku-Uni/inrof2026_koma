@@ -675,7 +675,7 @@ int main(int argc, char ** argv)
 
         koma::FeetechState state;
         if(!serial.send_read_state_command()) {}
-        while(!serial.try_read_state_response(state)) {
+        while(serial.try_read_state_response(state)) {
             state.print();
         }
     }
