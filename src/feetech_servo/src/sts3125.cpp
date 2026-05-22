@@ -449,11 +449,11 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
     return true;
 }
 
-koma::FeetechState koma::FeetechSerial::send_ping_command()
+bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
 {
     if (serial_fd_ < 0) {
         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Serial port is not open");
-        return koma::FeetechState();
+        return false;
     }
 
     const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
@@ -490,7 +490,7 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             "Serial write failed: %s",
             std::strerror(errno)
         );
-        return koma::FeetechState();
+        return false;
     }
 
     if (written != static_cast<ssize_t>(sizeof(tx))) {
@@ -500,7 +500,7 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             written,
             sizeof(tx)
         );
-        return koma::FeetechState();
+        return false;
     }
 
     constexpr size_t expected_rx_size = 6 + read_size;
@@ -553,12 +553,12 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             received,
             expected_rx_size
         );
-        return koma::FeetechState();
+        return false;
     }
 
     if (rx[0] != 0xFF || rx[1] != 0xFF) {
         RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Invalid response header");
-        return koma::FeetechState();
+        return false;
     }
 
     if (rx[2] != servo_id) {
@@ -568,7 +568,7 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             rx[2],
             servo_id
         );
-        return koma::FeetechState();
+        return false;
     }
 
     uint8_t length = rx[3];
@@ -581,7 +581,7 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             length,
             static_cast<unsigned>(read_size + 2)
         );
-        return koma::FeetechState();
+        return false;
     }
 
     if (error != 0x00) {
@@ -590,7 +590,7 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             "Servo returned error: 0x%02X",
             error
         );
-        return koma::FeetechState();
+        return false;
     }
 
     const uint8_t received_checksum = rx[expected_rx_size - 1];
@@ -610,7 +610,7 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             received_checksum,
             expected_checksum
         );
-        return koma::FeetechState();
+        return false;
     }
 
     // DATA は rx[5] から始まる。
@@ -625,8 +625,6 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
             (static_cast<uint16_t>(rx[5 + addr + 1]) << 8)
         );
     };
-
-    koma::FeetechState state;
 
     state.model_l = u8(0);
     state.model_h = u8(1);
@@ -673,7 +671,7 @@ koma::FeetechState koma::FeetechSerial::send_ping_command()
 
     state.present_current = u16(69);
 
-    return state;
+    return true;
 }
 
 uint8_t koma::FeetechSerial::make_checksum(uint8_t buf[8]) {}
@@ -685,7 +683,8 @@ int main(int argc, char ** argv)
         1
     );
 
-    koma::FeetechState state = serial.send_ping_command();
+    koma::FeetechState state;
+    if (!serial.read_all_state(state)) {}
     state.print();
 
     std::vector<double> positions = {

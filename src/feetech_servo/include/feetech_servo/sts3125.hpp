@@ -113,7 +113,7 @@ namespace koma {
             bool send_write_state_command(double position);
             bool send_read_state_command();
             bool try_read_state_response(koma::FeetechState& state);
-            koma::FeetechState send_ping_command();
+            bool read_all_state(koma::FeetechState& state);
         private:
             int serial_fd_;
             int servo_id_;
