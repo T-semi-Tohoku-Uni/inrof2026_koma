@@ -777,7 +777,6 @@ int main(int argc, char ** argv)
   }
   state_id_3.print();
 
-
   std::vector<double> positions = {1000.0, 2000.0, 3000.0, 2000.0};
 
   size_t index = 0;
@@ -803,7 +802,6 @@ int main(int argc, char ** argv)
     if (!serial_12.send_action_command()) {
     }
     if (!serial_3.send_action_command()) {
-        
     }
 
     if (!serial_12.send_read_state_command(1)) {
