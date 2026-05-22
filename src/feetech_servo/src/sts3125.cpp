@@ -539,6 +539,9 @@ int main(int argc, char ** argv)
 {
     koma::FeetechSerial serial = koma::FeetechSerial("/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0", 1);
 
-    koma::FeetechState state = serial.send_ping_command();
-    state.print();
+    while (1) {
+        koma::FeetechState state = serial.send_read_state_command();
+        state.print();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
