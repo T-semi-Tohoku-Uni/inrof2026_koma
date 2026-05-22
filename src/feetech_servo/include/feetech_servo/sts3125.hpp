@@ -110,6 +110,7 @@ namespace koma {
     class FeetechSerial {
         public:
             FeetechSerial(const char* device_name, int servo_id);
+            bool send_write_state_command(double position);
             bool send_read_state_command();
             bool try_read_state_response(koma::FeetechState& state);
             koma::FeetechState send_ping_command();

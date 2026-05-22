@@ -116,6 +116,96 @@ int koma::FeetechSerial::open_serial(const char* device_name) {
     return fd;
 }
 
+bool koma::FeetechSerial::send_write_state_command(double position) {
+    auto logger = rclcpp::get_logger("rclcpp");
+
+    if (serial_fd_ < 0) {
+        RCLCPP_ERROR(logger, "Serial port is not open");
+        return false;
+    }
+
+    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
+
+    constexpr uint8_t instruction = 0x03;      // WRITE
+    constexpr uint8_t goal_position_addr = 42; // Goal Position L
+
+    // position は raw tick として扱う
+    if (position < 0.0) {
+        position = 0.0;
+    }
+
+    if (position > 4095.0) {
+        position = 4095.0;
+    }
+
+    const uint16_t goal_position =
+        static_cast<uint16_t>(std::lround(position));
+
+    const uint8_t pos_l = static_cast<uint8_t>(goal_position & 0xFF);
+    const uint8_t pos_h = static_cast<uint8_t>((goal_position >> 8) & 0xFF);
+
+    // Packet:
+    // FF FF ID LENGTH INSTRUCTION ADDRESS PARAMS... CHECKSUM
+    //
+    // params = address + pos_l + pos_h = 3 bytes
+    // length = instruction + params + checksum = 1 + 3 + 1 = 5
+    uint8_t tx[9];
+    std::memset(tx, 0x00, sizeof(tx));
+
+    tx[0] = 0xFF;
+    tx[1] = 0xFF;
+    tx[2] = servo_id;
+    tx[3] = 0x05;
+    tx[4] = instruction;
+    tx[5] = goal_position_addr;
+    tx[6] = pos_l;
+    tx[7] = pos_h;
+
+    uint16_t sum = 0;
+    for (size_t i = 2; i <= 7; ++i) {
+        sum += tx[i];
+    }
+
+    tx[8] = static_cast<uint8_t>(~static_cast<uint8_t>(sum & 0xFF));
+
+    tcflush(serial_fd_, TCIFLUSH);
+
+    const ssize_t written = ::write(serial_fd_, tx, sizeof(tx));
+
+    if (written < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            RCLCPP_WARN(logger, "Serial write would block");
+            return false;
+        }
+
+        RCLCPP_ERROR(
+            logger,
+            "Serial write failed: %s",
+            std::strerror(errno)
+        );
+        return false;
+    }
+
+    if (written != static_cast<ssize_t>(sizeof(tx))) {
+        RCLCPP_WARN(
+            logger,
+            "Serial write incomplete: %zd / %zu bytes",
+            written,
+            sizeof(tx)
+        );
+        return false;
+    }
+
+    RCLCPP_INFO(
+        logger,
+        "WRITE position command sent: id=%u position=%u",
+        static_cast<unsigned>(servo_id),
+        static_cast<unsigned>(goal_position)
+    );
+
+    return true;
+}
+
 bool koma::FeetechSerial::read_exact(uint8_t* buffer, size_t size) {
     size_t total = 0;
 
@@ -595,55 +685,29 @@ int main(int argc, char ** argv)
         1
     );
 
-    bool waiting_response = false;
-    auto last_send_time = std::chrono::steady_clock::now() - std::chrono::seconds(1);
+    std::vector<double> positions = {
+        1000.0,
+        2000.0,
+        3000.0,
+        2000.0
+    };
+
+    size_t index = 0;
 
     while (true) {
-        const auto now = std::chrono::steady_clock::now();
+        double position = positions[index];
 
-        // 1秒ごとに READ コマンドを送る
-        if (!waiting_response &&
-            now - last_send_time >= std::chrono::seconds(1)) {
+        bool ok = serial.send_write_state_command(position);
 
-            if (serial.send_read_state_command()) {
-                waiting_response = true;
-                last_send_time = now;
-
-                std::cout << "READ command sent" << std::endl;
-            } else {
-                last_send_time = now;
-
-                std::cerr << "Failed to send READ command" << std::endl;
-            }
+        if (ok) {
+            std::cout << "sent position: " << position << std::endl;
+        } else {
+            std::cerr << "failed to send position: " << position << std::endl;
         }
 
-        // ブロックせずに、今来ている分だけ読む
-        if (waiting_response) {
-            koma::FeetechState state;
+        index = (index + 1) % positions.size();
 
-            if (serial.try_read_state_response(state)) {
-                waiting_response = false;
-
-                std::printf(
-                    "id=%u position=%u speed=%u load=%u\n",
-                    static_cast<unsigned>(state.id),
-                    static_cast<unsigned>(state.present_position),
-                    static_cast<unsigned>(state.present_speed),
-                    static_cast<unsigned>(state.present_load)
-                );
-
-                // 詳細表示したいならこれ
-                // state.print();
-            }
-
-            // 応答が来なかった場合の保険
-            if (now - last_send_time > std::chrono::milliseconds(100)) {
-                waiting_response = false;
-                std::cerr << "Read response timeout" << std::endl;
-            }
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     return 0;
