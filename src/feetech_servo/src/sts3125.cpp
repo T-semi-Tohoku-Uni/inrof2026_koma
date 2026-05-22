@@ -685,8 +685,8 @@ int main(int argc, char ** argv)
     size_t index = 0;
 
     while (true) {
-        double position = positions[index];
-        bool ok = serial.send_write_state_command(position);
+        // double position = positions[index];
+        // bool ok = serial.send_write_state_command(position);
 
         // if (ok) {
         //     std::cout << "sent position: " << position << std::endl;
@@ -698,7 +698,7 @@ int main(int argc, char ** argv)
         while (!serial.try_read_state_response(state)) {}
         state.print();
 
-        index = (index + 1) % positions.size();
+        // index = (index + 1) % positions.size();
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
