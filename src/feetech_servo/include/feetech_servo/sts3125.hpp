@@ -121,7 +121,7 @@ namespace koma {
             uint16_t make_u16(uint8_t low, uint8_t high) {
                 return static_cast<uint16_t>(low) | (static_cast<uint16_t>(high) << 8);
             }
-            uint8_t* read_exact(uint8_t* buffer, size_t size);
+            bool read_exact(uint8_t* buffer, size_t size);
             
             // bool write();
             // FeetechJointState read();
