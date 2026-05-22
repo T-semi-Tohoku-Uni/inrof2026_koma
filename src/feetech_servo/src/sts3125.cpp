@@ -80,7 +80,7 @@ int koma::FeetechSerial::open_serial(const char* device_name) {
                         device_name, std::strerror(errno));
         return -1;
     }
-    fcntl(fd, F_SETFL, 0);
+    fcntl(fd, F_SETFL, O_NONBLOCK);
 
     struct termios tty;
     if (tcgetattr(fd, &tty) != 0) {
@@ -669,13 +669,13 @@ int main(int argc, char ** argv)
             std::cerr << "failed to send position: " << position << std::endl;
         }
 
-        index = (index + 1) % positions.size();
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-
         koma::FeetechState state;
         if (!serial.read_all_state(state)) {}
         state.print();
+
+        index = (index + 1) % positions.size();
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     return 0;
