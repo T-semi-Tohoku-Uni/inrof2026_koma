@@ -369,13 +369,13 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
         return koma::FeetechState();
     }
 
-    constexpr uint8_t servo_id = 0x01;
+    const uint8_t servo_id = static_cast<uint8_t>(servo_id_);
     constexpr uint8_t instruction = 0x02;   // READ
     constexpr uint8_t start_address = 0x00;
     constexpr uint8_t read_size = 0x47;     // 71 bytes: addr 0〜70
 
     uint8_t tx[8];
-    memset(tx, 0x00, sizeof(tx));
+    std::memset(tx, 0x00, sizeof(tx));
 
     tx[0] = 0xFF;
     tx[1] = 0xFF;
@@ -388,13 +388,13 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
     uint8_t sum = tx[2] + tx[3] + tx[4] + tx[5] + tx[6];
     tx[7] = static_cast<uint8_t>(~sum);
 
-    std::cout << "TX: ";
-    for (size_t i = 0; i < sizeof(tx); ++i) {
-        printf("%02X ", tx[i]);
-    }
-    std::cout << std::endl;
+    RCLCPP_INFO(
+        rclcpp::get_logger("rclcpp"),
+        "TX: %02X %02X %02X %02X %02X %02X %02X %02X",
+        tx[0], tx[1], tx[2], tx[3], tx[4], tx[5], tx[6], tx[7]
+    );
 
-    tcflush(serial_fd_, TCIFLUSH);  // 古い受信データを捨てる
+    tcflush(serial_fd_, TCIFLUSH);
 
     ssize_t written = ::write(serial_fd_, tx, sizeof(tx));
     if (written < 0) {
@@ -409,16 +409,16 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
     if (written != static_cast<ssize_t>(sizeof(tx))) {
         RCLCPP_WARN(
             rclcpp::get_logger("rclcpp"),
-            "Serial write incomplete: %ld / %zu bytes",
+            "Serial write incomplete: %zd / %zu bytes",
             written,
             sizeof(tx)
         );
         return koma::FeetechState();
     }
 
-    constexpr size_t expected_rx_size = 6 + read_size;  // header, id, length, error, data, checksum
+    constexpr size_t expected_rx_size = 6 + read_size;
     uint8_t rx[128];
-    memset(rx, 0x00, sizeof(rx));
+    std::memset(rx, 0x00, sizeof(rx));
 
     size_t received = 0;
 
@@ -435,6 +435,10 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
         if (n > 0) {
             received += static_cast<size_t>(n);
         } else if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 // まだ来てないだけ
             } else {
@@ -455,12 +459,6 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
         std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
 
-    std::cout << "RX(" << received << "): ";
-    for (size_t i = 0; i < received; ++i) {
-        printf("%02X ", rx[i]);
-    }
-    std::cout << std::endl;
-
     if (received < expected_rx_size) {
         RCLCPP_WARN(
             rclcpp::get_logger("rclcpp"),
@@ -471,7 +469,6 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
         return koma::FeetechState();
     }
 
-    // 簡易チェック
     if (rx[0] != 0xFF || rx[1] != 0xFF) {
         RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Invalid response header");
         return koma::FeetechState();
@@ -480,57 +477,116 @@ koma::FeetechState koma::FeetechSerial::send_read_state_command()
     if (rx[2] != servo_id) {
         RCLCPP_WARN(
             rclcpp::get_logger("rclcpp"),
-            "Unexpected servo id: %u",
-            rx[2]
+            "Unexpected servo id: received=%u expected=%u",
+            rx[2],
+            servo_id
         );
         return koma::FeetechState();
     }
 
+    uint8_t length = rx[3];
     uint8_t error = rx[4];
+
+    if (length != read_size + 2) {
+        RCLCPP_WARN(
+            rclcpp::get_logger("rclcpp"),
+            "Unexpected response length: received=%u expected=%u",
+            length,
+            static_cast<unsigned>(read_size + 2)
+        );
+        return koma::FeetechState();
+    }
+
     if (error != 0x00) {
         RCLCPP_WARN(
             rclcpp::get_logger("rclcpp"),
             "Servo returned error: 0x%02X",
             error
         );
+        return koma::FeetechState();
     }
 
-    // DATA は rx[5] から始まる
-    // address 0 から読んでいるので:
-    // rx[5 + addr] がそのアドレスの値
+    const uint8_t received_checksum = rx[expected_rx_size - 1];
 
-    std::cout << "ID register: " << static_cast<int>(rx[5 + 5]) << std::endl;
-    std::cout << "Baudrate: " << static_cast<int>(rx[5 + 6]) << std::endl;
+    uint16_t checksum_sum = 0;
+    for (size_t i = 2; i < expected_rx_size - 1; ++i) {
+        checksum_sum += rx[i];
+    }
 
-    uint16_t present_position =
-        static_cast<uint16_t>(rx[5 + 56]) |
-        (static_cast<uint16_t>(rx[5 + 57]) << 8);
+    const uint8_t expected_checksum =
+        static_cast<uint8_t>(~static_cast<uint8_t>(checksum_sum & 0xFF));
 
-    uint16_t present_speed =
-        static_cast<uint16_t>(rx[5 + 58]) |
-        (static_cast<uint16_t>(rx[5 + 59]) << 8);
+    if (received_checksum != expected_checksum) {
+        RCLCPP_WARN(
+            rclcpp::get_logger("rclcpp"),
+            "Checksum mismatch: received=0x%02X expected=0x%02X",
+            received_checksum,
+            expected_checksum
+        );
+        return koma::FeetechState();
+    }
 
-    uint16_t present_load =
-        static_cast<uint16_t>(rx[5 + 60]) |
-        (static_cast<uint16_t>(rx[5 + 61]) << 8);
+    // DATA は rx[5] から始まる。
+    // address 0 から読んでいるので rx[5 + addr] がそのアドレスの値。
+    auto u8 = [&](size_t addr) -> uint8_t {
+        return rx[5 + addr];
+    };
 
-    uint8_t present_voltage = rx[5 + 62];
-    uint8_t present_temperature = rx[5 + 63];
-    uint8_t moving = rx[5 + 66];
+    auto u16 = [&](size_t addr) -> uint16_t {
+        return static_cast<uint16_t>(
+            static_cast<uint16_t>(rx[5 + addr]) |
+            (static_cast<uint16_t>(rx[5 + addr + 1]) << 8)
+        );
+    };
 
-    uint16_t present_current =
-        static_cast<uint16_t>(rx[5 + 69]) |
-        (static_cast<uint16_t>(rx[5 + 70]) << 8);
+    koma::FeetechState state;
 
-    std::cout << "present_position: " << present_position << std::endl;
-    std::cout << "present_speed: " << present_speed << std::endl;
-    std::cout << "present_load: " << present_load << std::endl;
-    std::cout << "present_voltage: " << static_cast<int>(present_voltage) << std::endl;
-    std::cout << "present_temperature: " << static_cast<int>(present_temperature) << std::endl;
-    std::cout << "moving: " << static_cast<int>(moving) << std::endl;
-    std::cout << "present_current: " << present_current << std::endl;
+    state.model_l = u8(0);
+    state.model_h = u8(1);
+    state.firmware_version = u8(3);
+    state.id = u8(5);
+    state.baudrate = u8(6);
+    state.return_delay = u8(7);
+    state.response_status_level = u8(8);
 
-    return koma::FeetechState();
+    state.min_angle_limit = u16(9);
+    state.max_angle_limit = u16(11);
+
+    state.max_temperature_limit = u8(13);
+    state.max_voltage_limit = u8(14);
+    state.min_voltage_limit = u8(15);
+
+    state.max_torque = u16(16);
+
+    state.p_coefficient = u8(21);
+    state.d_coefficient = u8(22);
+    state.i_coefficient = u8(23);
+
+    state.mode = u8(33);
+
+    state.torque_enable = u8(40);
+    state.acceleration = u8(41);
+
+    state.goal_position = u16(42);
+    state.goal_time = u16(44);
+    state.goal_speed = u16(46);
+    state.torque_limit = u16(48);
+
+    state.eprom_lock = u8(55);
+
+    state.present_position = u16(56);
+    state.present_speed = u16(58);
+    state.present_load = u16(60);
+
+    state.present_voltage = u8(62);
+    state.present_temperature = u8(63);
+    state.async_write_flag = u8(64);
+    state.servo_status = u8(65);
+    state.moving = u8(66);
+
+    state.present_current = u16(69);
+
+    return state;
 }
 
 uint8_t koma::FeetechSerial::make_checksum(uint8_t buf[8]) {}
