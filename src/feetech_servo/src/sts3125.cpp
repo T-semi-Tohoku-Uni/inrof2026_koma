@@ -170,31 +170,7 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
 
     tcflush(serial_fd_, TCIFLUSH);
 
-    const ssize_t written = ::write(serial_fd_, tx, sizeof(tx));
-
-    if (written < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            RCLCPP_WARN(logger, "Serial write would block");
-            return false;
-        }
-
-        RCLCPP_ERROR(
-            logger,
-            "Serial write failed: %s",
-            std::strerror(errno)
-        );
-        return false;
-    }
-
-    if (written != static_cast<ssize_t>(sizeof(tx))) {
-        RCLCPP_WARN(
-            logger,
-            "Serial write incomplete: %zd / %zu bytes",
-            written,
-            sizeof(tx)
-        );
-        return false;
-    }
+    if (!write_packet(tx, 9)) return false;
 
     RCLCPP_INFO(
         logger,
@@ -263,36 +239,12 @@ bool koma::FeetechSerial::send_read_state_command()
     tx[4] = instruction;
     tx[5] = start_address;
     tx[6] = read_size;
-    tx[7] = make_checksum(tx);
+    tx[7] = make_checksum(&tx[2], 5);
 
     rx_buffer_.clear();
     tcflush(serial_fd_, TCIFLUSH);
 
-    const ssize_t written = ::write(serial_fd_, tx, sizeof(tx));
-
-    if (written < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            RCLCPP_WARN(logger, "Serial write would block");
-            return false;
-        }
-
-        RCLCPP_ERROR(
-            logger,
-            "Serial write failed: %s",
-            std::strerror(errno)
-        );
-        return false;
-    }
-
-    if (written != static_cast<ssize_t>(sizeof(tx))) {
-        RCLCPP_WARN(
-            logger,
-            "Serial write incomplete: %zd / %zu bytes",
-            written,
-            sizeof(tx)
-        );
-        return false;
-    }
+    if (!write_packet(tx, 8)) return false;
 
     return true;
 }
@@ -469,7 +421,7 @@ bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
     tx[4] = instruction;
     tx[5] = start_address;
     tx[6] = read_size;
-    tx[7] = make_checksum(tx);
+    tx[7] = make_checksum(&tx[2], 5);
 
     RCLCPP_INFO(
         rclcpp::get_logger("rclcpp"),
@@ -479,25 +431,7 @@ bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
 
     tcflush(serial_fd_, TCIFLUSH);
 
-    ssize_t written = ::write(serial_fd_, tx, sizeof(tx));
-    if (written < 0) {
-        RCLCPP_ERROR(
-            rclcpp::get_logger("rclcpp"),
-            "Serial write failed: %s",
-            std::strerror(errno)
-        );
-        return false;
-    }
-
-    if (written != static_cast<ssize_t>(sizeof(tx))) {
-        RCLCPP_WARN(
-            rclcpp::get_logger("rclcpp"),
-            "Serial write incomplete: %zd / %zu bytes",
-            written,
-            sizeof(tx)
-        );
-        return false;
-    }
+    if (!write_packet(tx, 8)) return false;
 
     constexpr size_t expected_rx_size = 6 + read_size;
     uint8_t rx[128];
@@ -670,12 +604,40 @@ bool koma::FeetechSerial::read_all_state(koma::FeetechState& state)
     return true;
 }
 
-uint8_t koma::FeetechSerial::make_checksum(uint8_t tx[]) {
-    uint8_t sum = tx[2] + tx[3] + tx[4] + tx[5] + tx[6];
-    return static_cast<uint8_t>(~sum);
+uint8_t koma::FeetechSerial::make_checksum(uint8_t tx[], size_t size) {
+    uint16_t sum = 0;
+
+    for (size_t i = 0; i < size; ++i) {
+        sum += tx[i];
+    }
+
+    return static_cast<uint8_t>(~static_cast<uint8_t>(sum & 0xFF));
 }
 
-uint8_t koma::FeetechSerial::make_checksum(uint8_t buf[8]) {}
+bool koma::FeetechSerial::write_packet(uint8_t tx[], size_t size) {
+    ssize_t written = ::write(serial_fd_, tx, size);
+
+    if (written < 0) {
+        RCLCPP_ERROR(
+            rclcpp::get_logger("rclcpp"),
+            "Serial write failed: %s",
+            std::strerror(errno)
+        );
+        return false;
+    }
+
+    if (written != static_cast<ssize_t>(size)) {
+        RCLCPP_WARN(
+            rclcpp::get_logger("rclcpp"),
+            "Serial write incomplete: %zd / %zu bytes",
+            written,
+            size
+        );
+        return false;
+    }
+
+    return true;
+}
 
 int main(int argc, char ** argv)
 {
@@ -711,6 +673,10 @@ int main(int argc, char ** argv)
         index = (index + 1) % positions.size();
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        koma::FeetechState state;
+        if(!serial.send_read_state_command()) {}
+        while(!serial.try_read_state_response(state)) {}
     }
 
     return 0;
