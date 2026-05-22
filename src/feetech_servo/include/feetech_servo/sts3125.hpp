@@ -124,7 +124,6 @@ namespace koma {
             uint16_t make_u16(uint8_t low, uint8_t high) {
                 return static_cast<uint16_t>(low) | (static_cast<uint16_t>(high) << 8);
             }
-            bool read_exact(uint8_t* buffer, size_t size);
             bool write_packet(uint8_t tx[], size_t size);
             
             // bool write();

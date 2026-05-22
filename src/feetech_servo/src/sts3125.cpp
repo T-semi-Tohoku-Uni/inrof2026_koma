@@ -182,39 +182,6 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
     return true;
 }
 
-bool koma::FeetechSerial::read_exact(uint8_t* buffer, size_t size) {
-    size_t total = 0;
-
-    while (total < size) {
-        ssize_t n = ::read(serial_fd_, buffer + total, size - total);
-
-        if (n < 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-
-            RCLCPP_ERROR(
-                rclcpp::get_logger("rclcpp"),
-                "Serial read failed: %s",
-                std::strerror(errno)
-            );
-            return false;
-        }
-
-        if (n == 0) {
-            RCLCPP_ERROR(
-                rclcpp::get_logger("rclcpp"),
-                "Serial read timeout"
-            );
-            return false;
-        }
-
-        total += static_cast<size_t>(n);
-    }
-
-    return true;
-}
-
 bool koma::FeetechSerial::send_read_state_command()
 {
     auto logger = rclcpp::get_logger("rclcpp");
