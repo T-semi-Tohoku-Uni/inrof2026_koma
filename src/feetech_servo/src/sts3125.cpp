@@ -590,11 +590,61 @@ uint8_t koma::FeetechSerial::make_checksum(uint8_t buf[8]) {}
 
 int main(int argc, char ** argv)
 {
-    koma::FeetechSerial serial = koma::FeetechSerial("/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0", 1);
+    koma::FeetechSerial serial(
+        "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0",
+        1
+    );
 
-    while (1) {
-        koma::FeetechState state = serial.send_read_state_command();
-        state.print();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+    bool waiting_response = false;
+    auto last_send_time = std::chrono::steady_clock::now() - std::chrono::seconds(1);
+
+    while (true) {
+        const auto now = std::chrono::steady_clock::now();
+
+        // 1秒ごとに READ コマンドを送る
+        if (!waiting_response &&
+            now - last_send_time >= std::chrono::seconds(1)) {
+
+            if (serial.send_read_state_command()) {
+                waiting_response = true;
+                last_send_time = now;
+
+                std::cout << "READ command sent" << std::endl;
+            } else {
+                last_send_time = now;
+
+                std::cerr << "Failed to send READ command" << std::endl;
+            }
+        }
+
+        // ブロックせずに、今来ている分だけ読む
+        if (waiting_response) {
+            koma::FeetechState state;
+
+            if (serial.try_read_state_response(state)) {
+                waiting_response = false;
+
+                std::printf(
+                    "id=%u position=%u speed=%u load=%u\n",
+                    static_cast<unsigned>(state.id),
+                    static_cast<unsigned>(state.present_position),
+                    static_cast<unsigned>(state.present_speed),
+                    static_cast<unsigned>(state.present_load)
+                );
+
+                // 詳細表示したいならこれ
+                // state.print();
+            }
+
+            // 応答が来なかった場合の保険
+            if (now - last_send_time > std::chrono::milliseconds(100)) {
+                waiting_response = false;
+                std::cerr << "Read response timeout" << std::endl;
+            }
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
+
+    return 0;
 }
