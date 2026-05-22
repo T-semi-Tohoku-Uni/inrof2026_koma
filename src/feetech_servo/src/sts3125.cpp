@@ -325,6 +325,15 @@ bool koma::FeetechSerial::try_read_state_response(koma::FeetechState& state)
         } else {
             RCLCPP_DEBUG(logger, "Ignored WRITE ACK packet");
         }
+        
+        std::ostringstream oss;
+        for (size_t i = 0; i < packet_size; ++i) {
+            oss << std::hex << std::uppercase
+                << std::setw(2) << std::setfill('0')
+                << static_cast<int>(rx_buffer_[i]) << " ";
+        }
+
+        RCLCPP_WARN(logger, "Dropping packet: %s", oss.str().c_str());
 
         rx_buffer_.erase(rx_buffer_.begin(), rx_buffer_.begin() + packet_size);
         return false;
