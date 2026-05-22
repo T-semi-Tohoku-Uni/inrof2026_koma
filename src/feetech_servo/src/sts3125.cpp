@@ -669,8 +669,10 @@ int main(int argc, char ** argv)
         //     std::cerr << "failed to send position: " << position << std::endl;
         // }
 
-        if (!serial.read_all_state(state)) {}
-        state.print();
+        if (!serial.send_read_state_command()){}
+        while (serial.try_read_state_response(state)) {
+            state.print();
+        }
 
         // index = (index + 1) % positions.size();
 
