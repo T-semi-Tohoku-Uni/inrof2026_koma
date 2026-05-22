@@ -685,6 +685,9 @@ int main(int argc, char ** argv)
         1
     );
 
+    koma::FeetechState state = serial.send_ping_command();
+    state.print();
+
     std::vector<double> positions = {
         1000.0,
         2000.0,
