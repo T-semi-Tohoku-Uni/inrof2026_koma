@@ -761,16 +761,22 @@ bool koma::FeetechSerial::wait_write_ack(int servo_id, std::chrono::milliseconds
 
 int main(int argc, char ** argv)
 {
-  koma::FeetechSerial serial("/dev/serial/by-path/pci-0000:00:14.0-usb-0:6:1.0");
+  koma::FeetechSerial serial_12("/dev/serial/by-path/pci-0000:00:14.0-usb-0:6:1.0");
+  koma::FeetechSerial serial_3("/dev/serial/by-path/pci-0000:00:14.0-usb-0:5:1.0");
 
   koma::FeetechState state_id_1;
   koma::FeetechState state_id_2;
-  if (!serial.read_all_state(1, state_id_1)) {
+  koma::FeetechState state_id_3;
+  if (!serial_12.read_all_state(1, state_id_1)) {
   }
   state_id_1.print();
-  if (!serial.read_all_state(2, state_id_2)) {
+  if (!serial_12.read_all_state(2, state_id_2)) {
   }
   state_id_2.print();
+  if (!serial_3.read_all_state(3, state_id_3)) {
+  }
+  state_id_3.print();
+
 
   std::vector<double> positions = {1000.0, 2000.0, 3000.0, 2000.0};
 
@@ -780,29 +786,41 @@ int main(int argc, char ** argv)
     double position = positions[index];
 
     // set all motor position
-    if (!serial.send_write_state_command(1, position)) {
+    if (!serial_12.send_write_state_command(1, position)) {
     }
-    if (!serial.wait_write_ack(1, 2ms)) {
+    if (!serial_12.wait_write_ack(1, 2ms)) {
     }
-    if (!serial.send_write_state_command(2, position)) {
+    if (!serial_12.send_write_state_command(2, position)) {
     }
-    if (!serial.wait_write_ack(2, 2ms)) {
+    if (!serial_12.wait_write_ack(2, 2ms)) {
+    }
+    if (!serial_3.send_write_state_command(3, position)) {
+    }
+    if (!serial_3.wait_write_ack(3, 2ms)) {
     }
 
     // sent action to all motor
-    if (!serial.send_action_command()) {
+    if (!serial_12.send_action_command()) {
+    }
+    if (!serial_3.send_action_command()) {
+        
     }
 
-    if (!serial.send_read_state_command(1)) {
+    if (!serial_12.send_read_state_command(1)) {
     }
-    if (!serial.wait_read_state_response(1, state_id_1, 2ms)) {
+    if (!serial_12.wait_read_state_response(1, state_id_1, 2ms)) {
     }
-    if (!serial.send_read_state_command(2)) {
+    if (!serial_12.send_read_state_command(2)) {
     }
-    if (!serial.wait_read_state_response(2, state_id_2, 2ms)) {
+    if (!serial_12.wait_read_state_response(2, state_id_2, 2ms)) {
+    }
+    if (!serial_3.send_read_state_command(3)) {
+    }
+    if (!serial_3.wait_read_state_response(3, state_id_3, 2ms)) {
     }
     state_id_1.print();
     state_id_2.print();
+    state_id_3.print();
 
     index = (index + 1) % positions.size();
 
