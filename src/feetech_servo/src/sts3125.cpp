@@ -149,24 +149,22 @@ bool koma::FeetechSerial::send_write_state_command(double position) {
     //
     // params = address + pos_l + pos_h = 3 bytes
     // length = instruction + params + checksum = 1 + 3 + 1 = 5
-    uint8_t tx[9];
+    uint8_t tx[13];
     std::memset(tx, 0x00, sizeof(tx));
 
     tx[0] = 0xFF;
     tx[1] = 0xFF;
     tx[2] = servo_id;
-    tx[3] = 0x05;
-    tx[4] = instruction;
-    tx[5] = goal_position_addr;
+    tx[3] = 0x09;              // length
+    tx[4] = instruction;       // 0x03 WRITE
+    tx[5] = goal_position_addr; // 42
     tx[6] = pos_l;
     tx[7] = pos_h;
-
-    uint16_t sum = 0;
-    for (size_t i = 2; i <= 7; ++i) {
-        sum += tx[i];
-    }
-
-    tx[8] = static_cast<uint8_t>(~static_cast<uint8_t>(sum & 0xFF));
+    tx[8] = 0x00;              // time low
+    tx[9] = 0x00;              // time high
+    tx[10] = 0x00;             // speed low
+    tx[11] = 0x00;             // speed high
+    tx[12] = make_checksum(&tx[2], 10); // IDからspeed highまで
 
     tcflush(serial_fd_, TCIFLUSH);
 
