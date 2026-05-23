@@ -97,11 +97,11 @@ double koma::FeetechJointManager::tick_to_rad(int tick)
 
 void koma::FeetechJointManager::target_joint_state_callback(sensor_msgs::msg::JointState::SharedPtr msg) {
   serial_1_2_->send_write_state_command(1, rad_to_tick(msg->position[0]));
-  if (serial_1_2_->wait_write_ack(1, 4ms)) {
+  if (!serial_1_2_->wait_write_ack(1, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 1 is not responed");
   }
   serial_1_2_->send_write_state_command(2, rad_to_tick(msg->position[1]));
-  if (serial_1_2_->wait_write_ack(2, 4ms)) {
+  if (!serial_1_2_->wait_write_ack(2, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
   }
   serial_1_2_->send_action_command();
