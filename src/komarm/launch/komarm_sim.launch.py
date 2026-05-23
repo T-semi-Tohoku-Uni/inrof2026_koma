@@ -2,11 +2,12 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, EnvironmentVariable
 from launch_ros.actions import Node
 import launch_ros
+from pathlib import Path
 
 import math
 
@@ -14,6 +15,17 @@ def generate_launch_description():
     inrof2026_koma_package_dir = get_package_share_directory("inrof2026_koma")
     simulation_package_dir = get_package_share_directory("simulation")
     komarm_package_dir = get_package_share_directory("komarm")
+
+    # libtorch path
+    libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
+
+    # Get workspace dir
+    ws_root = Path(komarm_package_dir).parents[4]
+    resource_paths = [
+        str(ws_root / 'src'),
+        str(ws_root / 'src' / 'simulation' / 'models'),
+    ]
+    resource_path_value = ':'.join(resource_paths)
 
     x = 0.25
     y = 0.25
@@ -213,6 +225,22 @@ def generate_launch_description():
 
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
+        SetEnvironmentVariable(
+            name='IGN_GAZEBO_RESOURCE_PATH',
+            value=[
+                EnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', default_value=''),
+                ':',
+                resource_path_value,
+            ],
+        ),
+        SetEnvironmentVariable(
+            name='LD_LIBRARY_PATH',
+            value=[
+                libtorch_lib,
+                ':',
+                EnvironmentVariable('LD_LIBRARY_PATH', default_value=''),
+            ],
+        ),
         gazebo_node,
         robot_state_publisher_node,
         gz_spawn_entity,
