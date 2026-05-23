@@ -54,18 +54,6 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   } else {
     state_6.print();
   }
-  // if (!serial_3_4_->read_all_state(3, state_3)) {
-  //   RCLCPP_WARN(this->get_logger(), "Servo id 3 is not connected");
-  // }
-  // if (!serial_3_4_->read_all_state(4, state_4)) {
-  //   RCLCPP_WARN(this->get_logger(), "Servo id 4 is not connected");
-  // }
-  // if (!serial_5_->read_all_state(5, state_5)) {
-  //   RCLCPP_WARN(this->get_logger(), "Servo id 5 is not connected");
-  // }
-  // if (!serial_6_->read_all_state(6, state_6)) {
-  //   RCLCPP_WARN(this->get_logger(), "Servo id 6 is not connected");
-  // }
 
   cur_joint_state_pub_ =
     this->create_publisher<sensor_msgs::msg::JointState>("joint_states", rclcpp::SensorDataQoS());
