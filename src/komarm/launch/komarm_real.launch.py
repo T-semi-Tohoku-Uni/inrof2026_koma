@@ -30,12 +30,6 @@ def generate_launch_description():
         "komarm.urdf"
     )
 
-    gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r 4 {world_file_path}'])]
-    )
-
     with open(komarm_urdf_path, "r") as infp:
         robot_desc = infp.read()
     robot_desc = robot_desc.replace(
@@ -92,7 +86,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        gazebo_node,
         robot_state_publisher_node,
         rviz,
         joint_manager,
