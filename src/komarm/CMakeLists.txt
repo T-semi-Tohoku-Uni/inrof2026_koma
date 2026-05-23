@@ -16,6 +16,7 @@ find_package(Torch REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(feetech_servo REQUIRED)
 
 add_executable(catch_influence src/catch_influence.cpp)
 ament_target_dependencies(catch_influence rclcpp)
@@ -47,6 +48,7 @@ add_executable(feetech_joint src/feetech_joint.cpp)
 ament_target_dependencies(feetech_joint 
   rclcpp 
   sensor_msgs
+  feetech_servo
 )
 target_include_directories(feetech_joint
   PUBLIC
