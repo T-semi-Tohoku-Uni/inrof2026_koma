@@ -6,12 +6,12 @@
 #include <algorithm>
 #include <chrono>
 #include <cstring>
+#include <feetech_servo/sts3125.hpp>
 #include <functional>
 #include <iterator>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <vector>
-#include <feetech_servo/sts3125.hpp>
 
 using namespace std::chrono_literals;
 

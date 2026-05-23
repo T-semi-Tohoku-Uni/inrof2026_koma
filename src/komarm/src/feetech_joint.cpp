@@ -5,26 +5,20 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   joint_names_{"Revolute 12", "Revolute 11", "Revolute 7", "Revolute 8", "Revolute 9"}
 {
   const std::string port_1_2 = this->declare_parameter<std::string>(
-    "port_1_2",
-    "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0"
-  );
+    "port_1_2", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0");
 
   const std::string port_3_4 = this->declare_parameter<std::string>(
-    "port_3_4",
-    "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.2:1.0"
-  );
+    "port_3_4", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.2:1.0");
 
   const std::string port_5_6 = this->declare_parameter<std::string>(
-    "port_5_6",
-    "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.3:1.0"
-  );
+    "port_5_6", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.3:1.0");
 
   serial_1_2_ = std::make_unique<koma::FeetechSerial>(port_1_2.c_str());
   serial_3_4_ = std::make_unique<koma::FeetechSerial>(port_3_4.c_str());
   serial_5_6_ = std::make_unique<koma::FeetechSerial>(port_5_6.c_str());
 
   // check serial
-  if(!serial_1_2_->read_all_state(1, state_1)) {
+  if (!serial_1_2_->read_all_state(1, state_1)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 1 is not connected");
   } else {
     state_1.print();
@@ -34,7 +28,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   } else {
     state_2.print();
   }
-  if(!serial_3_4_->read_all_state(3, state_3)) {
+  if (!serial_3_4_->read_all_state(3, state_3)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 3 is not connected");
   } else {
     state_3.print();
@@ -44,7 +38,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   } else {
     state_4.print();
   }
-  if(!serial_5_6_->read_all_state(5, state_5)) {
+  if (!serial_5_6_->read_all_state(5, state_5)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 5 is not connected");
   } else {
     state_5.print();
@@ -58,19 +52,15 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   cur_joint_state_pub_ =
     this->create_publisher<sensor_msgs::msg::JointState>("joint_states", rclcpp::SensorDataQoS());
   publish_cur_joint_state_timer_ = this->create_wall_timer(
-    20ms,
-    std::bind(&koma::FeetechJointManager::publish_cur_joint_state, this)
-  );
+    20ms, std::bind(&koma::FeetechJointManager::publish_cur_joint_state, this));
   target_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
-    "target_joint_states",
-    rclcpp::SensorDataQoS(),
-    std::bind(&koma::FeetechJointManager::target_joint_state_callback, this, std::placeholders::_1)
-  );
+    "target_joint_states", rclcpp::SensorDataQoS(),
+    std::bind(
+      &koma::FeetechJointManager::target_joint_state_callback, this, std::placeholders::_1));
 }
 
 double koma::FeetechJointManager::rad_to_tick(double rad)
 {
-
   while (rad > M_PI) {
     rad -= 2.0 * M_PI;
   }
@@ -97,7 +87,9 @@ double koma::FeetechJointManager::tick_to_rad(int tick)
   return (static_cast<double>(tick) / 4096.0) * 2.0 * M_PI - M_PI;
 }
 
-void koma::FeetechJointManager::target_joint_state_callback(sensor_msgs::msg::JointState::SharedPtr msg) {
+void koma::FeetechJointManager::target_joint_state_callback(
+  sensor_msgs::msg::JointState::SharedPtr msg)
+{
   serial_1_2_->send_write_state_command(1, rad_to_tick(msg->position[0]));
   serial_3_4_->send_write_state_command(3, rad_to_tick(msg->position[2]));
   serial_5_6_->send_write_state_command(5, rad_to_tick(msg->position[4]));
@@ -128,7 +120,8 @@ void koma::FeetechJointManager::target_joint_state_callback(sensor_msgs::msg::Jo
   serial_5_6_->send_action_command();
 }
 
-void koma::FeetechJointManager::publish_cur_joint_state() {
+void koma::FeetechJointManager::publish_cur_joint_state()
+{
   serial_1_2_->send_read_state_command(1);
   serial_3_4_->send_read_state_command(3);
   serial_5_6_->send_read_state_command(5);
@@ -157,13 +150,9 @@ void koma::FeetechJointManager::publish_cur_joint_state() {
   sensor_msgs::msg::JointState joint_state;
   joint_state.name = joint_names_;
   joint_state.position = {
-    tick_to_rad(state_1.present_position),
-    tick_to_rad(state_2.present_position),
-    tick_to_rad(state_3.present_position),
-    tick_to_rad(state_4.present_position),
-    tick_to_rad(state_5.present_position),
-    tick_to_rad(state_6.present_position)
-  };
+    tick_to_rad(state_1.present_position), tick_to_rad(state_2.present_position),
+    tick_to_rad(state_3.present_position), tick_to_rad(state_4.present_position),
+    tick_to_rad(state_5.present_position), tick_to_rad(state_6.present_position)};
 
   joint_state.velocity = {
     speed_tick_to_rad_per_sec(state_1.present_speed),
@@ -173,7 +162,7 @@ void koma::FeetechJointManager::publish_cur_joint_state() {
     speed_tick_to_rad_per_sec(state_5.present_speed),
     speed_tick_to_rad_per_sec(state_6.present_speed),
   };
-  
+
   cur_joint_state_pub_->publish(joint_state);
 }
 
