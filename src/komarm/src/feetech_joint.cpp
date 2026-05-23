@@ -108,9 +108,11 @@ void koma::FeetechJointManager::target_joint_state_callback(sensor_msgs::msg::Jo
 }
 
 void koma::FeetechJointManager::publish_cur_joint_state() {
+  serial_1_2_->send_read_state_command(1);
   if (!serial_1_2_->wait_read_state_response(1, state_1, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 1 is not responed");
   }
+  serial_1_2_->send_read_state_command(2);
   if (!serial_1_2_->wait_read_state_response(2, state_2, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
   }
