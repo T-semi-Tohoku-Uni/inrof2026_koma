@@ -32,9 +32,13 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   // check serial
   if(!serial_1_2_->read_all_state(1, state_1)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 1 is not connected");
+  } else {
+    state_1.print();
   }
   if (!serial_1_2_->read_all_state(2, state_2)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not connected");
+  } else {
+    state_2.print();
   }
   // if (!serial_3_4_->read_all_state(3, state_3)) {
   //   RCLCPP_WARN(this->get_logger(), "Servo id 3 is not connected");
