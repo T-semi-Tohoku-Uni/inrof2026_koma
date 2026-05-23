@@ -28,8 +28,7 @@ private:
   rclcpp::TimerBase::SharedPtr publish_cur_joint_state_timer_;
   std::unique_ptr<koma::FeetechSerial> serial_1_2_;
   std::unique_ptr<koma::FeetechSerial> serial_3_4_;
-  std::unique_ptr<koma::FeetechSerial> serial_5_;
-  std::unique_ptr<koma::FeetechSerial> serial_6_;
+  std::unique_ptr<koma::FeetechSerial> serial_5_6_;
 
   std::vector<std::string> joint_names_;
 
