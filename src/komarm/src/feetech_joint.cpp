@@ -164,8 +164,32 @@ void koma::FeetechJointManager::publish_cur_joint_state() {
     tick_to_rad(state_5.present_position),
     tick_to_rad(state_6.present_position)
   };
+
+  joint_state.velocity = {
+    speed_tick_to_rad_per_sec(state_1.present_speed),
+    speed_tick_to_rad_per_sec(state_2.present_speed),
+    speed_tick_to_rad_per_sec(state_3.present_speed),
+    speed_tick_to_rad_per_sec(state_4.present_speed),
+    speed_tick_to_rad_per_sec(state_5.present_speed),
+    speed_tick_to_rad_per_sec(state_6.present_speed),
+  };
   
   cur_joint_state_pub_->publish(joint_state);
+}
+
+int koma::FeetechJointManager::decode_present_speed(uint16_t raw_speed)
+{
+  if (raw_speed & 0x8000) {
+    return -static_cast<int>(raw_speed & 0x7FFF);
+  }
+
+  return static_cast<int>(raw_speed);
+}
+
+double koma::FeetechJointManager::speed_tick_to_rad_per_sec(uint16_t raw_speed)
+{
+  const int speed_tick_per_sec = decode_present_speed(raw_speed);
+  return static_cast<double>(speed_tick_per_sec) * 2.0 * M_PI / 4096.0;
 }
 
 int main(int argc, char ** argv)
