@@ -119,7 +119,7 @@ void koma::FeetechJointManager::target_joint_state_callback(sensor_msgs::msg::Jo
   if (!serial_3_4_->wait_write_ack(3, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 3 is not responed");
   }
-  if (!serial_5_6_->wait_write_ack(3, 4ms)) {
+  if (!serial_5_6_->wait_write_ack(5, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 5 is not responed");
   }
 
