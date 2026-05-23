@@ -58,13 +58,6 @@ def generate_launch_description():
         parameters=[params]
     )
 
-    rviz = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="log",
-    )
-
     joint_manager = Node(
         package="komarm",
         executable="feetech_joint",
@@ -87,7 +80,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         robot_state_publisher_node,
-        rviz,
         joint_manager,
         # hand_pose,
         static_from_map_to_odom,
