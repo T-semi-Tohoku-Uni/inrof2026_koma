@@ -4,7 +4,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, EnvironmentVariable
+from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch_ros.actions import Node
 import launch_ros
 from pathlib import Path
@@ -20,12 +20,9 @@ def generate_launch_description():
     libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
 
     # Get workspace dir
-    ws_root = Path(komarm_package_dir).parents[4]
-    resource_paths = [
-        str(ws_root / 'src'),
-        str(ws_root / 'src' / 'simulation' / 'models'),
-    ]
-    resource_path_value = ':'.join(resource_paths)
+    ws_root = Path(komarm_package_dir).parents[3]
+    src_path = str(ws_root / 'src')
+    models_path = str(ws_root / 'src' / 'simulation' / 'models')
 
     x = 0.25
     y = 0.25
@@ -50,10 +47,10 @@ def generate_launch_description():
 
     with open(komarm_urdf_path, "r") as infp:
         robot_desc = infp.read()
-    robot_desc = robot_desc.replace(
-        "../meshes/",
-        f"file://{komarm_package_dir}/meshes/",
-    )
+    # robot_desc = robot_desc.replace(
+    #     "../meshes/",
+    #     f"file://{komarm_package_dir}/meshes/",
+    # )
 
     # TODO: delete
     fixed_base_joint = f"""
@@ -230,7 +227,9 @@ def generate_launch_description():
             value=[
                 EnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', default_value=''),
                 ':',
-                resource_path_value,
+                src_path,
+                ':',
+                models_path,
             ],
         ),
         SetEnvironmentVariable(

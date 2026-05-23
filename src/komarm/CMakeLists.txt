@@ -59,7 +59,7 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch urdf meshes include
+install(DIRECTORY launch urdf meshes include libtorch
   DESTINATION share/${PROJECT_NAME}
 )
 
