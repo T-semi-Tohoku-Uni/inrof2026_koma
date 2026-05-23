@@ -62,8 +62,32 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   target_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
     "target_joint_states",
     rclcpp::SensorDataQoS(),
-    std::bind(koma::FeetechJointManager::target_joint_state_callback, this, std::placeholders::_1)
+    std::bind(&koma::FeetechJointManager::target_joint_state_callback, this, std::placeholders::_1)
   );
+}
+
+double koma::FeetechJointManager::rad_to_tick(double rad)
+{
+
+  while (rad > M_PI) {
+    rad -= 2.0 * M_PI;
+  }
+
+  while (rad < -M_PI) {
+    rad += 2.0 * M_PI;
+  }
+
+  double tick = rad * 4096.0 / (2.0 * M_PI) + 2048.0;
+
+  if (tick < 0.0) {
+    tick = 0.0;
+  }
+
+  if (tick > 4095.0) {
+    tick = 4095.0;
+  }
+
+  return tick;
 }
 
 double koma::FeetechJointManager::tick_to_rad(int tick)
