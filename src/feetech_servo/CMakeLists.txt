@@ -12,31 +12,33 @@ find_package(rclcpp REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(sts3125 src/sts3125.cpp)
-ament_target_dependencies(sts3125 
-  rclcpp 
-)
-target_include_directories(sts3125
-  PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
-    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
-)
-install(TARGETS
-  sts3125
-  DESTINATION lib/${PROJECT_NAME}
+add_library(feetech_servo
+  src/sts3125.cpp
 )
 
+target_include_directories(feetech_servo PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+ament_target_dependencies(feetech_servo
+  rclcpp
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS feetech_servo
+  EXPORT export_feetech_servo
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+ament_export_targets(export_feetech_servo HAS_LIBRARY_TARGET)
+ament_export_dependencies(rclcpp)
 
 ament_package()
