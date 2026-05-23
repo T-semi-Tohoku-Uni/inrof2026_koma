@@ -18,7 +18,7 @@ find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(inrof2026_koma_type REQUIRED)
 find_package(visualization_msgs REQUIRED)
-
+find_package(feetech_servo REQUIRED)
 
 add_executable(catch_influence src/catch_influence.cpp)
 target_include_directories(catch_influence PUBLIC include)
@@ -52,6 +52,23 @@ install(TARGETS
   dummy_joint
   DESTINATION lib/${PROJECT_NAME}
 )
+
+add_executable(feetech_joint src/feetech_joint.cpp)
+ament_target_dependencies(feetech_joint 
+  rclcpp 
+  sensor_msgs
+  feetech_servo
+)
+target_include_directories(feetech_joint
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  feetech_joint
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 
 add_executable(hand_pose src/hand_pose.cpp)
 ament_target_dependencies(hand_pose 
