@@ -41,7 +41,9 @@ private:
   koma::FeetechState state_6;
 
   void publish_cur_joint_state();
+  void target_joint_state_callback(sensor_msgs::msg::JointState::SharedPtr msg);
   double tick_to_rad(int tick);
+  double rad_to_tick(double rad);
   // void target_joint_state_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
 };
 }  // namespace koma

@@ -59,6 +59,11 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
     20ms,
     std::bind(&koma::FeetechJointManager::publish_cur_joint_state, this)
   );
+  target_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
+    "target_joint_states",
+    rclcpp::SensorDataQoS(),
+    std::bind(koma::FeetechJointManager::target_joint_state_callback, this, std::placeholders::_1)
+  );
 }
 
 double koma::FeetechJointManager::tick_to_rad(int tick)
@@ -66,12 +71,23 @@ double koma::FeetechJointManager::tick_to_rad(int tick)
   return (static_cast<double>(tick) / 4096.0) * 2.0 * M_PI - M_PI;
 }
 
-
-void koma::FeetechJointManager::publish_cur_joint_state() {
-  if (serial_1_2_->wait_read_state_response(1, state_1, 4ms)) {
+void koma::FeetechJointManager::target_joint_state_callback(sensor_msgs::msg::JointState::SharedPtr msg) {
+  serial_1_2_->send_write_state_command(1, rad_to_tick(msg->position[0]));
+  if (serial_1_2_->wait_write_ack(1, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 1 is not responed");
   }
-  if (serial_1_2_->wait_read_state_response(2, state_2, 4ms)) {
+  serial_1_2_->send_write_state_command(2, rad_to_tick(msg->position[1]));
+  if (serial_1_2_->wait_write_ack(2, 4ms)) {
+    RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
+  }
+  serial_1_2_->send_action_command();
+}
+
+void koma::FeetechJointManager::publish_cur_joint_state() {
+  if (!serial_1_2_->wait_read_state_response(1, state_1, 4ms)) {
+    RCLCPP_WARN(this->get_logger(), "Servo id 1 is not responed");
+  }
+  if (!serial_1_2_->wait_read_state_response(2, state_2, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
   }
   // if (serial_3_4_->wait_read_state_response(3, state_3, 4ms)) {
