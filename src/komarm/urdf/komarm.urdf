@@ -69,14 +69,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="steel_satin"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -89,14 +89,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0217 -0.0324 -0.04195"/>
       <geometry>
-        <mesh filename="../meshes/servo_holder2_v9_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/servo_holder2_v9_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="steel_satin"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0217 -0.0324 -0.04195"/>
       <geometry>
-        <mesh filename="../meshes/servo_holder2_v9_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/servo_holder2_v9_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -109,14 +109,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0227 0.0338 -0.04195"/>
       <geometry>
-        <mesh filename="../meshes/hand_rotation_v13_4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/hand_rotation_v13_4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="steel_satin"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0227 0.0338 -0.04195"/>
       <geometry>
-        <mesh filename="../meshes/hand_rotation_v13_4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/hand_rotation_v13_4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -129,14 +129,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0.0005 0.0892 -0.04195"/>
       <geometry>
-        <mesh filename="../meshes/hand_v17_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/hand_v17_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="steel_satin"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.0005 0.0892 -0.04195"/>
       <geometry>
-        <mesh filename="../meshes/hand_v17_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/hand_v17_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -149,14 +149,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0212 -0.0 -0.0125"/>
       <geometry>
-        <mesh filename="../meshes/servo_holder_v23_3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/servo_holder_v23_3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="steel_satin"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0212 -0.0 -0.0125"/>
       <geometry>
-        <mesh filename="../meshes/servo_holder_v23_3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/servo_holder_v23_3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -169,14 +169,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0.00135 -0.0369 0.0165"/>
       <geometry>
-        <mesh filename="../meshes/base_mount_v2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/base_mount_v2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="steel_satin"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.00135 -0.0369 0.0165"/>
       <geometry>
-        <mesh filename="../meshes/base_mount_v2_1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://komarm/meshes/base_mount_v2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
