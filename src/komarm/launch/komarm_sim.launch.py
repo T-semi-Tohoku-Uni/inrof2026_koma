@@ -47,10 +47,10 @@ def generate_launch_description():
 
     with open(komarm_urdf_path, "r") as infp:
         robot_desc = infp.read()
-    # robot_desc = robot_desc.replace(
-    #     "../meshes/",
-    #     f"file://{komarm_package_dir}/meshes/",
-    # )
+    robot_desc = robot_desc.replace(
+        "../meshes/",
+        f"package://komarm/meshes/",
+    )
 
     # TODO: delete
     fixed_base_joint = f"""
