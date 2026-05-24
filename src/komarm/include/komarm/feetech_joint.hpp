@@ -12,7 +12,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <vector>
-#include <math.hpp>
 
 using namespace std::chrono_literals;
 
