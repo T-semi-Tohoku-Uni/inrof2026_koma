@@ -63,22 +63,22 @@ def generate_launch_description():
         executable="feetech_joint",
         output="screen",
         parameters=[
-            {
-                "servo_1_min": -math.pi/2,
-                "servo_1_max":  math.pi/2,
+            # {
+            #     "servo_1_min": -math.pi/2,
+            #     "servo_1_max":  math.pi/2,
 
-                "servo_2_min": 0.0,
-                "servo_2_max": math.pi,
+            #     "servo_2_min": 0.0,
+            #     "servo_2_max": math.pi,
 
-                "servo_3_min": 0.0,
-                "servo_3_max": math.pi,
+            #     "servo_3_min": 0.0,
+            #     "servo_3_max": math.pi,
 
-                "servo_4_min": -math.pi/4.0,
-                "servo_4_max": math.pi/2.0,
+            #     "servo_4_min": -math.pi/4.0,
+            #     "servo_4_max": math.pi/2.0,
 
-                "servo_5_min": -math.pi,
-                "servo_5_max": math.pi,
-            }
+            #     "servo_5_min": -math.pi,
+            #     "servo_5_max": math.pi,
+            # }
         ]
     )
 
