@@ -117,7 +117,7 @@ class FeetechSerial
 {
 public:
   FeetechSerial(const char * device_name);
-  bool send_write_state_command(int servo_id, double position);
+  bool send_write_state_command(int servo_id, uint16_t position);
   bool send_action_command();
   bool send_read_state_command(int servo_id);
   bool try_read_state_response(int servo_id, koma::FeetechState & state);

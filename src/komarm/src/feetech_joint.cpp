@@ -87,7 +87,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   //   state_6.print();
   // }
 
-  if (!serial_1_2_->set_angle_limit(1, 1000, 3000)) {
+  if (!serial_1_2_->set_angle_limit(1, rad_to_tick(servo_1_min), rad_to_tick(servo_1_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
 
@@ -101,7 +101,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
       &koma::FeetechJointManager::target_joint_state_callback, this, std::placeholders::_1));
 }
 
-double koma::FeetechJointManager::rad_to_tick(double rad)
+uint16_t koma::FeetechJointManager::rad_to_tick(double rad)
 {
   while (rad > M_PI) {
     rad -= 2.0 * M_PI;
@@ -121,7 +121,7 @@ double koma::FeetechJointManager::rad_to_tick(double rad)
     tick = 4095.0;
   }
 
-  return tick;
+  return static_cast<uint16_t>(std::lround(tick));
 }
 
 double koma::FeetechJointManager::tick_to_rad(int tick)

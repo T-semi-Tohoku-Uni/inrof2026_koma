@@ -110,7 +110,7 @@ int koma::FeetechSerial::open_serial(const char * device_name)
   return fd;
 }
 
-bool koma::FeetechSerial::send_write_state_command(int servo_id, double position)
+bool koma::FeetechSerial::send_write_state_command(int servo_id, uint16_t position)
 {
   auto logger = rclcpp::get_logger("rclcpp");
 
@@ -123,15 +123,6 @@ bool koma::FeetechSerial::send_write_state_command(int servo_id, double position
 
   constexpr uint8_t instruction = 0x04;       // WRITE
   constexpr uint8_t goal_position_addr = 42;  // Goal Position L
-
-  // position は raw tick として扱う
-  if (position < 0.0) {
-    position = 0.0;
-  }
-
-  if (position > 4095.0) {
-    position = 4095.0;
-  }
 
   const uint16_t goal_position = static_cast<uint16_t>(std::lround(position));
 
