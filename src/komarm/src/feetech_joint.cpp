@@ -55,6 +55,23 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   serial_3_4_ = std::make_unique<koma::FeetechSerial>(port_3_4.c_str());
   serial_5_6_ = std::make_unique<koma::FeetechSerial>(port_5_6.c_str());
 
+
+  if (!serial_1_2_->set_angle_limit(1, rad_to_tick(servo_1_min), rad_to_tick(servo_1_max))) {
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+  }
+  if (!serial_1_2_->set_angle_limit(1, rad_to_tick(servo_2_min), rad_to_tick(servo_2_max))) {
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+  }
+  if (!serial_3_4_->set_angle_limit(1, rad_to_tick(servo_3_min), rad_to_tick(servo_3_max))) {
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+  }
+  if (!serial_3_4_->set_angle_limit(1, rad_to_tick(servo_4_min), rad_to_tick(servo_4_max))) {
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+  }
+  if (!serial_5_6_->set_angle_limit(1, rad_to_tick(servo_5_min), rad_to_tick(servo_5_max))) {
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+  }
+
   // check serial
   if (!serial_1_2_->read_all_state(1, state_1)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 1 is not connected");
@@ -86,10 +103,6 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   // } else {
   //   state_6.print();
   // }
-
-  if (!serial_1_2_->set_angle_limit(1, rad_to_tick(servo_1_min), rad_to_tick(servo_1_max))) {
-    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
-  }
 
   cur_joint_state_pub_ =
     this->create_publisher<sensor_msgs::msg::JointState>("joint_states", rclcpp::SensorDataQoS());
