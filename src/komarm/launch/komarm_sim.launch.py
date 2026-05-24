@@ -2,11 +2,12 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch_ros.actions import Node
 import launch_ros
+from pathlib import Path
 
 import math
 
@@ -14,6 +15,14 @@ def generate_launch_description():
     inrof2026_koma_package_dir = get_package_share_directory("inrof2026_koma")
     simulation_package_dir = get_package_share_directory("simulation")
     komarm_package_dir = get_package_share_directory("komarm")
+
+    # libtorch path
+    libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
+
+    # Get workspace dir
+    ws_root = Path(komarm_package_dir).parents[3]
+    src_path = str(ws_root / 'src')
+    models_path = str(ws_root / 'src' / 'simulation' / 'models')
 
     x = 0.25
     y = 0.25
@@ -40,7 +49,7 @@ def generate_launch_description():
         robot_desc = infp.read()
     robot_desc = robot_desc.replace(
         "../meshes/",
-        f"file://{komarm_package_dir}/meshes/",
+        f"package://komarm/meshes/",
     )
 
     # TODO: delete
@@ -82,9 +91,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 12</joint_name>
         <topic>/komarm/revolute_12/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>30.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>2.0</d_gain>
         </plugin>
 
         <plugin
@@ -92,9 +101,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 11</joint_name>
         <topic>/komarm/revolute_11/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>2.0</d_gain>
         </plugin>
 
         <plugin
@@ -104,7 +113,7 @@ def generate_launch_description():
         <topic>/komarm/revolute_7/cmd_pos</topic>
         <p_gain>10.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>0.5</d_gain>
         </plugin>
 
         <plugin
@@ -112,9 +121,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 8</joint_name>
         <topic>/komarm/revolute_8/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>15.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>0.5</d_gain>
         </plugin>
 
         <plugin
@@ -122,9 +131,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 9</joint_name>
         <topic>/komarm/revolute_9/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>0.001</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>1.0</d_gain>
         </plugin>
     </gazebo>
     """
@@ -211,8 +220,33 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    catch_influence = Node(
+        package="komarm",
+        executable="catch_influence",
+        output="screen",
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
+        SetEnvironmentVariable(
+            name='IGN_GAZEBO_RESOURCE_PATH',
+            value=[
+                EnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', default_value=''),
+                ':',
+                src_path,
+                ':',
+                models_path,
+            ],
+        ),
+        SetEnvironmentVariable(
+            name='LD_LIBRARY_PATH',
+            value=[
+                libtorch_lib,
+                ':',
+                EnvironmentVariable('LD_LIBRARY_PATH', default_value=''),
+            ],
+        ),
         gazebo_node,
         robot_state_publisher_node,
         gz_spawn_entity,
@@ -221,4 +255,5 @@ def generate_launch_description():
         hand_pose,
         bridge,
         static_from_map_to_odom,
+        catch_influence,
     ]) 
