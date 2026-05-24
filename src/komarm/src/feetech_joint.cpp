@@ -13,6 +13,44 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   const std::string port_5_6 = this->declare_parameter<std::string>(
     "port_5_6", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.3:1.0");
 
+  const double servo_1_min = this->declare_parameter<double> (
+    "servo_1_min", -M_1_PI
+  );
+  const double servo_2_min = this->declare_parameter<double> (
+    "servo_2_min", -M_1_PI
+  );
+  const double servo_3_min = this->declare_parameter<double> (
+    "servo_3_min", -M_1_PI
+  );
+  const double servo_4_min = this->declare_parameter<double> (
+    "servo_4_min", -M_1_PI
+  );
+  const double servo_5_min = this->declare_parameter<double> (
+    "servo_5_min", -M_1_PI
+  );
+  // const double servo_1_min = this->declare_parameter<double> (
+  //   "servo_6_min", -M_1_PI
+  // );
+
+  const double servo_1_max = this->declare_parameter<double> (
+    "servo_1_max", M_1_PI
+  );
+  const double servo_2_max = this->declare_parameter<double> (
+    "servo_2_max", M_1_PI
+  );
+  const double servo_3_max = this->declare_parameter<double> (
+    "servo_3_max", M_1_PI
+  );
+  const double servo_4_max = this->declare_parameter<double> (
+    "servo_4_max", M_1_PI
+  );
+  const double servo_5_max = this->declare_parameter<double> (
+    "servo_5_max", M_1_PI
+  );
+  // const double servo_6_max = this->declare_parameter<double> (
+  //   "servo_6_max", M_1_PI
+  // );
+
   serial_1_2_ = std::make_unique<koma::FeetechSerial>(port_1_2.c_str());
   serial_3_4_ = std::make_unique<koma::FeetechSerial>(port_3_4.c_str());
   serial_5_6_ = std::make_unique<koma::FeetechSerial>(port_5_6.c_str());
@@ -48,6 +86,10 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   // } else {
   //   state_6.print();
   // }
+
+  if (!serial_1_2_->set_angle_limit(1, 1000, 3000)) {
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+  }
 
   cur_joint_state_pub_ =
     this->create_publisher<sensor_msgs::msg::JointState>("joint_states", rclcpp::SensorDataQoS());

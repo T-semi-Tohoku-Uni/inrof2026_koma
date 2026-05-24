@@ -124,6 +124,7 @@ public:
   bool wait_read_state_response(
     int servo_id, koma::FeetechState & state, std::chrono::milliseconds timeout);
   bool read_all_state(int servo_id, koma::FeetechState & state);
+  bool set_angle_limit(int servo_id, uint16_t min_position, uint16_t max_position);
   bool wait_write_ack(int servo_id, std::chrono::milliseconds timeout);
   bool try_read_write_ack(int servo_id);
 
