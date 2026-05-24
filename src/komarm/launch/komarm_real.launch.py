@@ -107,6 +107,11 @@ def generate_launch_description():
         package="komarm",
         executable="catch_influence",
         output="screen",
+        parameters=[
+            {
+                "model_path": "/home/keigo/komarm/logs/rsl_rl/reach/2026-05-20_05-43-29/exported/policy.pt"
+            }
+        ]
     )
 
     return LaunchDescription([

@@ -36,7 +36,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Load the model
-  model_path_ = "/home/keigo/komarm/logs/rsl_rl/reach/2026-05-20_05-43-29/exported/policy.pt";
+  const std::string model_path_ = this->declare_parameter<std::string>(
+    "model_path", "/home/keigo/komarm/logs/rsl_rl/reach/2026-05-20_05-43-29/exported/policy.pt");
+  
   module_ = load_model(model_path_);
   //inference mode
   module_.eval();
