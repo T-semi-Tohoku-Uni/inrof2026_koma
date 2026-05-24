@@ -38,6 +38,7 @@ private:
   koma::FeetechState state_4;
   koma::FeetechState state_5;
   koma::FeetechState state_6;
+  std::array<bool, 256> reverse_map_{};
 
   void publish_cur_joint_state();
   void target_joint_state_callback(sensor_msgs::msg::JointState::SharedPtr msg);

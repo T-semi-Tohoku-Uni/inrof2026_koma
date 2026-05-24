@@ -55,7 +55,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
     "is_servo_1_reverse", false
   );
   const bool is_servo_2_reverse = this->declare_parameter<bool> (
-    "is_servo_2_reverse", true
+    "is_servo_2_reverse", false
   );
   const bool is_servo_3_reverse = this->declare_parameter<bool> (
     "is_servo_3_reverse", false
@@ -88,21 +88,11 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
 
-  if (!serial_1_2_->set_reverse(1, is_servo_1_reverse)) {
-    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 1");
-  }
-  if (!serial_1_2_->set_reverse(2, is_servo_2_reverse)) {
-    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 2");
-  }
-  if (!serial_3_4_->set_reverse(3, is_servo_3_reverse)) {
-    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 3");
-  }
-  if (!serial_3_4_->set_reverse(4, is_servo_4_reverse)) {
-    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 4");
-  }
-  if (!serial_5_6_->set_reverse(5, is_servo_5_reverse)) {
-    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 5");
-  }
+  reverse_map_[1] = is_servo_1_reverse;
+  reverse_map_[2] = is_servo_2_reverse;
+  reverse_map_[3] = is_servo_3_reverse;
+  reverse_map_[4] = is_servo_4_reverse;
+  reverse_map_[5] = is_servo_5_reverse;
 
   // check serial
   if (!serial_1_2_->read_all_state(1, state_1)) {
@@ -177,6 +167,12 @@ double koma::FeetechJointManager::tick_to_rad(int tick)
 void koma::FeetechJointManager::target_joint_state_callback(
   sensor_msgs::msg::JointState::SharedPtr msg)
 {
+  for (size_t servo_idx_=0; servo_idx_ < msg->position.size(); servo_idx_++) {
+    if (reverse_map_[servo_idx_+1]) {
+      msg->position[servo_idx_] *= -1;
+    }
+  }
+
   serial_1_2_->send_write_state_command(1, rad_to_tick(msg->position[0]));
   serial_3_4_->send_write_state_command(3, rad_to_tick(msg->position[2]));
   serial_5_6_->send_write_state_command(5, rad_to_tick(msg->position[4]));
@@ -251,6 +247,13 @@ void koma::FeetechJointManager::publish_cur_joint_state()
     speed_tick_to_rad_per_sec(state_5.present_speed),
     // speed_tick_to_rad_per_sec(state_6.present_speed),
   };
+
+  for (size_t servo_idx_=0; servo_idx_<joint_state.position.size(); servo_idx_++) {
+    if (reverse_map_[servo_idx_+1]) {
+      joint_state.position[servo_idx_]*=-1;
+      joint_state.velocity[servo_idx_]*=-1;
+    }
+  }
 
   joint_state.header.stamp = this->get_clock()->now();
   cur_joint_state_pub_->publish(joint_state);
