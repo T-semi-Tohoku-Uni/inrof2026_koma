@@ -7,7 +7,7 @@ koma::HandPose::HandPose(const rclcpp::NodeOptions & options) : Node("hand_pose"
   dist_z = std::uniform_real_distribution<double>(0.0, 0.0);
 
   hand_pose_client_ = this->create_client<inrof2026_koma_type::srv::PoseStamped>("hand_pose");
-  while(!this->hand_pose_client_->wait_for_service(1s)) {
+  while (!this->hand_pose_client_->wait_for_service(1s)) {
     if (!rclcpp::ok()) break;
     RCLCPP_WARN(this->get_logger(), "srvHandPose not available");
   }
@@ -20,13 +20,13 @@ koma::HandPose::HandPose(const rclcpp::NodeOptions & options) : Node("hand_pose"
 
 void koma::HandPose::handPoseCallback()
 {
-  while(!this->hand_pose_client_->wait_for_service(1s)) {
+  while (!this->hand_pose_client_->wait_for_service(1s)) {
     if (!rclcpp::ok()) break;
     RCLCPP_WARN(this->get_logger(), "srvHandPose not available");
   }
 
-  inrof2026_koma_type::srv::PoseStamped_Request::SharedPtr request
-    = std::make_shared<inrof2026_koma_type::srv::PoseStamped::Request>();
+  inrof2026_koma_type::srv::PoseStamped_Request::SharedPtr request =
+    std::make_shared<inrof2026_koma_type::srv::PoseStamped::Request>();
   geometry_msgs::msg::PoseStamped pose_msg;
   pose_msg.header.frame_id = "base_link";
   pose_msg.header.stamp = this->get_clock()->now();
@@ -72,11 +72,9 @@ void koma::HandPose::handPoseCallback()
   hand_pose_marker_pub_->publish(marker);
   request->pose_stamped = pose_msg;
   hand_pose_client_->async_send_request(
-    request,
-    [this](rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedFuture future) {
+    request, [this](rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedFuture future) {
       const auto response = future.get();
-    }
-  );
+    });
 }
 
 int main(int argc, char ** argv)

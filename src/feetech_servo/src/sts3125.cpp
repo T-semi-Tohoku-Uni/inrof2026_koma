@@ -662,9 +662,7 @@ bool koma::FeetechSerial::write_packet(uint8_t tx[], size_t size)
 }
 
 bool koma::FeetechSerial::set_angle_limit(
-  int servo_id,
-  uint16_t min_position,
-  uint16_t max_position)
+  int servo_id, uint16_t min_position, uint16_t max_position)
 {
   auto logger = rclcpp::get_logger("rclcpp");
 
@@ -675,9 +673,7 @@ bool koma::FeetechSerial::set_angle_limit(
 
   if (min_position > 4095 || max_position > 4095) {
     RCLCPP_ERROR(
-      logger,
-      "Angle limit out of range: min=%u max=%u",
-      static_cast<unsigned>(min_position),
+      logger, "Angle limit out of range: min=%u max=%u", static_cast<unsigned>(min_position),
       static_cast<unsigned>(max_position));
 
     return false;
@@ -685,101 +681,82 @@ bool koma::FeetechSerial::set_angle_limit(
 
   if (min_position > max_position) {
     RCLCPP_ERROR(
-      logger,
-      "Invalid angle limit: min=%u > max=%u",
-      static_cast<unsigned>(min_position),
+      logger, "Invalid angle limit: min=%u > max=%u", static_cast<unsigned>(min_position),
       static_cast<unsigned>(max_position));
 
     return false;
   }
 
-  const uint8_t servo_id_uint8_t =
-    static_cast<uint8_t>(servo_id);
+  const uint8_t servo_id_uint8_t = static_cast<uint8_t>(servo_id);
 
   constexpr uint8_t instruction = 0x03;  // WRITE
 
   constexpr uint8_t addr_min_angle_limit = 9;
   constexpr uint8_t addr_max_angle_limit = 11;
-  constexpr uint8_t addr_eprom_lock      = 55;
+  constexpr uint8_t addr_eprom_lock = 55;
 
-  auto write_u8 =
-    [&](uint8_t address, uint8_t value) -> bool
-    {
-      uint8_t tx[8];
-      std::memset(tx, 0x00, sizeof(tx));
+  auto write_u8 = [&](uint8_t address, uint8_t value) -> bool {
+    uint8_t tx[8];
+    std::memset(tx, 0x00, sizeof(tx));
 
-      tx[0] = 0xFF;
-      tx[1] = 0xFF;
-      tx[2] = servo_id_uint8_t;
-      tx[3] = 0x04;         // length
-      tx[4] = instruction;  // WRITE
-      tx[5] = address;
-      tx[6] = value;
-      tx[7] = make_checksum(&tx[2], 5);
+    tx[0] = 0xFF;
+    tx[1] = 0xFF;
+    tx[2] = servo_id_uint8_t;
+    tx[3] = 0x04;         // length
+    tx[4] = instruction;  // WRITE
+    tx[5] = address;
+    tx[6] = value;
+    tx[7] = make_checksum(&tx[2], 5);
 
-      rx_buffer_.clear();
-      tcflush(serial_fd_, TCIFLUSH);
+    rx_buffer_.clear();
+    tcflush(serial_fd_, TCIFLUSH);
 
-      if (!write_packet(tx, sizeof(tx))) {
-        return false;
-      }
+    if (!write_packet(tx, sizeof(tx))) {
+      return false;
+    }
 
-      if (tcdrain(serial_fd_) != 0) {
-        RCLCPP_ERROR(
-          logger,
-          "tcdrain failed: %s",
-          std::strerror(errno));
+    if (tcdrain(serial_fd_) != 0) {
+      RCLCPP_ERROR(logger, "tcdrain failed: %s", std::strerror(errno));
 
-        return false;
-      }
+      return false;
+    }
 
-      return wait_write_ack(
-        servo_id,
-        std::chrono::milliseconds(20));
-    };
+    return wait_write_ack(servo_id, std::chrono::milliseconds(20));
+  };
 
-  auto write_u16 =
-    [&](uint8_t address, uint16_t value) -> bool
-    {
-      uint8_t tx[9];
-      std::memset(tx, 0x00, sizeof(tx));
+  auto write_u16 = [&](uint8_t address, uint16_t value) -> bool {
+    uint8_t tx[9];
+    std::memset(tx, 0x00, sizeof(tx));
 
-      const uint8_t value_l =
-        static_cast<uint8_t>(value & 0xFF);
+    const uint8_t value_l = static_cast<uint8_t>(value & 0xFF);
 
-      const uint8_t value_h =
-        static_cast<uint8_t>((value >> 8) & 0xFF);
+    const uint8_t value_h = static_cast<uint8_t>((value >> 8) & 0xFF);
 
-      tx[0] = 0xFF;
-      tx[1] = 0xFF;
-      tx[2] = servo_id_uint8_t;
-      tx[3] = 0x05;         // length
-      tx[4] = instruction;  // WRITE
-      tx[5] = address;
-      tx[6] = value_l;
-      tx[7] = value_h;
-      tx[8] = make_checksum(&tx[2], 6);
+    tx[0] = 0xFF;
+    tx[1] = 0xFF;
+    tx[2] = servo_id_uint8_t;
+    tx[3] = 0x05;         // length
+    tx[4] = instruction;  // WRITE
+    tx[5] = address;
+    tx[6] = value_l;
+    tx[7] = value_h;
+    tx[8] = make_checksum(&tx[2], 6);
 
-      rx_buffer_.clear();
-      tcflush(serial_fd_, TCIFLUSH);
+    rx_buffer_.clear();
+    tcflush(serial_fd_, TCIFLUSH);
 
-      if (!write_packet(tx, sizeof(tx))) {
-        return false;
-      }
+    if (!write_packet(tx, sizeof(tx))) {
+      return false;
+    }
 
-      if (tcdrain(serial_fd_) != 0) {
-        RCLCPP_ERROR(
-          logger,
-          "tcdrain failed: %s",
-          std::strerror(errno));
+    if (tcdrain(serial_fd_) != 0) {
+      RCLCPP_ERROR(logger, "tcdrain failed: %s", std::strerror(errno));
 
-        return false;
-      }
+      return false;
+    }
 
-      return wait_write_ack(
-        servo_id,
-        std::chrono::milliseconds(20));
-    };
+    return wait_write_ack(servo_id, std::chrono::milliseconds(20));
+  };
 
   //
   // Unlock EPROM
@@ -791,40 +768,31 @@ bool koma::FeetechSerial::set_angle_limit(
     return false;
   }
 
-  std::this_thread::sleep_for(
-    std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
   //
   // Write Min Angle Limit
   //
-  RCLCPP_INFO(
-    logger,
-    "Setting Min Angle Limit = %u",
-    static_cast<unsigned>(min_position));
+  RCLCPP_INFO(logger, "Setting Min Angle Limit = %u", static_cast<unsigned>(min_position));
 
   if (!write_u16(addr_min_angle_limit, min_position)) {
     RCLCPP_ERROR(logger, "Failed to write min angle limit");
     return false;
   }
 
-  std::this_thread::sleep_for(
-    std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
   //
   // Write Max Angle Limit
   //
-  RCLCPP_INFO(
-    logger,
-    "Setting Max Angle Limit = %u",
-    static_cast<unsigned>(max_position));
+  RCLCPP_INFO(logger, "Setting Max Angle Limit = %u", static_cast<unsigned>(max_position));
 
   if (!write_u16(addr_max_angle_limit, max_position)) {
     RCLCPP_ERROR(logger, "Failed to write max angle limit");
     return false;
   }
 
-  std::this_thread::sleep_for(
-    std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
   //
   // Lock EPROM
@@ -836,8 +804,7 @@ bool koma::FeetechSerial::set_angle_limit(
     return false;
   }
 
-  std::this_thread::sleep_for(
-    std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
   return true;
 }

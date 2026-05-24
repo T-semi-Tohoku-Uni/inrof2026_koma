@@ -13,64 +13,33 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   const std::string port_5_6 = this->declare_parameter<std::string>(
     "port_5_6", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.3:1.0");
 
-  const double servo_1_min = this->declare_parameter<double> (
-    "servo_1_min", -M_PI
-  );
-  const double servo_2_min = this->declare_parameter<double> (
-    "servo_2_min", -M_PI
-  );
-  const double servo_3_min = this->declare_parameter<double> (
-    "servo_3_min", -M_PI
-  );
-  const double servo_4_min = this->declare_parameter<double> (
-    "servo_4_min", -M_PI
-  );
-  const double servo_5_min = this->declare_parameter<double> (
-    "servo_5_min", -M_PI
-  );
+  const double servo_1_min = this->declare_parameter<double>("servo_1_min", -M_PI);
+  const double servo_2_min = this->declare_parameter<double>("servo_2_min", -M_PI);
+  const double servo_3_min = this->declare_parameter<double>("servo_3_min", -M_PI);
+  const double servo_4_min = this->declare_parameter<double>("servo_4_min", -M_PI);
+  const double servo_5_min = this->declare_parameter<double>("servo_5_min", -M_PI);
   // const double servo_1_min = this->declare_parameter<double> (
   //   "servo_6_min", -M_1_PI
   // );
 
-  const double servo_1_max = this->declare_parameter<double> (
-    "servo_1_max", M_PI
-  );
-  const double servo_2_max = this->declare_parameter<double> (
-    "servo_2_max", M_PI
-  );
-  const double servo_3_max = this->declare_parameter<double> (
-    "servo_3_max", M_PI
-  );
-  const double servo_4_max = this->declare_parameter<double> (
-    "servo_4_max", M_PI
-  );
-  const double servo_5_max = this->declare_parameter<double> (
-    "servo_5_max", M_PI
-  );
+  const double servo_1_max = this->declare_parameter<double>("servo_1_max", M_PI);
+  const double servo_2_max = this->declare_parameter<double>("servo_2_max", M_PI);
+  const double servo_3_max = this->declare_parameter<double>("servo_3_max", M_PI);
+  const double servo_4_max = this->declare_parameter<double>("servo_4_max", M_PI);
+  const double servo_5_max = this->declare_parameter<double>("servo_5_max", M_PI);
   // const double servo_6_max = this->declare_parameter<double> (
   //   "servo_6_max", M_1_PI
   // );
 
-  const bool is_servo_1_reverse = this->declare_parameter<bool> (
-    "is_servo_1_reverse", false
-  );
-  const bool is_servo_2_reverse = this->declare_parameter<bool> (
-    "is_servo_2_reverse", false
-  );
-  const bool is_servo_3_reverse = this->declare_parameter<bool> (
-    "is_servo_3_reverse", false
-  );
-  const bool is_servo_4_reverse = this->declare_parameter<bool> (
-    "is_servo_4_reverse", false
-  );
-  const bool is_servo_5_reverse = this->declare_parameter<bool> (
-    "is_servo_5_reverse", false
-  );
+  const bool is_servo_1_reverse = this->declare_parameter<bool>("is_servo_1_reverse", false);
+  const bool is_servo_2_reverse = this->declare_parameter<bool>("is_servo_2_reverse", false);
+  const bool is_servo_3_reverse = this->declare_parameter<bool>("is_servo_3_reverse", false);
+  const bool is_servo_4_reverse = this->declare_parameter<bool>("is_servo_4_reverse", false);
+  const bool is_servo_5_reverse = this->declare_parameter<bool>("is_servo_5_reverse", false);
 
   serial_1_2_ = std::make_unique<koma::FeetechSerial>(port_1_2.c_str());
   serial_3_4_ = std::make_unique<koma::FeetechSerial>(port_3_4.c_str());
   serial_5_6_ = std::make_unique<koma::FeetechSerial>(port_5_6.c_str());
-
 
   if (!serial_1_2_->set_angle_limit(1, rad_to_tick(servo_1_min), rad_to_tick(servo_1_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
@@ -167,8 +136,8 @@ double koma::FeetechJointManager::tick_to_rad(int tick)
 void koma::FeetechJointManager::target_joint_state_callback(
   sensor_msgs::msg::JointState::SharedPtr msg)
 {
-  for (size_t servo_idx_=0; servo_idx_ < msg->position.size(); servo_idx_++) {
-    if (reverse_map_[servo_idx_+1]) {
+  for (size_t servo_idx_ = 0; servo_idx_ < msg->position.size(); servo_idx_++) {
+    if (reverse_map_[servo_idx_ + 1]) {
       msg->position[servo_idx_] *= -1;
     }
   }
@@ -235,7 +204,7 @@ void koma::FeetechJointManager::publish_cur_joint_state()
   joint_state.position = {
     tick_to_rad(state_1.present_position), tick_to_rad(state_2.present_position),
     tick_to_rad(state_3.present_position), tick_to_rad(state_4.present_position),
-    tick_to_rad(state_5.present_position), 
+    tick_to_rad(state_5.present_position),
     // tick_to_rad(state_6.present_position)
   };
 
@@ -248,10 +217,10 @@ void koma::FeetechJointManager::publish_cur_joint_state()
     // speed_tick_to_rad_per_sec(state_6.present_speed),
   };
 
-  for (size_t servo_idx_=0; servo_idx_<joint_state.position.size(); servo_idx_++) {
-    if (reverse_map_[servo_idx_+1]) {
-      joint_state.position[servo_idx_]*=-1;
-      joint_state.velocity[servo_idx_]*=-1;
+  for (size_t servo_idx_ = 0; servo_idx_ < joint_state.position.size(); servo_idx_++) {
+    if (reverse_map_[servo_idx_ + 1]) {
+      joint_state.position[servo_idx_] *= -1;
+      joint_state.velocity[servo_idx_] *= -1;
     }
   }
 
