@@ -165,6 +165,7 @@ void koma::FeetechJointManager::publish_cur_joint_state()
     // speed_tick_to_rad_per_sec(state_6.present_speed),
   };
 
+  joint_state.header.stamp = this->get_clock()->now();
   cur_joint_state_pub_->publish(joint_state);
 }
 
