@@ -18,6 +18,7 @@ def generate_launch_description():
 
     # libtorch path
     libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
+    weight_path = str(Path(komarm_package_dir) / "weight" / "policy.pt")
 
 
     x = 0.25
@@ -109,7 +110,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
-                "model_path": "/home/keigo/komarm/logs/rsl_rl/reach/2026-05-20_05-43-29/exported/policy.pt"
+                "model_path": weight_path
             }
         ]
     )
