@@ -14,38 +14,38 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
     "port_5_6", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.3:1.0");
 
   const double servo_1_min = this->declare_parameter<double> (
-    "servo_1_min", -M_1_PI
+    "servo_1_min", -M_PI
   );
   const double servo_2_min = this->declare_parameter<double> (
-    "servo_2_min", -M_1_PI
+    "servo_2_min", -M_PI
   );
   const double servo_3_min = this->declare_parameter<double> (
-    "servo_3_min", -M_1_PI
+    "servo_3_min", -M_PI
   );
   const double servo_4_min = this->declare_parameter<double> (
-    "servo_4_min", -M_1_PI
+    "servo_4_min", -M_PI
   );
   const double servo_5_min = this->declare_parameter<double> (
-    "servo_5_min", -M_1_PI
+    "servo_5_min", -M_PI
   );
   // const double servo_1_min = this->declare_parameter<double> (
   //   "servo_6_min", -M_1_PI
   // );
 
   const double servo_1_max = this->declare_parameter<double> (
-    "servo_1_max", M_1_PI
+    "servo_1_max", M_PI
   );
   const double servo_2_max = this->declare_parameter<double> (
-    "servo_2_max", M_1_PI
+    "servo_2_max", M_PI
   );
   const double servo_3_max = this->declare_parameter<double> (
-    "servo_3_max", M_1_PI
+    "servo_3_max", M_PI
   );
   const double servo_4_max = this->declare_parameter<double> (
-    "servo_4_max", M_1_PI
+    "servo_4_max", M_PI
   );
   const double servo_5_max = this->declare_parameter<double> (
-    "servo_5_max", M_1_PI
+    "servo_5_max", M_PI
   );
   // const double servo_6_max = this->declare_parameter<double> (
   //   "servo_6_max", M_1_PI
