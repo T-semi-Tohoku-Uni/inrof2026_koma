@@ -8,6 +8,7 @@
             "includePath": [
                 "/opt/ros/humble/include/**",
                 "${workspaceFolder}/src/**/include/**",
+                "${workspaceFolder}/install/inrof2026_koma_type/include/inrof2026_koma_type",
                 "/usr/include/**"
             ],
             "name": "ROS",

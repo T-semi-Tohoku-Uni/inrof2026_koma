@@ -110,7 +110,7 @@ int koma::FeetechSerial::open_serial(const char * device_name)
   return fd;
 }
 
-bool koma::FeetechSerial::send_write_state_command(int servo_id, double position)
+bool koma::FeetechSerial::send_write_state_command(int servo_id, uint16_t position)
 {
   auto logger = rclcpp::get_logger("rclcpp");
 
@@ -123,15 +123,6 @@ bool koma::FeetechSerial::send_write_state_command(int servo_id, double position
 
   constexpr uint8_t instruction = 0x04;       // WRITE
   constexpr uint8_t goal_position_addr = 42;  // Goal Position L
-
-  // position は raw tick として扱う
-  if (position < 0.0) {
-    position = 0.0;
-  }
-
-  if (position > 4095.0) {
-    position = 4095.0;
-  }
 
   const uint16_t goal_position = static_cast<uint16_t>(std::lround(position));
 
@@ -666,6 +657,154 @@ bool koma::FeetechSerial::write_packet(uint8_t tx[], size_t size)
       rclcpp::get_logger("rclcpp"), "Serial write incomplete: %zd / %zu bytes", written, size);
     return false;
   }
+
+  return true;
+}
+
+bool koma::FeetechSerial::set_angle_limit(
+  int servo_id, uint16_t min_position, uint16_t max_position)
+{
+  auto logger = rclcpp::get_logger("rclcpp");
+
+  if (serial_fd_ < 0) {
+    RCLCPP_ERROR(logger, "Serial port is not open");
+    return false;
+  }
+
+  if (min_position > 4095 || max_position > 4095) {
+    RCLCPP_ERROR(
+      logger, "Angle limit out of range: min=%u max=%u", static_cast<unsigned>(min_position),
+      static_cast<unsigned>(max_position));
+
+    return false;
+  }
+
+  if (min_position > max_position) {
+    RCLCPP_ERROR(
+      logger, "Invalid angle limit: min=%u > max=%u", static_cast<unsigned>(min_position),
+      static_cast<unsigned>(max_position));
+
+    return false;
+  }
+
+  const uint8_t servo_id_uint8_t = static_cast<uint8_t>(servo_id);
+
+  constexpr uint8_t instruction = 0x03;  // WRITE
+
+  constexpr uint8_t addr_min_angle_limit = 9;
+  constexpr uint8_t addr_max_angle_limit = 11;
+  constexpr uint8_t addr_eprom_lock = 55;
+
+  auto write_u8 = [&](uint8_t address, uint8_t value) -> bool {
+    uint8_t tx[8];
+    std::memset(tx, 0x00, sizeof(tx));
+
+    tx[0] = 0xFF;
+    tx[1] = 0xFF;
+    tx[2] = servo_id_uint8_t;
+    tx[3] = 0x04;         // length
+    tx[4] = instruction;  // WRITE
+    tx[5] = address;
+    tx[6] = value;
+    tx[7] = make_checksum(&tx[2], 5);
+
+    rx_buffer_.clear();
+    tcflush(serial_fd_, TCIFLUSH);
+
+    if (!write_packet(tx, sizeof(tx))) {
+      return false;
+    }
+
+    if (tcdrain(serial_fd_) != 0) {
+      RCLCPP_ERROR(logger, "tcdrain failed: %s", std::strerror(errno));
+
+      return false;
+    }
+
+    return wait_write_ack(servo_id, std::chrono::milliseconds(20));
+  };
+
+  auto write_u16 = [&](uint8_t address, uint16_t value) -> bool {
+    uint8_t tx[9];
+    std::memset(tx, 0x00, sizeof(tx));
+
+    const uint8_t value_l = static_cast<uint8_t>(value & 0xFF);
+
+    const uint8_t value_h = static_cast<uint8_t>((value >> 8) & 0xFF);
+
+    tx[0] = 0xFF;
+    tx[1] = 0xFF;
+    tx[2] = servo_id_uint8_t;
+    tx[3] = 0x05;         // length
+    tx[4] = instruction;  // WRITE
+    tx[5] = address;
+    tx[6] = value_l;
+    tx[7] = value_h;
+    tx[8] = make_checksum(&tx[2], 6);
+
+    rx_buffer_.clear();
+    tcflush(serial_fd_, TCIFLUSH);
+
+    if (!write_packet(tx, sizeof(tx))) {
+      return false;
+    }
+
+    if (tcdrain(serial_fd_) != 0) {
+      RCLCPP_ERROR(logger, "tcdrain failed: %s", std::strerror(errno));
+
+      return false;
+    }
+
+    return wait_write_ack(servo_id, std::chrono::milliseconds(20));
+  };
+
+  //
+  // Unlock EPROM
+  //
+  RCLCPP_INFO(logger, "Unlocking EPROM...");
+
+  if (!write_u8(addr_eprom_lock, 0x00)) {
+    RCLCPP_ERROR(logger, "Failed to unlock EPROM");
+    return false;
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  //
+  // Write Min Angle Limit
+  //
+  RCLCPP_INFO(logger, "Setting Min Angle Limit = %u", static_cast<unsigned>(min_position));
+
+  if (!write_u16(addr_min_angle_limit, min_position)) {
+    RCLCPP_ERROR(logger, "Failed to write min angle limit");
+    return false;
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  //
+  // Write Max Angle Limit
+  //
+  RCLCPP_INFO(logger, "Setting Max Angle Limit = %u", static_cast<unsigned>(max_position));
+
+  if (!write_u16(addr_max_angle_limit, max_position)) {
+    RCLCPP_ERROR(logger, "Failed to write max angle limit");
+    return false;
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  //
+  // Lock EPROM
+  //
+  RCLCPP_INFO(logger, "Locking EPROM...");
+
+  if (!write_u8(addr_eprom_lock, 0x01)) {
+    RCLCPP_ERROR(logger, "Failed to lock EPROM");
+    return false;
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
   return true;
 }

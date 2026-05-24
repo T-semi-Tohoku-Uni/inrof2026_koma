@@ -91,9 +91,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 12</joint_name>
         <topic>/komarm/revolute_12/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>30.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>2.0</d_gain>
         </plugin>
 
         <plugin
@@ -101,9 +101,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 11</joint_name>
         <topic>/komarm/revolute_11/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>2.0</d_gain>
         </plugin>
 
         <plugin
@@ -113,7 +113,7 @@ def generate_launch_description():
         <topic>/komarm/revolute_7/cmd_pos</topic>
         <p_gain>10.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>0.5</d_gain>
         </plugin>
 
         <plugin
@@ -121,9 +121,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 8</joint_name>
         <topic>/komarm/revolute_8/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>15.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>0.5</d_gain>
         </plugin>
 
         <plugin
@@ -131,9 +131,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute 9</joint_name>
         <topic>/komarm/revolute_9/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>0.001</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.1</d_gain>
+        <d_gain>1.0</d_gain>
         </plugin>
     </gazebo>
     """
@@ -220,6 +220,13 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    catch_influence = Node(
+        package="komarm",
+        executable="catch_influence",
+        output="screen",
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         SetEnvironmentVariable(
@@ -248,4 +255,5 @@ def generate_launch_description():
         hand_pose,
         bridge,
         static_from_map_to_odom,
+        catch_influence,
     ]) 

@@ -38,11 +38,12 @@ private:
   koma::FeetechState state_4;
   koma::FeetechState state_5;
   koma::FeetechState state_6;
+  std::array<bool, 256> reverse_map_{};
 
   void publish_cur_joint_state();
   void target_joint_state_callback(sensor_msgs::msg::JointState::SharedPtr msg);
   double tick_to_rad(int tick);
-  double rad_to_tick(double rad);
+  uint16_t rad_to_tick(double rad);
   int decode_present_speed(uint16_t raw_speed);
   double speed_tick_to_rad_per_sec(uint16_t raw_speed);
   // void target_joint_state_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
