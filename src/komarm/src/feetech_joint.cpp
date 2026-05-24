@@ -55,7 +55,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
     "is_servo_1_reverse", false
   );
   const bool is_servo_2_reverse = this->declare_parameter<bool> (
-    "is_servo_2_reverse", false
+    "is_servo_2_reverse", true
   );
   const bool is_servo_3_reverse = this->declare_parameter<bool> (
     "is_servo_3_reverse", false
