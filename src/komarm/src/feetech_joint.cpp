@@ -51,6 +51,22 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   //   "servo_6_max", M_1_PI
   // );
 
+  const bool is_servo_1_reverse = this->declare_parameter<bool> (
+    "is_servo_1_reverse", false
+  );
+  const bool is_servo_2_reverse = this->declare_parameter<bool> (
+    "is_servo_2_reverse", false
+  );
+  const bool is_servo_3_reverse = this->declare_parameter<bool> (
+    "is_servo_3_reverse", false
+  );
+  const bool is_servo_4_reverse = this->declare_parameter<bool> (
+    "is_servo_4_reverse", false
+  );
+  const bool is_servo_5_reverse = this->declare_parameter<bool> (
+    "is_servo_5_reverse", false
+  );
+
   serial_1_2_ = std::make_unique<koma::FeetechSerial>(port_1_2.c_str());
   serial_3_4_ = std::make_unique<koma::FeetechSerial>(port_3_4.c_str());
   serial_5_6_ = std::make_unique<koma::FeetechSerial>(port_5_6.c_str());
@@ -70,6 +86,22 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   }
   if (!serial_5_6_->set_angle_limit(5, rad_to_tick(servo_5_min), rad_to_tick(servo_5_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+  }
+
+  if (!serial_1_2_->set_reverse(1, is_servo_1_reverse)) {
+    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 1");
+  }
+  if (!serial_1_2_->set_reverse(2, is_servo_2_reverse)) {
+    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 2");
+  }
+  if (!serial_3_4_->set_reverse(3, is_servo_3_reverse)) {
+    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 3");
+  }
+  if (!serial_3_4_->set_reverse(4, is_servo_4_reverse)) {
+    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 4");
+  }
+  if (!serial_5_6_->set_reverse(5, is_servo_5_reverse)) {
+    RCLCPP_WARN(this->get_logger(), "Failed to reverse reverse 5");
   }
 
   // check serial
