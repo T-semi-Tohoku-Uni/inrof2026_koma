@@ -43,11 +43,11 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   } else {
     state_5.print();
   }
-  if (!serial_5_6_->read_all_state(6, state_6)) {
-    RCLCPP_WARN(this->get_logger(), "Servo id 6 is not connected");
-  } else {
-    state_6.print();
-  }
+  // if (!serial_5_6_->read_all_state(6, state_6)) {
+  //   RCLCPP_WARN(this->get_logger(), "Servo id 6 is not connected");
+  // } else {
+  //   state_6.print();
+  // }
 
   cur_joint_state_pub_ =
     this->create_publisher<sensor_msgs::msg::JointState>("joint_states", rclcpp::SensorDataQoS());
@@ -105,16 +105,16 @@ void koma::FeetechJointManager::target_joint_state_callback(
 
   serial_1_2_->send_write_state_command(2, rad_to_tick(msg->position[1]));
   serial_3_4_->send_write_state_command(4, rad_to_tick(msg->position[3]));
-  serial_5_6_->send_write_state_command(6, rad_to_tick(msg->position[5]));
+  // serial_5_6_->send_write_state_command(6, rad_to_tick(msg->position[5]));
   if (!serial_1_2_->wait_write_ack(2, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
   }
   if (!serial_3_4_->wait_write_ack(4, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 4 is not responed");
   }
-  if (!serial_5_6_->wait_write_ack(6, 4ms)) {
-    RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
-  }
+  // if (!serial_5_6_->wait_write_ack(6, 4ms)) {
+  //   RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
+  // }
   serial_1_2_->send_action_command();
   serial_3_4_->send_action_command();
   serial_5_6_->send_action_command();
@@ -136,23 +136,25 @@ void koma::FeetechJointManager::publish_cur_joint_state()
   }
   serial_1_2_->send_read_state_command(2);
   serial_3_4_->send_read_state_command(4);
-  serial_5_6_->send_read_state_command(6);
+  // serial_5_6_->send_read_state_command(6);
   if (!serial_1_2_->wait_read_state_response(2, state_2, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
   }
   if (!serial_3_4_->wait_read_state_response(4, state_4, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 4 is not responed");
   }
-  if (!serial_5_6_->wait_read_state_response(6, state_6, 4ms)) {
-    RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
-  }
+  // if (!serial_5_6_->wait_read_state_response(6, state_6, 4ms)) {
+  //   RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
+  // }
 
   sensor_msgs::msg::JointState joint_state;
   joint_state.name = joint_names_;
   joint_state.position = {
     tick_to_rad(state_1.present_position), tick_to_rad(state_2.present_position),
     tick_to_rad(state_3.present_position), tick_to_rad(state_4.present_position),
-    tick_to_rad(state_5.present_position), tick_to_rad(state_6.present_position)};
+    tick_to_rad(state_5.present_position), 
+    // tick_to_rad(state_6.present_position)
+  };
 
   joint_state.velocity = {
     speed_tick_to_rad_per_sec(state_1.present_speed),
@@ -160,7 +162,7 @@ void koma::FeetechJointManager::publish_cur_joint_state()
     speed_tick_to_rad_per_sec(state_3.present_speed),
     speed_tick_to_rad_per_sec(state_4.present_speed),
     speed_tick_to_rad_per_sec(state_5.present_speed),
-    speed_tick_to_rad_per_sec(state_6.present_speed),
+    // speed_tick_to_rad_per_sec(state_6.present_speed),
   };
 
   cur_joint_state_pub_->publish(joint_state);
