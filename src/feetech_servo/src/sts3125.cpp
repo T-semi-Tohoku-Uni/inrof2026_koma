@@ -712,7 +712,7 @@ bool koma::FeetechSerial::set_angle_limit(
   constexpr uint8_t addr_eprom_lock      = 55;
 
   auto write_u8 =
-    [&](uint8_t address, uint8_t value, bool is_unlock) -> bool
+    [&](uint8_t address, uint8_t value) -> bool
     {
       uint8_t tx[8];
       std::memset(tx, 0x00, sizeof(tx));
@@ -742,14 +742,9 @@ bool koma::FeetechSerial::set_angle_limit(
         return false;
       }
 
-      if (is_unlock) {
-        return wait_write_ack(
-          servo_id,
-          std::chrono::milliseconds(20));
-      } else {
-        return true;
-      }
-      
+      return wait_write_ack(
+        servo_id,
+        std::chrono::milliseconds(20));
     };
 
   auto write_u16 =
@@ -800,7 +795,7 @@ bool koma::FeetechSerial::set_angle_limit(
   //
   RCLCPP_INFO(logger, "Unlocking EPROM...");
 
-  if (!write_u8(addr_eprom_lock, 0x00, true)) {
+  if (!write_u8(addr_eprom_lock, 0x00)) {
     RCLCPP_ERROR(logger, "Failed to unlock EPROM");
     return false;
   }
@@ -845,7 +840,7 @@ bool koma::FeetechSerial::set_angle_limit(
   //
   RCLCPP_INFO(logger, "Locking EPROM...");
 
-  if (!write_u8(addr_eprom_lock, 0x01, true)) {
+  if (!write_u8(addr_eprom_lock, 0x01)) {
     RCLCPP_ERROR(logger, "Failed to lock EPROM");
     return false;
   }
