@@ -21,7 +21,7 @@ def generate_launch_description():
     src_path = str(ws_root / 'src')
     models_path = str(ws_root / 'src' / 'simulation' / 'models')
 
-    rviz_config = Path(inrof2026_koma_package_dir) / "config" / "default.rviz"
+    rviz_config = str(Path(inrof2026_koma_package_dir) / "config" / "default.rviz")
 
     rviz = Node(
         package="rviz2",
