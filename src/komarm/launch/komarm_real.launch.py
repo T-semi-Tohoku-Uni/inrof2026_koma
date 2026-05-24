@@ -73,11 +73,11 @@ def generate_launch_description():
                 "servo_3_min": 0.0,
                 "servo_3_max": math.pi,
 
-                "servo_4_min": 0.0,
-                "servo_4_max": math.pi,
+                "servo_4_min": -math.pi/4.0,
+                "servo_4_max": math.pi/2.0,
 
-                "servo_5_min": -math.pi/4.0,
-                "servo_5_max": math.pi/2.0,
+                "servo_5_min": -math.pi,
+                "servo_5_max": math.pi,
             }
         ]
     )
