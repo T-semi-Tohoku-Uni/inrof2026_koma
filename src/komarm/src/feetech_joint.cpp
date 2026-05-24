@@ -59,16 +59,16 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   if (!serial_1_2_->set_angle_limit(1, rad_to_tick(servo_1_min), rad_to_tick(servo_1_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
-  if (!serial_1_2_->set_angle_limit(1, rad_to_tick(servo_2_min), rad_to_tick(servo_2_max))) {
+  if (!serial_1_2_->set_angle_limit(2, rad_to_tick(servo_2_min), rad_to_tick(servo_2_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
-  if (!serial_3_4_->set_angle_limit(1, rad_to_tick(servo_3_min), rad_to_tick(servo_3_max))) {
+  if (!serial_3_4_->set_angle_limit(3, rad_to_tick(servo_3_min), rad_to_tick(servo_3_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
-  if (!serial_3_4_->set_angle_limit(1, rad_to_tick(servo_4_min), rad_to_tick(servo_4_max))) {
+  if (!serial_3_4_->set_angle_limit(4, rad_to_tick(servo_4_min), rad_to_tick(servo_4_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
-  if (!serial_5_6_->set_angle_limit(1, rad_to_tick(servo_5_min), rad_to_tick(servo_5_max))) {
+  if (!serial_5_6_->set_angle_limit(5, rad_to_tick(servo_5_min), rad_to_tick(servo_5_max))) {
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
 
