@@ -69,14 +69,12 @@ def generate_launch_description():
 
                 "servo_2_min": 0.0,
                 "servo_2_max": math.pi,
-                "is_servo_2_reverse": True,
 
                 "servo_3_min": 0.0,
                 "servo_3_max": math.pi,
 
                 "servo_4_min": -math.pi/4.0,
                 "servo_4_max": math.pi/2.0,
-                "is_servo_4_reverse": True,
 
                 "servo_5_min": -math.pi,
                 "servo_5_max": math.pi,
