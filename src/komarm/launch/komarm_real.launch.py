@@ -2,11 +2,12 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch_ros.actions import Node
 import launch_ros
+from pathlib import Path
 
 import math
 
@@ -14,6 +15,10 @@ def generate_launch_description():
     inrof2026_koma_package_dir = get_package_share_directory("inrof2026_koma")
     simulation_package_dir = get_package_share_directory("simulation")
     komarm_package_dir = get_package_share_directory("komarm")
+
+    # libtorch path
+    libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
+
 
     x = 0.25
     y = 0.25
@@ -98,9 +103,24 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'map', 'world'],
     )
 
+    catch_influence = Node(
+        package="komarm",
+        executable="catch_influence",
+        output="screen",
+    )
+
     return LaunchDescription([
+        SetEnvironmentVariable(
+            name='LD_LIBRARY_PATH',
+            value=[
+                libtorch_lib,
+                ':',
+                EnvironmentVariable('LD_LIBRARY_PATH', default_value=''),
+            ],
+        ),
         robot_state_publisher_node,
         joint_manager,
-        # hand_pose,
+        hand_pose,
         static_from_map_to_odom,
+        catch_influence,
     ]) 
