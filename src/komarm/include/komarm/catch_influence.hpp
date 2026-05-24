@@ -1,53 +1,51 @@
 #pragma once
-#include <rclcpp/rclcpp.hpp>
-#include <torch/torch.h>
 #include <torch/script.h>
-#include <sensor_msgs/msg/joint_state.hpp>
-#include <inrof2026_koma_type/srv/pose_stamped.hpp>
+#include <torch/torch.h>
+
 #include <chrono>
+#include <inrof2026_koma_type/srv/pose_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 
 using namespace std::chrono_literals;
 
+namespace koma
+{
+class CatchInfluence : public rclcpp::Node
+{
+public:
+  CatchInfluence(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-namespace koma{
-    class CatchInfluence : public rclcpp::Node{
-        public:
-            CatchInfluence(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+private:
+  //variables
+  torch::jit::script::Module module_;
+  std::string model_path_;
+  sensor_msgs::msg::JointState cur_joint_state_;
+  bool has_cur_joint_state_ = false;
+  geometry_msgs::msg::PoseStamped cur_hand_pose_;
+  bool has_cur_hand_pose_ = false;
+  sensor_msgs::msg::JointState pre_action_;
+  rclcpp::TimerBase::SharedPtr control_timer_;
 
-        private:
-        
-            //variables
-            torch::jit::script::Module module_;
-            std::string model_path_;
-            sensor_msgs::msg::JointState cur_joint_state_;
-            bool has_cur_joint_state_=false;
-            geometry_msgs::msg::PoseStamped cur_hand_pose_;
-            bool has_cur_hand_pose_=false;
-            sensor_msgs::msg::JointState pre_action_;
-            rclcpp::TimerBase::SharedPtr control_timer_;
+  //functions
+  torch::jit::script::Module load_model(const std::string & model_path);
+  torch::Tensor inference(const torch::Tensor & obs);
+  void control_loop();
 
-            //functions
-            torch::jit::script::Module load_model(const std::string& model_path);
-            torch::Tensor inference(const torch::Tensor& obs);
-            void control_loop();
-            
+  //publishers
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr target_joint_pub_;
 
-            //publishers
-            rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr target_joint_pub_;
+  //subscribers
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_sub_;
 
-            //subscribers
-            rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_sub_;
+  //server
+  rclcpp::Service<inrof2026_koma_type::srv::PoseStamped>::SharedPtr hand_srv_;
 
-            //server
-            rclcpp::Service<inrof2026_koma_type::srv::PoseStamped>::SharedPtr hand_srv_;
+  //callback function
+  void joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
+  void hand_callback(
+    const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Request> request,
+    const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Response> Response);
+};
 
-            //callback function
-            void joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
-            void hand_callback(
-                const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Request> request,
-                const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Response> Response
-            );
-
-    };
-
-}
+}  // namespace koma
