@@ -88,7 +88,7 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch urdf meshes include libtorch weight
+install(DIRECTORY launch inrof2026_koma_urdf include libtorch weight
   DESTINATION share/${PROJECT_NAME}
 )
 

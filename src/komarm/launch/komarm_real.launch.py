@@ -32,6 +32,7 @@ def generate_launch_description():
     )
     komarm_urdf_path = os.path.join(
         komarm_package_dir,
+        "inrof2026_koma_urdf",
         "urdf",
         "komarm.urdf"
     )
@@ -40,7 +41,7 @@ def generate_launch_description():
         robot_desc = infp.read()
     robot_desc = robot_desc.replace(
         "../meshes/",
-        f"package://komarm/meshes/",
+        f"package://komarm/inrof2026_koma_urdf/meshes/",
     )
 
     # TODO: delete
@@ -75,8 +76,12 @@ def generate_launch_description():
 
             #     "servo_2_min": 0.0,
             #     "servo_2_max": math.pi,
+            "is_servo_1_reverse": True,
             "is_servo_2_reverse": True,
+            "is_servo_3_reverse": True,
             "is_servo_4_reverse": True,
+            "is_servo_5_reverse": True,
+            # "is_servo_4_reverse": True,
 
             #     "servo_3_min": 0.0,
             #     "servo_3_max": math.pi,

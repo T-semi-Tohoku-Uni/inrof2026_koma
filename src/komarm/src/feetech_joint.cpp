@@ -1,8 +1,8 @@
 #include <komarm/feetech_joint.hpp>
 
 koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & options)
-: Node("joint_manager", options),
-  joint_names_{"Revolute 12", "Revolute 11", "Revolute 7", "Revolute 8", "Revolute 9"}
+: Node("joint_manager", options), joint_names_{"Revolute 1", "Revolute 2", "Revolute 3",
+                                               "Revolute 4", "Revolute 5", "Revolute 6"}
 {
   const std::string port_1_2 = this->declare_parameter<std::string>(
     "port_1_2", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0");
@@ -18,6 +18,8 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   const double servo_3_min = this->declare_parameter<double>("servo_3_min", -M_PI);
   const double servo_4_min = this->declare_parameter<double>("servo_4_min", -M_PI);
   const double servo_5_min = this->declare_parameter<double>("servo_5_min", -M_PI);
+  const double servo_6_min = this->declare_parameter<double>("servo_6_min", -M_PI);
+
   // const double servo_1_min = this->declare_parameter<double> (
   //   "servo_6_min", -M_1_PI
   // );
@@ -27,6 +29,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   const double servo_3_max = this->declare_parameter<double>("servo_3_max", M_PI);
   const double servo_4_max = this->declare_parameter<double>("servo_4_max", M_PI);
   const double servo_5_max = this->declare_parameter<double>("servo_5_max", M_PI);
+  const double servo_6_max = this->declare_parameter<double>("servo_6_max", M_PI);
   // const double servo_6_max = this->declare_parameter<double> (
   //   "servo_6_max", M_1_PI
   // );
@@ -36,6 +39,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   const bool is_servo_3_reverse = this->declare_parameter<bool>("is_servo_3_reverse", false);
   const bool is_servo_4_reverse = this->declare_parameter<bool>("is_servo_4_reverse", false);
   const bool is_servo_5_reverse = this->declare_parameter<bool>("is_servo_5_reverse", false);
+  const bool is_servo_6_reverse = this->declare_parameter<bool>("is_servo_6_reverse", false);
 
   serial_1_2_ = std::make_unique<koma::FeetechSerial>(port_1_2.c_str());
   serial_3_4_ = std::make_unique<koma::FeetechSerial>(port_3_4.c_str());
@@ -45,16 +49,19 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
     RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
   }
   if (!serial_1_2_->set_angle_limit(2, rad_to_tick(servo_2_min), rad_to_tick(servo_2_max))) {
-    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 2");
   }
   if (!serial_3_4_->set_angle_limit(3, rad_to_tick(servo_3_min), rad_to_tick(servo_3_max))) {
-    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 3");
   }
   if (!serial_3_4_->set_angle_limit(4, rad_to_tick(servo_4_min), rad_to_tick(servo_4_max))) {
-    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 4");
   }
   if (!serial_5_6_->set_angle_limit(5, rad_to_tick(servo_5_min), rad_to_tick(servo_5_max))) {
-    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 1");
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 5");
+  }
+  if (!serial_5_6_->set_angle_limit(6, rad_to_tick(servo_6_min), rad_to_tick(servo_6_max))) {
+    RCLCPP_WARN(this->get_logger(), "Failed to limit servo 6");
   }
 
   reverse_map_[1] = is_servo_1_reverse;
@@ -62,6 +69,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   reverse_map_[3] = is_servo_3_reverse;
   reverse_map_[4] = is_servo_4_reverse;
   reverse_map_[5] = is_servo_5_reverse;
+  reverse_map_[6] = is_servo_6_reverse;
 
   // check serial
   if (!serial_1_2_->read_all_state(1, state_1)) {
@@ -88,6 +96,11 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
     RCLCPP_WARN(this->get_logger(), "Servo id 5 is not connected");
   } else {
     state_5.print();
+  }
+  if (!serial_5_6_->read_all_state(6, state_6)) {
+    RCLCPP_WARN(this->get_logger(), "Servo id 6 is not connected");
+  } else {
+    state_6.print();
   }
   // if (!serial_5_6_->read_all_state(6, state_6)) {
   //   RCLCPP_WARN(this->get_logger(), "Servo id 6 is not connected");
@@ -157,16 +170,16 @@ void koma::FeetechJointManager::target_joint_state_callback(
 
   serial_1_2_->send_write_state_command(2, rad_to_tick(msg->position[1]));
   serial_3_4_->send_write_state_command(4, rad_to_tick(msg->position[3]));
-  // serial_5_6_->send_write_state_command(6, rad_to_tick(msg->position[5]));
+  serial_5_6_->send_write_state_command(6, rad_to_tick(msg->position[5]));
   if (!serial_1_2_->wait_write_ack(2, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
   }
   if (!serial_3_4_->wait_write_ack(4, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 4 is not responed");
   }
-  // if (!serial_5_6_->wait_write_ack(6, 4ms)) {
-  //   RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
-  // }
+  if (!serial_5_6_->wait_write_ack(6, 4ms)) {
+    RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
+  }
   serial_1_2_->send_action_command();
   serial_3_4_->send_action_command();
   serial_5_6_->send_action_command();
@@ -188,25 +201,23 @@ void koma::FeetechJointManager::publish_cur_joint_state()
   }
   serial_1_2_->send_read_state_command(2);
   serial_3_4_->send_read_state_command(4);
-  // serial_5_6_->send_read_state_command(6);
+  serial_5_6_->send_read_state_command(6);
   if (!serial_1_2_->wait_read_state_response(2, state_2, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 2 is not responed");
   }
   if (!serial_3_4_->wait_read_state_response(4, state_4, 4ms)) {
     RCLCPP_WARN(this->get_logger(), "Servo id 4 is not responed");
   }
-  // if (!serial_5_6_->wait_read_state_response(6, state_6, 4ms)) {
-  //   RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
-  // }
+  if (!serial_5_6_->wait_read_state_response(6, state_6, 4ms)) {
+    RCLCPP_WARN(this->get_logger(), "Servo id 6 is not responed");
+  }
 
   sensor_msgs::msg::JointState joint_state;
   joint_state.name = joint_names_;
   joint_state.position = {
     tick_to_rad(state_1.present_position), tick_to_rad(state_2.present_position),
     tick_to_rad(state_3.present_position), tick_to_rad(state_4.present_position),
-    tick_to_rad(state_5.present_position),
-    // tick_to_rad(state_6.present_position)
-  };
+    tick_to_rad(state_5.present_position), tick_to_rad(state_6.present_position)};
 
   joint_state.velocity = {
     speed_tick_to_rad_per_sec(state_1.present_speed),
@@ -214,7 +225,7 @@ void koma::FeetechJointManager::publish_cur_joint_state()
     speed_tick_to_rad_per_sec(state_3.present_speed),
     speed_tick_to_rad_per_sec(state_4.present_speed),
     speed_tick_to_rad_per_sec(state_5.present_speed),
-    // speed_tick_to_rad_per_sec(state_6.present_speed),
+    speed_tick_to_rad_per_sec(state_6.present_speed),
   };
 
   for (size_t servo_idx_ = 0; servo_idx_ < joint_state.position.size(); servo_idx_++) {
