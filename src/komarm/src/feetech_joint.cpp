@@ -1,8 +1,8 @@
 #include <komarm/feetech_joint.hpp>
 
 koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & options)
-: Node("joint_manager", options),
-  joint_names_{"Revolute 1", "Revolute 2", "Revolute 3", "Revolute 4", "Revolute 5", "Revolute 6"}
+: Node("joint_manager", options), joint_names_{"Revolute 1", "Revolute 2", "Revolute 3",
+                                               "Revolute 4", "Revolute 5", "Revolute 6"}
 {
   const std::string port_1_2 = this->declare_parameter<std::string>(
     "port_1_2", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0");
@@ -217,9 +217,7 @@ void koma::FeetechJointManager::publish_cur_joint_state()
   joint_state.position = {
     tick_to_rad(state_1.present_position), tick_to_rad(state_2.present_position),
     tick_to_rad(state_3.present_position), tick_to_rad(state_4.present_position),
-    tick_to_rad(state_5.present_position),
-    tick_to_rad(state_6.present_position)
-  };
+    tick_to_rad(state_5.present_position), tick_to_rad(state_6.present_position)};
 
   joint_state.velocity = {
     speed_tick_to_rad_per_sec(state_1.present_speed),
