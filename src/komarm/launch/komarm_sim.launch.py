@@ -49,7 +49,7 @@ def generate_launch_description():
         robot_desc = infp.read()
     robot_desc = robot_desc.replace(
         "../meshes/",
-        f"package://komarm/meshes/",
+        f"package://komarm/inrof2026_koma_urdf/meshes/",
     )
 
     # TODO: delete
