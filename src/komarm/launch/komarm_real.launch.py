@@ -32,6 +32,7 @@ def generate_launch_description():
     )
     komarm_urdf_path = os.path.join(
         komarm_package_dir,
+        "inrof2026_koma_urdf"
         "urdf",
         "komarm.urdf"
     )
