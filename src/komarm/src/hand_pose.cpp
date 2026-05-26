@@ -2,9 +2,9 @@
 
 koma::HandPose::HandPose(const rclcpp::NodeOptions & options) : Node("hand_pose")
 {
-  dist_x = std::uniform_real_distribution<double>(-0.10, 0.10);
-  dist_y = std::uniform_real_distribution<double>(-0.20, -0.15);
-  dist_z = std::uniform_real_distribution<double>(0.0, 0.0);
+  dist_x = std::uniform_real_distribution<double>(0.30, 0.30);
+  dist_y = std::uniform_real_distribution<double>(0.0, 0.0);
+  dist_z = std::uniform_real_distribution<double>(0.10, 0.10);
 
   hand_pose_client_ = this->create_client<inrof2026_koma_type::srv::PoseStamped>("hand_pose");
   while (!this->hand_pose_client_->wait_for_service(1s)) {
