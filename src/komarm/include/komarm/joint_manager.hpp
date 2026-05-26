@@ -18,11 +18,12 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr target_joint_state_sub_;
 
   // Connect between gazebo
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_12_pub_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_11_pub_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_7_pub_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_8_pub_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_9_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_1_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_2_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_3_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_4_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_5_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr gazebo_rev_6_pub_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr gazebo_joint_state_sub_;
 
   void gazeboJointStatesCallback(const sensor_msgs::msg::JointState::SharedPtr msg);

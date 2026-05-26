@@ -152,10 +152,10 @@ void CatchInfluence::control_loop()
   // post compute
   sensor_msgs::msg::JointState target_joint;
   target_joint.header.stamp = this->get_clock()->now();
-  target_joint.name = {"Revolute 12", "Revolute 11", "Revolute 7", "Revolute 8", "Revolute 9"};
-  target_joint.position.resize(5);
+  target_joint.name = {"Revolute 1", "Revolute 2", "Revolute 3", "Revolute 4", "Revolute 5", "Revolute 6"};
+  target_joint.position.resize(target_joint.name.size());
   // TODO
-  for (size_t i = 0; i < 5; i++) {
+  for (size_t i = 0; i < target_joint.name.size(); i++) {
     double raw = action[i].item<double>();
     target_joint.position[i] = 0.5 * raw;
     pre_action_.position[i] = raw;

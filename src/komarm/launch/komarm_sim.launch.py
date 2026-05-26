@@ -2,7 +2,7 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -18,6 +18,7 @@ def generate_launch_description():
 
     # libtorch path
     libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
+    weight_path = str(Path(komarm_package_dir) / "weight" / "policy.pt")
 
     # Get workspace dir
     ws_root = Path(komarm_package_dir).parents[3]
@@ -71,11 +72,12 @@ def generate_launch_description():
         filename="ignition-gazebo-joint-state-publisher-system"
         name="ignition::gazebo::systems::JointStatePublisher">
         <topic>/komarm/gazebo_joint_states</topic>
-        <joint_name>Revolute 12</joint_name>
-        <joint_name>Revolute 11</joint_name>
-        <joint_name>Revolute 7</joint_name>
-        <joint_name>Revolute 8</joint_name>
-        <joint_name>Revolute 9</joint_name>
+        <joint_name>Revolute_1</joint_name>
+        <joint_name>Revolute_2</joint_name>
+        <joint_name>Revolute_3</joint_name>
+        <joint_name>Revolute_4</joint_name>
+        <joint_name>Revolute_5</joint_name>
+        <joint_name>Revolute_6</joint_name>
         </plugin>
     </gazebo>
     """
@@ -89,8 +91,8 @@ def generate_launch_description():
         <plugin
         filename="ignition-gazebo-joint-position-controller-system"
         name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute 12</joint_name>
-        <topic>/komarm/revolute_12/cmd_pos</topic>
+        <joint_name>Revolute_1</joint_name>
+        <topic>/komarm/revolute_1/cmd_pos</topic>
         <p_gain>30.0</p_gain>
         <i_gain>0.0</i_gain>
         <d_gain>2.0</d_gain>
@@ -99,8 +101,8 @@ def generate_launch_description():
         <plugin
         filename="ignition-gazebo-joint-position-controller-system"
         name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute 11</joint_name>
-        <topic>/komarm/revolute_11/cmd_pos</topic>
+        <joint_name>Revolute_2</joint_name>
+        <topic>/komarm/revolute_2/cmd_pos</topic>
         <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
         <d_gain>2.0</d_gain>
@@ -109,8 +111,8 @@ def generate_launch_description():
         <plugin
         filename="ignition-gazebo-joint-position-controller-system"
         name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute 7</joint_name>
-        <topic>/komarm/revolute_7/cmd_pos</topic>
+        <joint_name>Revolute_3</joint_name>
+        <topic>/komarm/revolute_3/cmd_pos</topic>
         <p_gain>10.0</p_gain>
         <i_gain>0.0</i_gain>
         <d_gain>0.5</d_gain>
@@ -119,8 +121,8 @@ def generate_launch_description():
         <plugin
         filename="ignition-gazebo-joint-position-controller-system"
         name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute 8</joint_name>
-        <topic>/komarm/revolute_8/cmd_pos</topic>
+        <joint_name>Revolute_4</joint_name>
+        <topic>/komarm/revolute_4/cmd_pos</topic>
         <p_gain>15.0</p_gain>
         <i_gain>0.0</i_gain>
         <d_gain>0.5</d_gain>
@@ -129,8 +131,18 @@ def generate_launch_description():
         <plugin
         filename="ignition-gazebo-joint-position-controller-system"
         name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute 9</joint_name>
-        <topic>/komarm/revolute_9/cmd_pos</topic>
+        <joint_name>Revolute_5</joint_name>
+        <topic>/komarm/revolute_5/cmd_pos</topic>
+        <p_gain>0.001</p_gain>
+        <i_gain>0.0</i_gain>
+        <d_gain>1.0</d_gain>
+        </plugin>
+
+        <plugin
+        filename="ignition-gazebo-joint-position-controller-system"
+        name="ignition::gazebo::systems::JointPositionController">
+        <joint_name>Revolute_6</joint_name>
+        <topic>/komarm/revolute_6/cmd_pos</topic>
         <p_gain>0.001</p_gain>
         <i_gain>0.0</i_gain>
         <d_gain>1.0</d_gain>
@@ -180,11 +192,12 @@ def generate_launch_description():
             
             "/komarm/gazebo_joint_states@sensor_msgs/msg/JointState@gz.msgs.Model",
             
-            "/komarm/revolute_12/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
-            "/komarm/revolute_11/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
-            "/komarm/revolute_7/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
-            "/komarm/revolute_8/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
-            "/komarm/revolute_9/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_1/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_2/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_3/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_4/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_5/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
+            "/komarm/revolute_6/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
             ],
         output='screen'
     )
@@ -237,6 +250,11 @@ def generate_launch_description():
         package="komarm",
         executable="catch_influence",
         output="screen",
+        parameters=[
+            {
+                "model_path": weight_path
+            }
+        ],
         remappings=[('clock', '/world/inrof/clock')]
     )
 
@@ -269,5 +287,4 @@ def generate_launch_description():
         bridge,
         static_from_map_to_odom,
         catch_influence,
-        foxglove_bridge
     ]) 
