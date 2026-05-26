@@ -6,6 +6,10 @@
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2/exceptions.h>
 
 using namespace std::chrono_literals;
 
@@ -22,10 +26,14 @@ private:
   std::string model_path_;
   sensor_msgs::msg::JointState cur_joint_state_;
   bool has_cur_joint_state_ = false;
+  geometry_msgs::msg::PoseStamped target_hand_pose_;
+  bool has_target_hand_pose_ = false;
   geometry_msgs::msg::PoseStamped cur_hand_pose_;
   bool has_cur_hand_pose_ = false;
   sensor_msgs::msg::JointState pre_action_;
   rclcpp::TimerBase::SharedPtr control_timer_;
+  std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   //functions
   torch::jit::script::Module load_model(const std::string & model_path);

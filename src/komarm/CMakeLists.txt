@@ -27,6 +27,7 @@ ament_target_dependencies(catch_influence
   sensor_msgs 
   geometry_msgs
   inrof2026_koma_type  
+  tf2_ros
 )
 target_link_libraries(catch_influence "${TORCH_LIBRARIES}")
 target_compile_options(catch_influence PRIVATE "${TORCH_CXX_FLAGS}")

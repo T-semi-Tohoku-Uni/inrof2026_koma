@@ -30,6 +30,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     "hand_pose",
     std::bind(&CatchInfluence::hand_callback, this, std::placeholders::_1, std::placeholders::_2));
 
+  tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
   // Initialize previous action
   pre_action_ = sensor_msgs::msg::JointState();
   pre_action_.name = {"Revolute_1", "Revolute_2", "Revolute_3",
@@ -50,6 +53,27 @@ void CatchInfluence::joint_callback(const sensor_msgs::msg::JointState::SharedPt
 {
   cur_joint_state_ = *msg;
   has_cur_joint_state_ = true;
+
+  geometry_msgs::msg::TransformStamped base_to_hand_tf;
+  try {
+    base_to_hand_tf = tf_buffer_->lookupTransform(
+      "base_link",        
+      "hand_unit_v1_1",   
+      tf2::TimePointZero  
+    );
+  } catch (const tf2::TransformException & ex) {
+    RCLCPP_WARN(
+      this->get_logger(),
+      "Could not transform base_link -> hand_unit_v1_1: %s",
+      ex.what()
+    );
+    return;
+  }
+
+  cur_hand_pose_.pose.position.x = base_to_hand_tf.transform.translation.x;
+  cur_hand_pose_.pose.position.y = base_to_hand_tf.transform.translation.y;
+  cur_hand_pose_.pose.position.z = base_to_hand_tf.transform.translation.z;
+  cur_hand_pose_.pose.orientation = base_to_hand_tf.transform.rotation;
 }
 
 void CatchInfluence::hand_callback(
@@ -57,8 +81,8 @@ void CatchInfluence::hand_callback(
   const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Response> Response)
 {
   RCLCPP_INFO(this->get_logger(), "Change hand pose");
-  cur_hand_pose_ = request->pose_stamped;
-  has_cur_hand_pose_ = true;
+  target_hand_pose_ = request->pose_stamped;
+  has_target_hand_pose_ = true;
 }
 
 //define the function that loads the parameters of the model
@@ -102,7 +126,7 @@ void CatchInfluence::control_loop()
     RCLCPP_WARN(this->get_logger(), "cur_joint_state is empty");
     return;
   }
-  if (!has_cur_hand_pose_) {
+  if (!has_target_hand_pose_) {
     RCLCPP_WARN(this->get_logger(), "cur_hand_pose is empty");
     return;
   }
@@ -118,22 +142,10 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.position[4],
                           cur_joint_state_.position[5],
 
-                          /* joint vel */
-                          cur_joint_state_.velocity[0],
-                          cur_joint_state_.velocity[1],
-                          cur_joint_state_.velocity[2],
-                          cur_joint_state_.velocity[3],
-                          cur_joint_state_.velocity[4],
-                          cur_joint_state_.velocity[5],
-
                           /* target arm position */
-                          cur_hand_pose_.pose.position.x,
-                          cur_hand_pose_.pose.position.y,
-                          cur_hand_pose_.pose.position.z,
-                          cur_hand_pose_.pose.orientation.w,
-                          cur_hand_pose_.pose.orientation.x,
-                          cur_hand_pose_.pose.orientation.y,
-                          cur_hand_pose_.pose.orientation.z,
+                          target_hand_pose_.pose.position.x - cur_hand_pose_.pose.position.x,
+                          target_hand_pose_.pose.position.y - cur_hand_pose_.pose.position.y,
+                          target_hand_pose_.pose.position.z - cur_hand_pose_.pose.position.z,
 
                           /* pre action */
                           pre_action_.position[0],
