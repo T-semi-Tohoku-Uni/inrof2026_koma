@@ -32,7 +32,8 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // Initialize previous action
   pre_action_ = sensor_msgs::msg::JointState();
-  pre_action_.name = {"Revolute 1", "Revolute 2", "Revolute 3", "Revolute 4", "Revolute 5", "Revolute 6"};
+  pre_action_.name = {"Revolute 1", "Revolute 2", "Revolute 3",
+                      "Revolute 4", "Revolute 5", "Revolute 6"};
   pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Load the model
