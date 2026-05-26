@@ -32,8 +32,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // Initialize previous action
   pre_action_ = sensor_msgs::msg::JointState();
-  pre_action_.name = {"Revolute 12", "Revolute 11", "Revolute 7", "Revolute 8", "Revolute 9"};
-  pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0};
+  pre_action_.name = {"Revolute 1", "Revolute 2", "Revolute 3",
+                      "Revolute 4", "Revolute 5", "Revolute 6"};
+  pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Load the model
   const std::string model_path_ = this->declare_parameter<std::string>(
@@ -115,6 +116,7 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.position[2],
                           cur_joint_state_.position[3],
                           cur_joint_state_.position[4],
+                          cur_joint_state_.position[5],
 
                           /* joint vel */
                           cur_joint_state_.velocity[0],
@@ -122,6 +124,7 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.velocity[2],
                           cur_joint_state_.velocity[3],
                           cur_joint_state_.velocity[4],
+                          cur_joint_state_.velocity[5],
 
                           /* target arm position */
                           cur_hand_pose_.pose.position.x,
@@ -138,6 +141,7 @@ void CatchInfluence::control_loop()
                           pre_action_.position[2],
                           pre_action_.position[3],
                           pre_action_.position[4],
+                          pre_action_.position[5],
                         },
                         torch::TensorOptions().dtype(torch::kFloat32))
                         .unsqueeze(0);
