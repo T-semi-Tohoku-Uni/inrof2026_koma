@@ -1,8 +1,8 @@
 #include <komarm/feetech_joint.hpp>
 
 koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & options)
-: Node("joint_manager", options), joint_names_{"Revolute 1", "Revolute 2", "Revolute 3",
-                                               "Revolute 4", "Revolute 5", "Revolute 6"}
+: Node("joint_manager", options), joint_names_{"Revolute_1", "Revolute_2", "Revolute_3",
+                                               "Revolute_4", "Revolute_5", "Revolute_6"}
 {
   const std::string port_1_2 = this->declare_parameter<std::string>(
     "port_1_2", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1.1:1.0");
