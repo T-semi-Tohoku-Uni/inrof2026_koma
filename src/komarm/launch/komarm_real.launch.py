@@ -79,7 +79,6 @@ def generate_launch_description():
             "is_servo_2_reverse": True,
             "is_servo_3_reverse": True,
             "is_servo_4_reverse": True,
-            "is_servo_5_reverse": True,
             # "is_servo_4_reverse": True,
 
             #     "servo_3_min": 0.0,
