@@ -42,7 +42,7 @@ def generate_launch_description():
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r 4 {world_file_path}'])]
+        launch_arguments=[('gz_args', [f' -r -s 4 {world_file_path}'])]
     )
 
     with open(komarm_urdf_path, "r") as infp:
@@ -189,6 +189,19 @@ def generate_launch_description():
         output='screen'
     )
 
+    foxglove_bridge = Node(
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        name="foxglove_bridge",
+        output="screen",
+        parameters=[
+            {
+                "address": "0.0.0.0",
+                "port": 8765,
+            }
+        ],
+    )
+
     rviz = Node(
         package="rviz2",
         executable="rviz2",
@@ -256,4 +269,5 @@ def generate_launch_description():
         bridge,
         static_from_map_to_odom,
         catch_influence,
+        foxglove_bridge
     ]) 

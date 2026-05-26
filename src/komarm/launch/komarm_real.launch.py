@@ -120,6 +120,19 @@ def generate_launch_description():
         ]
     )
 
+    foxglove_bridge = Node(
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        name="foxglove_bridge",
+        output="screen",
+        parameters=[
+            {
+                "address": "0.0.0.0",
+                "port": 8765,
+            }
+        ],
+    )
+
     return LaunchDescription([
         SetEnvironmentVariable(
             name='LD_LIBRARY_PATH',
@@ -134,4 +147,5 @@ def generate_launch_description():
         hand_pose,
         static_from_map_to_odom,
         catch_influence,
+        foxglove_bridge
     ]) 
