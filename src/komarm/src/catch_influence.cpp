@@ -32,8 +32,8 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // Initialize previous action
   pre_action_ = sensor_msgs::msg::JointState();
-  pre_action_.name = {"Revolute 1", "Revolute 2", "Revolute 3",
-                      "Revolute 4", "Revolute 5", "Revolute 6"};
+  pre_action_.name = {"Revolute_1", "Revolute_2", "Revolute_3",
+                      "Revolute_4", "Revolute_5", "Revolute_6"};
   pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Load the model
@@ -152,8 +152,8 @@ void CatchInfluence::control_loop()
   // post compute
   sensor_msgs::msg::JointState target_joint;
   target_joint.header.stamp = this->get_clock()->now();
-  target_joint.name = {"Revolute 1", "Revolute 2", "Revolute 3",
-                       "Revolute 4", "Revolute 5", "Revolute 6"};
+  target_joint.name = {"Revolute_1", "Revolute_2", "Revolute_3",
+                       "Revolute_4", "Revolute_5", "Revolute_6"};
   target_joint.position.resize(target_joint.name.size());
   // TODO
   for (size_t i = 0; i < target_joint.name.size(); i++) {
