@@ -31,7 +31,7 @@ def generate_launch_description():
         "field.world"
     )
     komarm_urdf_path = os.path.join(
-        komarm_package_dir,
+        inrof2026_koma_package_dir,
         "inrof2026_koma_urdf",
         "urdf",
         "komarm.urdf"
@@ -41,7 +41,7 @@ def generate_launch_description():
         robot_desc = infp.read()
     robot_desc = robot_desc.replace(
         "../meshes/",
-        f"package://komarm/inrof2026_koma_urdf/meshes/",
+        f"package://inrof2026_koma/inrof2026_koma_urdf/meshes/",
     )
 
     # TODO: delete
