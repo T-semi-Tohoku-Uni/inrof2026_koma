@@ -10,20 +10,23 @@ koma::JointManager::JointManager(const rclcpp::NodeOptions & options) : Node("jo
     std::bind(&koma::JointManager::targetJointStatesCallback, this, std::placeholders::_1));
 
   // Connect between gazebo
-  gazebo_rev_12_pub_ = this->create_publisher<std_msgs::msg::Float64>(
-    "/komarm/revolute_12/cmd_pos",
+  gazebo_rev_1_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+    "/komarm/revolute_1/cmd_pos",
     rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
-  gazebo_rev_11_pub_ = this->create_publisher<std_msgs::msg::Float64>(
-    "/komarm/revolute_11/cmd_pos",
+  gazebo_rev_2_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+    "/komarm/revolute_2/cmd_pos",
     rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
-  gazebo_rev_7_pub_ = this->create_publisher<std_msgs::msg::Float64>(
-    "/komarm/revolute_7/cmd_pos",
+  gazebo_rev_3_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+    "/komarm/revolute_3/cmd_pos",
     rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
-  gazebo_rev_8_pub_ = this->create_publisher<std_msgs::msg::Float64>(
-    "/komarm/revolute_8/cmd_pos",
+  gazebo_rev_4_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+    "/komarm/revolute_4/cmd_pos",
     rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
-  gazebo_rev_9_pub_ = this->create_publisher<std_msgs::msg::Float64>(
-    "/komarm/revolute_9/cmd_pos",
+  gazebo_rev_5_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+    "/komarm/revolute_5/cmd_pos",
+    rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
+  gazebo_rev_6_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+    "/komarm/revolute_6/cmd_pos",
     rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
   gazebo_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
     "/komarm/gazebo_joint_states", 10,
@@ -35,25 +38,29 @@ koma::JointManager::JointManager(const rclcpp::NodeOptions & options) : Node("jo
 void koma::JointManager::targetJointStatesCallback(
   const sensor_msgs::msg::JointState::SharedPtr msg)
 {
-  std_msgs::msg::Float64 revolute_12;
-  revolute_12.data = msg->position[0];
-  this->gazebo_rev_12_pub_->publish(revolute_12);
+  std_msgs::msg::Float64 revolute_1;
+  revolute_1.data = msg->position[0];
+  this->gazebo_rev_1_pub_->publish(revolute_1);
 
-  std_msgs::msg::Float64 revolute_11;
-  revolute_11.data = msg->position[1];
-  this->gazebo_rev_11_pub_->publish(revolute_11);
+  std_msgs::msg::Float64 revolute_2;
+  revolute_2.data = msg->position[0];
+  this->gazebo_rev_2_pub_->publish(revolute_2);
 
-  std_msgs::msg::Float64 revolute_7;
-  revolute_7.data = msg->position[2];
-  this->gazebo_rev_7_pub_->publish(revolute_7);
+  std_msgs::msg::Float64 revolute_3;
+  revolute_3.data = msg->position[0];
+  this->gazebo_rev_3_pub_->publish(revolute_3);
 
-  std_msgs::msg::Float64 revolute_8;
-  revolute_8.data = msg->position[3];
-  this->gazebo_rev_8_pub_->publish(revolute_8);
+  std_msgs::msg::Float64 revolute_4;
+  revolute_4.data = msg->position[0];
+  this->gazebo_rev_4_pub_->publish(revolute_4);
 
-  std_msgs::msg::Float64 revolute_9;
-  revolute_9.data = msg->position[4];
-  this->gazebo_rev_9_pub_->publish(revolute_9);
+  std_msgs::msg::Float64 revolute_5;
+  revolute_5.data = msg->position[0];
+  this->gazebo_rev_5_pub_->publish(revolute_5);
+
+  std_msgs::msg::Float64 revolute_6;
+  revolute_6.data = msg->position[0];
+  this->gazebo_rev_6_pub_->publish(revolute_6);
 }
 
 void koma::JointManager::gazeboJointStatesCallback(
