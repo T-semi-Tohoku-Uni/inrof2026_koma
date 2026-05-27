@@ -97,6 +97,16 @@ def generate_launch_description():
         package="komarm",
         executable="hand_pose",
         output="screen",
+        parameters=[
+            {
+                "target_x_min": 0.20,
+                "target_x_max": 0.20,
+                "target_y_min": -0.20,
+                "target_y_max": 0.20,
+                "target_z_min": 0.10,
+                "target_z_max": 0.10,
+            }
+        ]
     )
 
     static_from_map_to_odom = Node(
