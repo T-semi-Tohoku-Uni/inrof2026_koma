@@ -17,7 +17,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // Initialize publishers and subscribers
   target_joint_pub_ = this->create_publisher<sensor_msgs::msg::JointState>(
-    "target_joint_states", rclcpp::SensorDataQoS());
+    "joint_command", rclcpp::QoS(10).reliable());
 
   joint_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
     "joint_states", rclcpp::SensorDataQoS(),
@@ -158,7 +158,7 @@ void CatchInfluence::control_loop()
   // TODO
   for (size_t i = 0; i < target_joint.name.size(); i++) {
     double raw = action[i].item<double>();
-    target_joint.position[i] = 0.5 * raw;
+    target_joint.position[i] = 0.5*raw;
     pre_action_.position[i] = raw;
   }
 

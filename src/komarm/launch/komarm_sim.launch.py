@@ -72,7 +72,7 @@ def generate_launch_description():
         <plugin
         filename="ignition-gazebo-joint-state-publisher-system"
         name="ignition::gazebo::systems::JointStatePublisher">
-        <topic>/komarm/gazebo_joint_states</topic>
+        <topic>/joint_states</topic>
         <joint_name>Revolute_1</joint_name>
         <joint_name>Revolute_2</joint_name>
         <joint_name>Revolute_3</joint_name>
@@ -191,7 +191,7 @@ def generate_launch_description():
             '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/world/inrof/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
             
-            "/komarm/gazebo_joint_states@sensor_msgs/msg/JointState@gz.msgs.Model",
+            "/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model",
             
             "/komarm/revolute_1/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
             "/komarm/revolute_2/cmd_pos@std_msgs/msg/Float64@gz.msgs.Double",
@@ -282,7 +282,7 @@ def generate_launch_description():
         gazebo_node,
         robot_state_publisher_node,
         gz_spawn_entity,
-        rviz,
+        # rviz,
         joint_manager,
         hand_pose,
         bridge,
