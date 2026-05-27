@@ -282,7 +282,7 @@ def generate_launch_description():
         gazebo_node,
         robot_state_publisher_node,
         gz_spawn_entity,
-        # rviz,
+        rviz,
         joint_manager,
         hand_pose,
         bridge,

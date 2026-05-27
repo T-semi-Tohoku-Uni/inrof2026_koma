@@ -147,7 +147,7 @@ def generate_launch_description():
             ],
         ),
         robot_state_publisher_node,
-        rviz,
+        # rviz,
         joint_manager,
         hand_pose,
         static_from_map_to_odom,

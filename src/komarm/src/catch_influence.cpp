@@ -13,7 +13,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   RCLCPP_INFO(this->get_logger(), "CatchInfluence node has been started.");
 
   // create a timer for the control loop
-  control_timer_ = this->create_wall_timer(33ms, std::bind(&CatchInfluence::control_loop, this));
+  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
 
   // Initialize publishers and subscribers
   target_joint_pub_ = this->create_publisher<sensor_msgs::msg::JointState>(
@@ -38,7 +38,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // Load the model
   const std::string model_path_ = this->declare_parameter<std::string>(
-    "model_path", "/home/keigo/komarm/logs/rsl_rl/reach/2026-05-20_05-43-29/exported/policy.pt");
+    "model_path", "/home/keigo/inrof2026_koma/src/komarm/weight/policy.pt");
 
   module_ = load_model(model_path_);
   //inference mode
@@ -172,6 +172,5 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<koma::CatchInfluence>());
   rclcpp::shutdown();
-
   return 0;
 }
