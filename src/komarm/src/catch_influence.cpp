@@ -13,11 +13,11 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   RCLCPP_INFO(this->get_logger(), "CatchInfluence node has been started.");
 
   // create a timer for the control loop
-  control_timer_ = this->create_wall_timer(33ms, std::bind(&CatchInfluence::control_loop, this));
+  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
 
   // Initialize publishers and subscribers
   target_joint_pub_ = this->create_publisher<sensor_msgs::msg::JointState>(
-    "target_joint_states", rclcpp::SensorDataQoS());
+    "joint_command", rclcpp::QoS(10).reliable());
 
   joint_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
     "joint_states", rclcpp::SensorDataQoS(),
@@ -32,12 +32,13 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // Initialize previous action
   pre_action_ = sensor_msgs::msg::JointState();
-  pre_action_.name = {"Revolute 12", "Revolute 11", "Revolute 7", "Revolute 8", "Revolute 9"};
-  pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0};
+  pre_action_.name = {"Revolute_1", "Revolute_2", "Revolute_3",
+                      "Revolute_4", "Revolute_5", "Revolute_6"};
+  pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Load the model
   const std::string model_path_ = this->declare_parameter<std::string>(
-    "model_path", "/home/keigo/komarm/logs/rsl_rl/reach/2026-05-20_05-43-29/exported/policy.pt");
+    "model_path", "/home/keigo/inrof2026_koma/src/komarm/weight/policy.pt");
 
   module_ = load_model(model_path_);
   //inference mode
@@ -115,6 +116,7 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.position[2],
                           cur_joint_state_.position[3],
                           cur_joint_state_.position[4],
+                          cur_joint_state_.position[5],
 
                           /* joint vel */
                           cur_joint_state_.velocity[0],
@@ -122,6 +124,7 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.velocity[2],
                           cur_joint_state_.velocity[3],
                           cur_joint_state_.velocity[4],
+                          cur_joint_state_.velocity[5],
 
                           /* target arm position */
                           cur_hand_pose_.pose.position.x,
@@ -138,6 +141,7 @@ void CatchInfluence::control_loop()
                           pre_action_.position[2],
                           pre_action_.position[3],
                           pre_action_.position[4],
+                          pre_action_.position[5],
                         },
                         torch::TensorOptions().dtype(torch::kFloat32))
                         .unsqueeze(0);
@@ -148,10 +152,11 @@ void CatchInfluence::control_loop()
   // post compute
   sensor_msgs::msg::JointState target_joint;
   target_joint.header.stamp = this->get_clock()->now();
-  target_joint.name = {"Revolute 12", "Revolute 11", "Revolute 7", "Revolute 8", "Revolute 9"};
-  target_joint.position.resize(5);
+  target_joint.name = {"Revolute_1", "Revolute_2", "Revolute_3",
+                       "Revolute_4", "Revolute_5", "Revolute_6"};
+  target_joint.position.resize(target_joint.name.size());
   // TODO
-  for (size_t i = 0; i < 5; i++) {
+  for (size_t i = 0; i < target_joint.name.size(); i++) {
     double raw = action[i].item<double>();
     target_joint.position[i] = 0.5 * raw;
     pre_action_.position[i] = raw;
@@ -167,6 +172,5 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<koma::CatchInfluence>());
   rclcpp::shutdown();
-
   return 0;
 }
