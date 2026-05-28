@@ -113,7 +113,7 @@ koma::FeetechJointManager::FeetechJointManager(const rclcpp::NodeOptions & optio
   publish_cur_joint_state_timer_ = this->create_wall_timer(
     20ms, std::bind(&koma::FeetechJointManager::publish_cur_joint_state, this));
   target_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
-    "target_joint_states", rclcpp::SensorDataQoS(),
+    "joint_command", rclcpp::SensorDataQoS(),
     std::bind(
       &koma::FeetechJointManager::target_joint_state_callback, this, std::placeholders::_1));
 }

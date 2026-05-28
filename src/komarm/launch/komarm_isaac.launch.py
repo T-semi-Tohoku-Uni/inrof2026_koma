@@ -2,7 +2,7 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -20,6 +20,10 @@ def generate_launch_description():
     libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
     weight_path = str(Path(komarm_package_dir) / "weight" / "policy.pt")
 
+    # Get workspace dir
+    ws_root = Path(komarm_package_dir).parents[3]
+    src_path = str(ws_root / 'src')
+    models_path = str(ws_root / 'src' / 'simulation' / 'models')
 
     x = 0.25
     y = 0.25
@@ -35,6 +39,12 @@ def generate_launch_description():
         "inrof2026_koma_urdf",
         "urdf",
         "komarm.urdf"
+    )
+
+    gazebo_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
+        launch_arguments=[('gz_args', [f' -r -s 4 {world_file_path}'])]
     )
 
     with open(komarm_urdf_path, "r") as infp:
@@ -65,48 +75,36 @@ def generate_launch_description():
         parameters=[params]
     )
 
-    joint_manager = Node(
-        package="komarm",
-        executable="feetech_joint",
+    foxglove_bridge = Node(
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        name="foxglove_bridge",
         output="screen",
         parameters=[
             {
-            #     "servo_1_min": -math.pi/2,
-            #     "servo_1_max":  math.pi/2,
-
-            #     "servo_2_min": 0.0,
-            #     "servo_2_max": math.pi,
-            "is_servo_2_reverse": True,
-            "is_servo_3_reverse": True,
-            "is_servo_4_reverse": True,
-            # "is_servo_4_reverse": True,
-
-            #     "servo_3_min": 0.0,
-            #     "servo_3_max": math.pi,
-
-            #     "servo_4_min": -math.pi/4.0,
-            #     "servo_4_max": math.pi/2.0,
-
-            #     "servo_5_min": -math.pi,
-            #     "servo_5_max": math.pi,
+                "address": "0.0.0.0",
+                "port": 8765,
             }
-        ]
+        ],
+    )
+
+    rviz = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="log",
+    )
+
+    joint_manager = Node(
+        package="komarm",
+        executable="dummy_joint",
+        output="screen",
     )
 
     hand_pose = Node(
         package="komarm",
         executable="hand_pose",
         output="screen",
-        parameters=[
-            {
-                "target_x_min": 0.20,
-                "target_x_max": 0.20,
-                "target_y_min": -0.20,
-                "target_y_max": 0.20,
-                "target_z_min": 0.10,
-                "target_z_max": 0.10,
-            }
-        ]
     )
 
     static_from_map_to_odom = Node(
@@ -125,23 +123,21 @@ def generate_launch_description():
             {
                 "model_path": weight_path
             }
-        ]
-    )
-
-    foxglove_bridge = Node(
-        package="foxglove_bridge",
-        executable="foxglove_bridge",
-        name="foxglove_bridge",
-        output="screen",
-        parameters=[
-            {
-                "address": "0.0.0.0",
-                "port": 8765,
-            }
         ],
     )
 
     return LaunchDescription([
+        launch_ros.actions.SetParameter(name='use_sim_time', value=True),
+        SetEnvironmentVariable(
+            name='IGN_GAZEBO_RESOURCE_PATH',
+            value=[
+                EnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', default_value=''),
+                ':',
+                src_path,
+                ':',
+                models_path,
+            ],
+        ),
         SetEnvironmentVariable(
             name='LD_LIBRARY_PATH',
             value=[
@@ -151,9 +147,9 @@ def generate_launch_description():
             ],
         ),
         robot_state_publisher_node,
+        # rviz,
         joint_manager,
         hand_pose,
         static_from_map_to_odom,
         catch_influence,
-        foxglove_bridge
     ]) 

@@ -6,7 +6,7 @@ koma::JointManager::JointManager(const rclcpp::NodeOptions & options) : Node("jo
   joint_state_pub_ =
     this->create_publisher<sensor_msgs::msg::JointState>("joint_states", rclcpp::SensorDataQoS());
   target_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
-    "target_joint_states", rclcpp::SensorDataQoS(),
+    "joint_command", rclcpp::SensorDataQoS(),
     std::bind(&koma::JointManager::targetJointStatesCallback, this, std::placeholders::_1));
 
   // Connect between gazebo
@@ -29,7 +29,7 @@ koma::JointManager::JointManager(const rclcpp::NodeOptions & options) : Node("jo
     "/komarm/revolute_6/cmd_pos",
     rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
   gazebo_joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
-    "/komarm/gazebo_joint_states", 10,
+    "joint_states", 10,
     std::bind(&koma::JointManager::gazeboJointStatesCallback, this, std::placeholders::_1));
 
   RCLCPP_INFO(this->get_logger(), "Success initialize JointManager");
