@@ -158,7 +158,7 @@ void CatchInfluence::control_loop()
   // TODO
   for (size_t i = 0; i < target_joint.name.size(); i++) {
     double raw = action[i].item<double>();
-    target_joint.position[i] = 0.5*raw;
+    target_joint.position[i] = 0.5 * raw;
     pre_action_.position[i] = raw;
   }
 
