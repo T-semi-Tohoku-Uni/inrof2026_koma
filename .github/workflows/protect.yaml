@@ -1,0 +1,30 @@
+name: Guard main merge source
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+
+jobs:
+  allow-only-dev-to-main:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check source branch
+        run: |
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Head branch: ${{ github.head_ref }}"
+
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "Error: Only pull requests from the dev branch can be merged into main."
+            echo "Current source branch: ${{ github.head_ref }}"
+            exit 1
+          fi
+
+          echo "Success: This pull request is from dev to main."
