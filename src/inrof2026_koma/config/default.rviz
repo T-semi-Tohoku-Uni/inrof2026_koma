@@ -50,7 +50,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Visualization Manager:
   Class: ""
   Displays:
@@ -83,89 +83,20 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /robot_description
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
-        DZ47B_63_circuit_breaker_holder_v3_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        arm_bracket_temp_v12_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        arm_root_v4_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hand_finger_v7_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hand_unit_v3_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        lipo_bracket_v5_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        pitch_1_test_v3_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        pitch_2_test_v3_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        raspi4_bracket_v1_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        raspi4_v2_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        roll_1_test_v3_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        roll_2_test_v3_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
       Name: RobotModel
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
     - Alpha: 0.699999988079071
       Class: rviz_default_plugins/Map
@@ -189,70 +120,19 @@ Visualization Manager:
       Use Timestamp: false
       Value: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        DZ47B_63_circuit_breaker_holder_v3_1:
-          Value: false
-        arm_bracket_temp_v12_1:
-          Value: false
-        arm_root_v4_1:
-          Value: false
-        base_footprint:
-          Value: true
-        base_link:
-          Value: true
-        hand_finger_v7_1:
-          Value: false
-        hand_unit_v3_1:
-          Value: false
-        lipo_bracket_v5_1:
-          Value: false
-        map:
-          Value: false
-        odom:
-          Value: false
-        pitch_1_test_v3_1:
-          Value: false
-        pitch_2_test_v3_1:
-          Value: false
-        raspi4_bracket_v1_1:
-          Value: false
-        raspi4_v2_1:
-          Value: false
-        roll_1_test_v3_1:
-          Value: false
-        roll_2_test_v3_1:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                DZ47B_63_circuit_breaker_holder_v3_1:
-                  {}
-                arm_bracket_temp_v12_1:
-                  arm_root_v4_1:
-                    pitch_1_test_v3_1:
-                      roll_1_test_v3_1:
-                        pitch_2_test_v3_1:
-                          roll_2_test_v3_1:
-                            hand_unit_v3_1:
-                              hand_finger_v7_1:
-                                {}
-                lipo_bracket_v5_1:
-                  {}
-                raspi4_bracket_v1_1:
-                  raspi4_v2_1:
-                    {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -366,7 +246,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 26; 95; 180
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -389,7 +269,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /route
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -436,7 +316,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -457,7 +337,7 @@ Visualization Manager:
         Value: /ball_shape
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: MarkerArray
@@ -497,10 +377,10 @@ Visualization Manager:
         Value: /pose_arrow_marker
       Value: true
     - Class: rviz_default_plugins/Marker
-      Enabled: true
+      Enabled: false
       Name: Marker
       Namespaces:
-        field: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Transient Local
@@ -508,7 +388,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /field_marker
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -555,7 +435,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 0.09609349817037582
+      Distance: 0.03014519065618515
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
