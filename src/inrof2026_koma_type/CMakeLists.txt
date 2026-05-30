@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(inrof2026_koma)
+project(inrof2026_koma_type)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,12 +7,20 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-install(DIRECTORY launch config map inrof2026_koma_urdf
-  DESTINATION share/${PROJECT_NAME}
+set(srv_files
+  "srv/PoseStamped.srv"
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${srv_files}
+  DEPENDENCIES
+    geometry_msgs
 )
 
 if(BUILD_TESTING)
