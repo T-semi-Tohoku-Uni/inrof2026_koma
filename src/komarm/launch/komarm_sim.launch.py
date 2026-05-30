@@ -94,9 +94,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_1</joint_name>
         <topic>/komarm/revolute_1/cmd_pos</topic>
-        <p_gain>30.0</p_gain>
+        <p_gain>1.1</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>2.0</d_gain>
+        <d_gain>0.04</d_gain>
         </plugin>
 
         <plugin
@@ -104,9 +104,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_2</joint_name>
         <topic>/komarm/revolute_2/cmd_pos</topic>
-        <p_gain>50.0</p_gain>
+        <p_gain>1.1</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>2.0</d_gain>
+        <d_gain>0.04</d_gain>
         </plugin>
 
         <plugin
@@ -114,9 +114,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_3</joint_name>
         <topic>/komarm/revolute_3/cmd_pos</topic>
-        <p_gain>10.0</p_gain>
+        <p_gain>1.1</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.5</d_gain>
+        <d_gain>0.04</d_gain>
         </plugin>
 
         <plugin
@@ -124,9 +124,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_4</joint_name>
         <topic>/komarm/revolute_4/cmd_pos</topic>
-        <p_gain>15.0</p_gain>
+        <p_gain>1.1</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.5</d_gain>
+        <d_gain>0.04</d_gain>
         </plugin>
 
         <plugin
@@ -134,9 +134,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_5</joint_name>
         <topic>/komarm/revolute_5/cmd_pos</topic>
-        <p_gain>0.001</p_gain>
+        <p_gain>1.1</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>1.0</d_gain>
+        <d_gain>0.04</d_gain>
         </plugin>
 
         <plugin
@@ -144,9 +144,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_6</joint_name>
         <topic>/komarm/revolute_6/cmd_pos</topic>
-        <p_gain>0.001</p_gain>
+        <p_gain>1.1</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>1.0</d_gain>
+        <d_gain>0.04</d_gain>
         </plugin>
     </gazebo>
     """
@@ -235,6 +235,16 @@ def generate_launch_description():
         package="komarm",
         executable="hand_pose",
         output="screen",
+        parameters=[
+            {
+                "target_x_min": 0.20,
+                "target_x_max": 0.20,
+                "target_y_min": -0.20,
+                "target_y_max": 0.20,
+                "target_z_min": 0.10,
+                "target_z_max": 0.10,
+            }
+        ],
         remappings=[('clock', '/world/inrof/clock')]
     )
 
