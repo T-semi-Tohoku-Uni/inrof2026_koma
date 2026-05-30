@@ -28,7 +28,7 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY include
+install(DIRECTORY include models worlds
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -32,7 +32,7 @@ def generate_launch_description():
     # Get workspace dir
     ws_root = Path(komarm_package_dir).parents[3]
     src_path = str(ws_root)
-    models_path = str(ws_root / 'simulation' / 'models')
+    models_path = str(ws_root / 'field' / 'models')
 
     print(src_path)
 
@@ -50,16 +50,9 @@ def generate_launch_description():
 
     # get file path
     world_file_path = os.path.join(
-        simulation_package_dir,
+        field_package_dir,
         "worlds", 
         "field.world"
-    )
-    world_mesh_path = os.path.join(
-        simulation_package_dir,
-        "models",
-        "inrof_field",
-        "meshes",
-        "InrofField.dae"
     )
     rviz_config_path = os.path.join(
         inrof2026_koma_package_dir,
@@ -280,7 +273,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
-                "mesh_resource": "package://simulation/models/inrof_field/meshes/InrofField.dae"
+                "mesh_resource": "package://field/models/inrof_field/meshes/InrofField.dae"
             }
         ]
     )
