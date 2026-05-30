@@ -7,9 +7,33 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+add_executable(joy2vel src/joy2vel.cpp)
+ament_target_dependencies(joy2vel 
+  rclcpp 
+  sensor_msgs
+  geometry_msgs
+)
+target_include_directories(joy2vel
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  joy2vel
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+install(DIRECTORY include
+  DESTINATION share/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

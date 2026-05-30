@@ -31,8 +31,8 @@ def generate_launch_description():
 
     # Get workspace dir
     ws_root = Path(komarm_package_dir).parents[3]
-    src_path = str(ws_root)
-    models_path = str(ws_root / 'field' / 'models')
+    src_path = str(ws_root / 'src')
+    models_path = str(ws_root / 'src' / 'field' / 'models')
 
     print(src_path)
 
@@ -278,6 +278,20 @@ def generate_launch_description():
         ]
     )
 
+    joy_node = Node(
+        package="joy",
+        executable="joy_node",
+        name="joy_node",
+        output="screen",
+    )
+
+    joy2Vel_node = Node(
+        package="localization",
+        executable="joy2vel",
+        name="joy2vel",
+        output="screen"
+    )
+
     static_from_map_to_odom = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
@@ -297,4 +311,6 @@ def generate_launch_description():
         rviz,
         map_server,
         static_from_map_to_odom,
+        joy_node,
+        joy2Vel_node
     ])
