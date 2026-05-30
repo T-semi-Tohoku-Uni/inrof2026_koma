@@ -117,6 +117,63 @@ def generate_launch_description():
         base_footprint_joint + "\n</robot>",
     )
 
+    laser_scan_link = """
+    <link name="laser_scan_link"/>
+
+    <joint name="base_link_to_laser_scan_link" type="fixed">
+        <parent link="base_link"/>
+        <child link="laser_scan_link"/>
+        <origin xyz="0.0765 0 -0.030" rpy="0 0 0"/>
+    </joint>
+    """
+    robot_desc = robot_desc.replace(
+        "</robot>",
+        laser_scan_link + "\n</robot>",
+    )
+
+    laser_scan_plugin = """
+    <gazebo reference="laser_scan_link">
+        <sensor name="ldlidar" type="gpu_lidar">
+            <ignition_frame_id>laser_scan_link</ignition_frame_id>
+            <topic>/ldlidar_node/scan</topic>
+            <update_rate>10</update_rate>
+
+            <ray>
+                <scan>
+                <horizontal>
+                    <samples>360</samples>
+                    <resolution>1.0</resolution>
+                    <min_angle>-1.3</min_angle>
+                    <max_angle> 1.3</max_angle>
+                </horizontal>
+                <vertical>
+                    <samples>1</samples>
+                    <resolution>0.1</resolution>
+                    <min_angle>0.0</min_angle>
+                    <max_angle>0.0</max_angle>
+                </vertical>
+                </scan>
+                <range>
+                <min>0.02</min>
+                <max>12.0</max>
+                <resolution>0.015</resolution>
+                </range>
+            </ray>
+
+            <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
+                <render_engine>ogre</render_engine>
+            </plugin>
+
+            <alwaysOn>true</alwaysOn>
+            <visualize>true</visualize>
+        </sensor>
+    </gazebo>
+    """
+    robot_desc = robot_desc.replace(
+        "</robot>",
+        laser_scan_plugin + "\n</robot>",
+    )
+
     odom_plugin = """
     <gazebo>
         <plugin filename="libignition-gazebo-velocity-control-system.so"
@@ -229,10 +286,6 @@ def generate_launch_description():
                    '-Y', str(theta)
                 ],
     )
-
-
-
-    lifecycle_nodes = ['map_server']
 
     # Bridge
     bridge = Node(

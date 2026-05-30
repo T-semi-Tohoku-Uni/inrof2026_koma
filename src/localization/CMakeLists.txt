@@ -14,6 +14,20 @@ find_package(geometry_msgs REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+# add_executable(mcl src/mcl.cpp)
+# ament_target_dependencies(mcl 
+#   rclcpp 
+# )
+# target_include_directories(mcl
+#   PUBLIC
+#     "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+#     "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+# )
+# install(TARGETS
+#   mcl
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+
 add_executable(joy2vel src/joy2vel.cpp)
 ament_target_dependencies(joy2vel 
   rclcpp 
