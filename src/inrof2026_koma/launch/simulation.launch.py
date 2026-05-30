@@ -17,22 +17,24 @@ import random
 def generate_launch_description():
     x = 0.25
     y = 0.25
-    z = 0.30
+    z = 0.256
     theta = math.pi/2
 
     # get each package dir
     inrof2026_koma_package_dir = get_package_share_directory("inrof2026_koma")
     simulation_package_dir = get_package_share_directory("simulation")
     komarm_package_dir = get_package_share_directory("komarm")
+    field_package_dir = get_package_share_directory("field")
 
     # libtorch path
     libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
 
     # Get workspace dir
     ws_root = Path(komarm_package_dir).parents[3]
-    src_path = str(ws_root / 'src')
-    models_path = str(ws_root / 'src' / 'simulation' / 'models')
-    world_path = str(ws_root / 'src' / 'simulation' / 'worlds')
+    src_path = str(ws_root)
+    models_path = str(ws_root / 'simulation' / 'models')
+
+    print(src_path)
 
     # Set env
     models_path_env = SetEnvironmentVariable(
@@ -43,8 +45,6 @@ def generate_launch_description():
             src_path,
             ':',
             models_path,
-            ':',
-            world_path
         ],
     )
 
@@ -54,10 +54,12 @@ def generate_launch_description():
         "worlds", 
         "field.world"
     )
-    map_server_config_path = os.path.join(
-        inrof2026_koma_package_dir,
-        "map",
-        "map.yaml"
+    world_mesh_path = os.path.join(
+        simulation_package_dir,
+        "models",
+        "inrof_field",
+        "meshes",
+        "InrofField.dae"
     )
     rviz_config_path = os.path.join(
         inrof2026_koma_package_dir,
@@ -136,7 +138,7 @@ def generate_launch_description():
         <odom_publish_frequency>10</odom_publish_frequency>
         <odom_topic>/odom</odom_topic>
         <tf_topic>/tf</tf_topic>
-        <dimensions>2</dimensions>
+        <dimensions>3</dimensions>
         <gaussian_noise>0.0</gaussian_noise>
         </plugin>
     </gazebo>
@@ -272,28 +274,15 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
-    # nav2 map_server
-    map_server_cmd = Node(
-        package="nav2_map_server",
+    map_server = Node(
+        package="field",
         executable="map_server",
         output="screen",
         parameters=[
-            {'yaml_filename': map_server_config_path},
-        ],
-        remappings=[('clock', '/world/inrof/clock')]
-    )
-
-    # tf transfromer
-    start_lifecycle_manager_cmd = Node(
-        package="nav2_lifecycle_manager",
-        executable="lifecycle_manager",
-        name="lifecycle_manager",
-        output="screen",
-        emulate_tty=True,
-        parameters=[
-            {'autostart': True},
-            {'node_names': lifecycle_nodes}],
-        remappings=[('clock', '/world/inrof/clock')]
+            {
+                "mesh_resource": "package://simulation/models/inrof_field/meshes/InrofField.dae"
+            }
+        ]
     )
 
     static_from_map_to_odom = Node(
@@ -313,7 +302,6 @@ def generate_launch_description():
         gz_spawn_entity,
         bridge,
         rviz,
-        map_server_cmd,
-        start_lifecycle_manager_cmd,
+        map_server,
         static_from_map_to_odom,
     ])

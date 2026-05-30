@@ -32,10 +32,10 @@
             <direction>-0.5 0.1 -0.9</direction>
         </light>
 
-        <model name="field">
+        <model name="inrof_field">
           <static>1</static>
           <include>
-            <uri>model://field</uri>
+            <uri>model://inrof_field</uri>
           </include>
         </model>
 

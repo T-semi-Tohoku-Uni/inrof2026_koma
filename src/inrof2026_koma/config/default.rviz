@@ -29,6 +29,8 @@ Panels:
         - /PointCloud23/Topic1
         - /MarkerArray1
         - /Marker3
+        - /Marker4
+        - /Marker4/Topic1
       Splitter Ratio: 0.5
     Tree Height: 1079
   - Class: rviz_common/Selection
@@ -494,6 +496,19 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /pose_arrow_marker
       Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        field: true
+      Topic:
+        Depth: 5
+        Durability Policy: Transient Local
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /field_marker
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -540,25 +555,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.8424826860427856
+      Distance: 0.09609349817037582
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.3235479593276978
-        Y: 0.3590759336948395
-        Z: 1.0882554054260254
+        X: -1.2573180198669434
+        Y: -1.1171010732650757
+        Z: 1.00294029712677
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5147960782051086
+      Pitch: 0.25479626655578613
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.158590078353882
+      Yaw: 3.748591899871826
     Saved: ~
 Window Geometry:
   Displays:
