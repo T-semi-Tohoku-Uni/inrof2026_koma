@@ -354,13 +354,12 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
-    print(inrof2026_koma_package_dir)
     mcl = Node(
         package="localization",
         executable="mcl",
         name="mcl",
         parameters=[{
-            "mapDir": os.path.join(inrof2026_koma_package_dir, "map/")
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/")
         }],
         output="screen",
         remappings=[('clock', '/world/inrof/clock')]
