@@ -43,23 +43,23 @@ void koma::JointManager::targetJointStatesCallback(
   this->gazebo_rev_1_pub_->publish(revolute_1);
 
   std_msgs::msg::Float64 revolute_2;
-  revolute_2.data = msg->position[0];
+  revolute_2.data = msg->position[1];
   this->gazebo_rev_2_pub_->publish(revolute_2);
 
   std_msgs::msg::Float64 revolute_3;
-  revolute_3.data = msg->position[0];
+  revolute_3.data = msg->position[2];
   this->gazebo_rev_3_pub_->publish(revolute_3);
 
   std_msgs::msg::Float64 revolute_4;
-  revolute_4.data = msg->position[0];
+  revolute_4.data = msg->position[3];
   this->gazebo_rev_4_pub_->publish(revolute_4);
 
   std_msgs::msg::Float64 revolute_5;
-  revolute_5.data = msg->position[0];
+  revolute_5.data = msg->position[4];
   this->gazebo_rev_5_pub_->publish(revolute_5);
 
   std_msgs::msg::Float64 revolute_6;
-  revolute_6.data = msg->position[0];
+  revolute_6.data = msg->position[5];
   this->gazebo_rev_6_pub_->publish(revolute_6);
 }
 

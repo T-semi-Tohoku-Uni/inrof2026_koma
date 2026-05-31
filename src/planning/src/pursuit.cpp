@@ -70,8 +70,8 @@ koma::Pursuit::Pursuit(const rclcpp::NodeOptions & options) : Node("pursuit", op
   path_sub_ = this->create_subscription<nav_msgs::msg::Path>(
     "path", rclcpp::QoS(rclcpp::KeepLast(10)),
     std::bind(&koma::Pursuit::path_callback, this, std::placeholders::_1));
-  robot_pose_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    "odom", rclcpp::QoS(rclcpp::KeepLast(10)),
+  robot_pose_sub_ = this->create_subscription<geometry_msgs::msg::Pose>(
+    "pose", rclcpp::QoS(rclcpp::KeepLast(10)),
     std::bind(&koma::Pursuit::robot_pose_callback, this, std::placeholders::_1));
 
   // publisher
@@ -123,9 +123,9 @@ void koma::Pursuit::path_callback(const nav_msgs::msg::Path::SharedPtr msg)
   current_waypoint_index_ = 0;
 }
 
-void koma::Pursuit::robot_pose_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
+void koma::Pursuit::robot_pose_callback(const geometry_msgs::msg::Pose::SharedPtr msg)
 {
-  robot_pose_ = msg->pose.pose;
+  robot_pose_ = *msg;
 }
 
 void koma::Pursuit::control_loop()

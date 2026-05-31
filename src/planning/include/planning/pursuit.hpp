@@ -72,9 +72,9 @@ private:
 
   // subscriber
   rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr path_sub_;
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr robot_pose_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr robot_pose_sub_;
   void path_callback(const nav_msgs::msg::Path::SharedPtr msg);
-  void robot_pose_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
+  void robot_pose_callback(const geometry_msgs::msg::Pose::SharedPtr msg);
 
   // publisher
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_command_pub_;
