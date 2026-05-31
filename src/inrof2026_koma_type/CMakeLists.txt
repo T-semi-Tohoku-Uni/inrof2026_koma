@@ -17,8 +17,13 @@ set(srv_files
   "srv/PoseStamped.srv"
 )
 
+set(action_files
+  "action/Pursuit.action"
+)
+
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}
+  ${action_files}
   DEPENDENCIES
     geometry_msgs
 )
