@@ -70,7 +70,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r 4 {world_file_path}'])]
+        launch_arguments=[('gz_args', [f' -r -s 4 {world_file_path}'])]
     )
 
 
@@ -178,7 +178,7 @@ def generate_launch_description():
     <gazebo>
         <plugin filename="libignition-gazebo-velocity-control-system.so"
                 name="ignition::gazebo::systems::VelocityControl">
-        <topic>/cmd_vel</topic>
+        <topic>/twist_command</topic>
         </plugin>
         <plugin filename="libignition-gazebo-odometry-publisher-system.so"
             name="ignition::gazebo::systems::OdometryPublisher">
@@ -294,7 +294,7 @@ def generate_launch_description():
         arguments=[
             '/ldlidar_node/scan@sensor_msgs/msg/LaserScan@ignition.msgs.LaserScan',
             '/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
-            '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+            '/twist_command@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/world/inrof/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
@@ -380,6 +380,33 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    pursuit = Node(
+        package="planning",
+        executable="pursuit",
+        name="pursuit",
+        output="screen",
+        parameters=[{
+            "max_linear_speed": 0.10,
+            "max_angular_speed": 0.7,
+            "max_linear_tolerance": 0.20,
+            "max_theta_tolerance": 0.10,
+            "max_reaching_distance": 0.05,
+            "max_reaching_theta": 0.10,
+            "lookahead_distance": 0.20,
+            "resampleThreshold": 0.10,
+            "Kp_tan": 0.80,
+            "Ki_tan": 0.0,
+            "Kd_tan": 0.0,
+            "Kp_normal": 0.80,
+            "Ki_normal": 0.00,
+            "Kd_normal": 0.00,
+            "Kp_theta": 1.0,
+            "Ki_theta": 0.00,
+            "Kd_theta": 0.00,
+        }],
+        remappings=[('clock', '/world/inrof/clock')]
+    ) 
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         models_path_env,
@@ -394,4 +421,5 @@ def generate_launch_description():
         joy2Vel_node,
         mcl,
         planner,
+        pursuit
     ])

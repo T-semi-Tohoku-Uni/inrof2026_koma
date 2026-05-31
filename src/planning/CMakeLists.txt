@@ -43,9 +43,29 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+add_executable(pursuit src/pursuit.cpp)
+ament_target_dependencies(pursuit
+  rclcpp
+  inrof2026_koma_type
+  geometry_msgs
+  nav_msgs
+  tf2
+  tf2_geometry_msgs
+)
+target_include_directories(pursuit
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  pursuit
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(DIRECTORY include
   DESTINATION share/${PROJECT_NAME}
 )
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
