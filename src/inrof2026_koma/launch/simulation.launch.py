@@ -365,6 +365,21 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    planner = Node(
+        package="planning",
+        executable="path_plan",
+        name="path_plan",
+        output="screen",
+        parameters=[{
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
+            "initial_x": x,
+            "initial_y": y,
+            "initial_z": z,
+            "initial_theta": theta
+        }],
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         models_path_env,
@@ -377,5 +392,6 @@ def generate_launch_description():
         static_from_map_to_odom,
         joy_node,
         joy2Vel_node,
-        mcl
+        mcl,
+        planner,
     ])
