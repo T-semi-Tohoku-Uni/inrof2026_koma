@@ -3,11 +3,11 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <inrof2026_koma_type/action/pursuit.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <nav_msgs/msg/path.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <nav_msgs/msg/odometry.hpp>
 
 using namespace std::chrono_literals;
 
