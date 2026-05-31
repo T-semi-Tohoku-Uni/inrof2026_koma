@@ -70,7 +70,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r -s 4 {world_file_path}'])]
+        launch_arguments=[('gz_args', [f' -r -s --headless-rendering -v 4 {world_file_path}'])]
     )
 
 
@@ -161,11 +161,11 @@ def generate_launch_description():
             </ray>
 
             <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
-                <render_engine>ogre</render_engine>
+                <render_engine>ogre2</render_engine>
             </plugin>
 
             <alwaysOn>true</alwaysOn>
-            <visualize>true</visualize>
+            <visualize>false</visualize>
         </sensor>
     </gazebo>
     """
@@ -296,7 +296,7 @@ def generate_launch_description():
             '/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
             '/twist_command@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
-            '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
+            # '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/world/inrof/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
             
             "/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model",
@@ -407,6 +407,24 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     ) 
 
+    foxglove_bridge = Node(
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        name="foxglove_bridge",
+        output="screen",
+        parameters=[
+            {
+                "address": "0.0.0.0",
+                "port": 8765,
+                "asset_uri_allowlist": [
+                    "package://**",
+                    "file://**",
+                ],
+            }
+        ],
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         models_path_env,
@@ -414,12 +432,13 @@ def generate_launch_description():
         node_robot_state_publisher,
         gz_spawn_entity,
         bridge,
-        rviz,
+        # rviz,
         map_server,
         static_from_map_to_odom,
         joy_node,
         joy2Vel_node,
         mcl,
         planner,
-        pursuit
+        pursuit,
+        foxglove_bridge
     ])
