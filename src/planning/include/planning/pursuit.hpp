@@ -7,6 +7,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 
 using namespace std::chrono_literals;
 
@@ -71,9 +72,9 @@ private:
 
   // subscriber
   rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr path_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr robot_pose_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr robot_pose_sub_;
   void path_callback(const nav_msgs::msg::Path::SharedPtr msg);
-  void robot_pose_callback(const geometry_msgs::msg::Pose::SharedPtr msg);
+  void robot_pose_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
 
   // publisher
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_command_pub_;

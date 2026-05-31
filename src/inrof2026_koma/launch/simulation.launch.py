@@ -7,12 +7,36 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, EnvironmentVariable
 from launch_ros.actions import Node
 import launch_ros
+import re
 
 from pathlib import Path
 
 import xacro
 import math
 import random
+
+def make_komarm_joints_fixed(robot_desc: str) -> str:
+    joint_names = [
+        "Revolute_1",
+        "Revolute_2",
+        "Revolute_3",
+        "Revolute_4",
+        "Revolute_5",
+        "Revolute_6",
+    ]
+
+    for joint_name in joint_names:
+        # <joint name="Revolute_1" type="revolute">
+        # <joint type="revolute" name="Revolute_1">
+        # の両方に対応
+        pattern = (
+            rf'(<joint\b(?=[^>]*\bname="{re.escape(joint_name)}")[^>]*\btype=")'
+            rf'[^"]+'
+            rf'("[^>]*>)'
+        )
+        robot_desc = re.sub(pattern, r"\1fixed\2", robot_desc)
+
+    return robot_desc
 
 def generate_launch_description():
     x = 0.25
@@ -82,26 +106,26 @@ def generate_launch_description():
         f"package://inrof2026_koma/inrof2026_koma_urdf/meshes/",
     )
 
-    # Add gazebo joint plugin
-    joint_state_plugin = """
-    <gazebo>
-        <plugin
-        filename="ignition-gazebo-joint-state-publisher-system"
-        name="ignition::gazebo::systems::JointStatePublisher">
-        <topic>/joint_states</topic>
-        <joint_name>Revolute_1</joint_name>
-        <joint_name>Revolute_2</joint_name>
-        <joint_name>Revolute_3</joint_name>
-        <joint_name>Revolute_4</joint_name>
-        <joint_name>Revolute_5</joint_name>
-        <joint_name>Revolute_6</joint_name>
-        </plugin>
-    </gazebo>
-    """
-    robot_desc = robot_desc.replace(
-        "</robot>",
-        joint_state_plugin + "\n</robot>",
-    )
+    # # Add gazebo joint plugin
+    # joint_state_plugin = """
+    # <gazebo>
+    #     <plugin
+    #     filename="ignition-gazebo-joint-state-publisher-system"
+    #     name="ignition::gazebo::systems::JointStatePublisher">
+    #     <topic>/joint_states</topic>
+    #     <joint_name>Revolute_1</joint_name>
+    #     <joint_name>Revolute_2</joint_name>
+    #     <joint_name>Revolute_3</joint_name>
+    #     <joint_name>Revolute_4</joint_name>
+    #     <joint_name>Revolute_5</joint_name>
+    #     <joint_name>Revolute_6</joint_name>
+    #     </plugin>
+    # </gazebo>
+    # """
+    # robot_desc = robot_desc.replace(
+    #     "</robot>",
+    #     joint_state_plugin + "\n</robot>",
+    # )
 
     base_footprint_joint = """
     <link name="base_footprint"/>
@@ -198,73 +222,7 @@ def generate_launch_description():
         odom_plugin + "\n</robot>",
     )
 
-    joint_position_controller_plugin = """
-    <gazebo>
-        <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute_1</joint_name>
-        <topic>/komarm/revolute_1/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
-        <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
-        </plugin>
-
-        <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute_2</joint_name>
-        <topic>/komarm/revolute_2/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
-        <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
-        </plugin>
-
-        <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute_3</joint_name>
-        <topic>/komarm/revolute_3/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
-        <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
-        </plugin>
-
-        <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute_4</joint_name>
-        <topic>/komarm/revolute_4/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
-        <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
-        </plugin>
-
-        <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute_5</joint_name>
-        <topic>/komarm/revolute_5/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
-        <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
-        </plugin>
-
-        <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>Revolute_6</joint_name>
-        <topic>/komarm/revolute_6/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
-        <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
-        </plugin>
-    </gazebo>
-    """
-    robot_desc = robot_desc.replace(
-        "</robot>",
-        joint_position_controller_plugin + "\n</robot>",
-    )
+    robot_desc = make_komarm_joints_fixed(robot_desc)
     params = {"robot_description": robot_desc}
 
     node_robot_state_publisher = Node(

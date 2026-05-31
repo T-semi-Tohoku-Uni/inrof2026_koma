@@ -70,8 +70,8 @@ koma::Pursuit::Pursuit(const rclcpp::NodeOptions & options) : Node("pursuit", op
   path_sub_ = this->create_subscription<nav_msgs::msg::Path>(
     "path", rclcpp::QoS(rclcpp::KeepLast(10)),
     std::bind(&koma::Pursuit::path_callback, this, std::placeholders::_1));
-  robot_pose_sub_ = this->create_subscription<geometry_msgs::msg::Pose>(
-    "pose", rclcpp::QoS(rclcpp::KeepLast(10)),
+  robot_pose_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+    "odom", rclcpp::QoS(rclcpp::KeepLast(10)),
     std::bind(&koma::Pursuit::robot_pose_callback, this, std::placeholders::_1));
 
   // publisher
@@ -123,9 +123,9 @@ void koma::Pursuit::path_callback(const nav_msgs::msg::Path::SharedPtr msg)
   current_waypoint_index_ = 0;
 }
 
-void koma::Pursuit::robot_pose_callback(const geometry_msgs::msg::Pose::SharedPtr msg)
+void koma::Pursuit::robot_pose_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
-  robot_pose_ = *msg;
+  robot_pose_ = msg->pose.pose;
 }
 
 void koma::Pursuit::control_loop()
@@ -189,8 +189,8 @@ void koma::Pursuit::control_loop()
   tf2::Matrix3x3(q_goal).getRPY(roll_goal, pitch_goal, yaw_goal);
 
   double theta_goal = yaw_goal - tf2::getYaw(robot_pose_.orientation);
-  while (theta_goal >= M_2_PI) theta_goal -= M_2_PI;
-  while (theta_goal < 0) theta_goal += M_2_PI;
+  while (theta_goal >= M_PI) theta_goal -= M_PI;
+  while (theta_goal < -M_PI) theta_goal += M_PI;
 
   //error calculation theta
   double target_theta = yaw;
@@ -252,7 +252,7 @@ void koma::Pursuit::control_loop()
   double linear_cmd_norm = linear_PID_norm_.compute(error_norm, 0.0);
 
   //PID control for theta speed
-  double theta_speed_cmd = omega_PID_.compute(target_theta, robot_pose_.orientation.z);
+  double theta_speed_cmd = omega_PID_.compute(target_theta, tf2::getYaw(robot_pose_.orientation));
 
   //convert to x,y speed
   double linear_speed_cmd_x = linear_cmd_tan * tx + linear_cmd_norm * nx;
