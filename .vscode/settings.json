@@ -114,5 +114,6 @@
         "${workspaceFolder}/src/planning/CMakeLists.txt",
         "${workspaceFolder}/src/simulation/CMakeLists.txt",
         "${workspaceFolder}/src/feetech_servo/CMakeLists.txt",
+        "${workspaceFolder}/src/field/CMakeLists.txt",
     ]
 }

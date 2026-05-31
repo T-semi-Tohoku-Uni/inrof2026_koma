@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(simulation)
+project(field)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,13 +7,31 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(visualization_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-install(DIRECTORY urdf meshes
+add_executable(map_server src/map_server.cpp)
+ament_target_dependencies(map_server 
+  rclcpp 
+  visualization_msgs
+)
+target_include_directories(map_server
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  map_server
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include models worlds
   DESTINATION share/${PROJECT_NAME}
 )
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
