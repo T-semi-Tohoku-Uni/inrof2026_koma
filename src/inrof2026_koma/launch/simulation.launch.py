@@ -15,6 +15,83 @@ import xacro
 import math
 import random
 
+def set_joint_effort_velocity_limits(
+    robot_desc: str,
+    effort: float = 1.5,
+    velocity: float = 4.0,
+) -> str:
+    joint_names = [
+        "Revolute_1",
+        "Revolute_2",
+        "Revolute_3",
+        "Revolute_4",
+        "Revolute_5",
+        "Revolute_6",
+    ]
+
+    for joint_name in joint_names:
+        joint_pattern = (
+            rf'(<joint\b(?=[^>]*\bname="{re.escape(joint_name)}")[^>]*>)(.*?)'
+            rf'(</joint>)'
+        )
+
+        def replace_joint(match: re.Match) -> str:
+            joint_open = match.group(1)
+            joint_body = match.group(2)
+            joint_close = match.group(3)
+
+            limit_match = re.search(r'<limit\b[^>]*/?>', joint_body)
+
+            if limit_match:
+                limit_tag = limit_match.group(0)
+
+                if re.search(r'\beffort="[^"]*"', limit_tag):
+                    limit_tag = re.sub(
+                        r'\beffort="[^"]*"',
+                        f'effort="{effort}"',
+                        limit_tag,
+                    )
+                else:
+                    limit_tag = limit_tag.replace(
+                        "<limit",
+                        f'<limit effort="{effort}"',
+                        1,
+                    )
+
+                if re.search(r'\bvelocity="[^"]*"', limit_tag):
+                    limit_tag = re.sub(
+                        r'\bvelocity="[^"]*"',
+                        f'velocity="{velocity}"',
+                        limit_tag,
+                    )
+                else:
+                    limit_tag = limit_tag.replace(
+                        "<limit",
+                        f'<limit velocity="{velocity}"',
+                        1,
+                    )
+
+                joint_body = (
+                    joint_body[:limit_match.start()]
+                    + limit_tag
+                    + joint_body[limit_match.end():]
+                )
+            else:
+                # continuous joint など limit が無い場合は追加する
+                # continuous に lower/upper は入れず、effort/velocity だけ入れる
+                joint_body += f'\n    <limit effort="{effort}" velocity="{velocity}"/>\n  '
+
+            return joint_open + joint_body + joint_close
+
+        robot_desc = re.sub(
+            joint_pattern,
+            replace_joint,
+            robot_desc,
+            flags=re.DOTALL,
+        )
+
+    return robot_desc
+
 def generate_launch_description():
     x = 0.25
     y = 0.25
@@ -266,6 +343,13 @@ def generate_launch_description():
         "</robot>",
         joint_position_controller_plugin + "\n</robot>",
     )
+
+    robot_desc = set_joint_effort_velocity_limits(
+        robot_desc,
+        effort=1.5,
+        velocity=4.0,
+    )
+
     params = {"robot_description": robot_desc}
 
     node_robot_state_publisher = Node(
