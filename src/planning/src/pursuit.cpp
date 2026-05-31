@@ -189,8 +189,8 @@ void koma::Pursuit::control_loop()
   tf2::Matrix3x3(q_goal).getRPY(roll_goal, pitch_goal, yaw_goal);
 
   double theta_goal = yaw_goal - tf2::getYaw(robot_pose_.orientation);
-  while (theta_goal >= M_2_PI) theta_goal -= M_2_PI;
-  while (theta_goal < 0) theta_goal += M_2_PI;
+  while (theta_goal >= M_PI) theta_goal -= M_PI;
+  while (theta_goal < -M_PI) theta_goal += M_PI;
 
   //error calculation theta
   double target_theta = yaw;
@@ -252,7 +252,7 @@ void koma::Pursuit::control_loop()
   double linear_cmd_norm = linear_PID_norm_.compute(error_norm, 0.0);
 
   //PID control for theta speed
-  double theta_speed_cmd = omega_PID_.compute(target_theta, robot_pose_.orientation.z);
+  double theta_speed_cmd = omega_PID_.compute(target_theta, tf2::getYaw(robot_pose_.orientation));
 
   //convert to x,y speed
   double linear_speed_cmd_x = linear_cmd_tan * tx + linear_cmd_norm * nx;

@@ -7,12 +7,90 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, EnvironmentVariable
 from launch_ros.actions import Node
 import launch_ros
+import re
 
 from pathlib import Path
 
 import xacro
 import math
 import random
+
+def set_joint_effort_velocity_limits(
+    robot_desc: str,
+    effort: float = 1.5,
+    velocity: float = 4.0,
+) -> str:
+    joint_names = [
+        "Revolute_1",
+        "Revolute_2",
+        "Revolute_3",
+        "Revolute_4",
+        "Revolute_5",
+        "Revolute_6",
+    ]
+
+    for joint_name in joint_names:
+        joint_pattern = (
+            rf'(<joint\b(?=[^>]*\bname="{re.escape(joint_name)}")[^>]*>)(.*?)'
+            rf'(</joint>)'
+        )
+
+        def replace_joint(match: re.Match) -> str:
+            joint_open = match.group(1)
+            joint_body = match.group(2)
+            joint_close = match.group(3)
+
+            limit_match = re.search(r'<limit\b[^>]*/?>', joint_body)
+
+            if limit_match:
+                limit_tag = limit_match.group(0)
+
+                if re.search(r'\beffort="[^"]*"', limit_tag):
+                    limit_tag = re.sub(
+                        r'\beffort="[^"]*"',
+                        f'effort="{effort}"',
+                        limit_tag,
+                    )
+                else:
+                    limit_tag = limit_tag.replace(
+                        "<limit",
+                        f'<limit effort="{effort}"',
+                        1,
+                    )
+
+                if re.search(r'\bvelocity="[^"]*"', limit_tag):
+                    limit_tag = re.sub(
+                        r'\bvelocity="[^"]*"',
+                        f'velocity="{velocity}"',
+                        limit_tag,
+                    )
+                else:
+                    limit_tag = limit_tag.replace(
+                        "<limit",
+                        f'<limit velocity="{velocity}"',
+                        1,
+                    )
+
+                joint_body = (
+                    joint_body[:limit_match.start()]
+                    + limit_tag
+                    + joint_body[limit_match.end():]
+                )
+            else:
+                # continuous joint など limit が無い場合は追加する
+                # continuous に lower/upper は入れず、effort/velocity だけ入れる
+                joint_body += f'\n    <limit effort="{effort}" velocity="{velocity}"/>\n  '
+
+            return joint_open + joint_body + joint_close
+
+        robot_desc = re.sub(
+            joint_pattern,
+            replace_joint,
+            robot_desc,
+            flags=re.DOTALL,
+        )
+
+    return robot_desc
 
 def generate_launch_description():
     x = 0.25
@@ -70,7 +148,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r -s 4 {world_file_path}'])]
+        launch_arguments=[('gz_args', [f' -r -s --headless-rendering -v 4 {world_file_path}'])]
     )
 
 
@@ -205,9 +283,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_1</joint_name>
         <topic>/komarm/revolute_1/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
+        <p_gain>5.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
+        <d_gain>10.0</d_gain>
         </plugin>
 
         <plugin
@@ -215,9 +293,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_2</joint_name>
         <topic>/komarm/revolute_2/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
+        <p_gain>200.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
+        <d_gain>10.0</d_gain>
         </plugin>
 
         <plugin
@@ -225,9 +303,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_3</joint_name>
         <topic>/komarm/revolute_3/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
+        <d_gain>0.01</d_gain>
         </plugin>
 
         <plugin
@@ -235,9 +313,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_4</joint_name>
         <topic>/komarm/revolute_4/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
+        <d_gain>0.01</d_gain>
         </plugin>
 
         <plugin
@@ -245,9 +323,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_5</joint_name>
         <topic>/komarm/revolute_5/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
+        <d_gain>0.01</d_gain>
         </plugin>
 
         <plugin
@@ -255,9 +333,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_6</joint_name>
         <topic>/komarm/revolute_6/cmd_pos</topic>
-        <p_gain>1.1</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.04</d_gain>
+        <d_gain>0.01</d_gain>
         </plugin>
     </gazebo>
     """
@@ -265,6 +343,13 @@ def generate_launch_description():
         "</robot>",
         joint_position_controller_plugin + "\n</robot>",
     )
+
+    robot_desc = set_joint_effort_velocity_limits(
+        robot_desc,
+        effort=1.5,
+        velocity=4.0,
+    )
+
     params = {"robot_description": robot_desc}
 
     node_robot_state_publisher = Node(
@@ -296,7 +381,7 @@ def generate_launch_description():
             '/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
             '/twist_command@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
-            '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
+            # '/tf_static@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/world/inrof/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
             
             "/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model",
@@ -394,10 +479,10 @@ def generate_launch_description():
             "max_reaching_theta": 0.10,
             "lookahead_distance": 0.20,
             "resampleThreshold": 0.10,
-            "Kp_tan": 0.80,
+            "Kp_tan": 1.0,
             "Ki_tan": 0.0,
             "Kd_tan": 0.0,
-            "Kp_normal": 0.80,
+            "Kp_normal": 1.0,
             "Ki_normal": 0.00,
             "Kd_normal": 0.00,
             "Kp_theta": 1.0,
@@ -406,6 +491,32 @@ def generate_launch_description():
         }],
         remappings=[('clock', '/world/inrof/clock')]
     ) 
+
+    dummy_joint = Node(
+        package="komarm",
+        executable="dummy_joint",
+        name="dummy_joint",
+        output="screen",
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
+    foxglove_bridge = Node(
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        name="foxglove_bridge",
+        output="screen",
+        parameters=[
+            {
+                "address": "0.0.0.0",
+                "port": 8765,
+                "asset_uri_allowlist": [
+                    "package://**",
+                    "file://**",
+                ],
+            }
+        ],
+        remappings=[('clock', '/world/inrof/clock')]
+    )
 
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
@@ -421,5 +532,7 @@ def generate_launch_description():
         joy2Vel_node,
         mcl,
         planner,
-        pursuit
+        pursuit,
+        dummy_joint,
+        # foxglove_bridge
     ])
