@@ -1,20 +1,23 @@
+#include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <visualization_msgs/msg/marker.hpp>
-#include <chrono>
 
 using namespace std::chrono_literals;
 
-namespace koma {
-    class FieldMeshMarkerPublisher: public rclcpp::Node {
-        public:
-            FieldMeshMarkerPublisher(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
-        private:
-            std::string mesh_resource_;
-            std::string frame_id_;
+namespace koma
+{
+class FieldMeshMarkerPublisher : public rclcpp::Node
+{
+public:
+  FieldMeshMarkerPublisher(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-            rclcpp::TimerBase::SharedPtr timer_;
-            rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr map_publisher_;
+private:
+  std::string mesh_resource_;
+  std::string frame_id_;
 
-            void publish_map();
-    };
-}
+  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr map_publisher_;
+
+  void publish_map();
+};
+}  // namespace koma
