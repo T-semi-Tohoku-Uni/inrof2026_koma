@@ -161,11 +161,11 @@ def generate_launch_description():
             </ray>
 
             <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
-                <render_engine>ogre2</render_engine>
+                <render_engine>ogre</render_engine>
             </plugin>
 
             <alwaysOn>true</alwaysOn>
-            <visualize>false</visualize>
+            <visualize>true</visualize>
         </sensor>
     </gazebo>
     """
@@ -394,10 +394,10 @@ def generate_launch_description():
             "max_reaching_theta": 0.10,
             "lookahead_distance": 0.20,
             "resampleThreshold": 0.10,
-            "Kp_tan": 0.80,
+            "Kp_tan": 1.0,
             "Ki_tan": 0.0,
             "Kd_tan": 0.0,
-            "Kp_normal": 0.80,
+            "Kp_normal": 1.0,
             "Ki_normal": 0.00,
             "Kd_normal": 0.00,
             "Kp_theta": 1.0,
@@ -432,7 +432,7 @@ def generate_launch_description():
         node_robot_state_publisher,
         gz_spawn_entity,
         bridge,
-        # rviz,
+        rviz,
         map_server,
         static_from_map_to_odom,
         joy_node,
@@ -440,5 +440,5 @@ def generate_launch_description():
         mcl,
         planner,
         pursuit,
-        foxglove_bridge
+        # foxglove_bridge
     ])
