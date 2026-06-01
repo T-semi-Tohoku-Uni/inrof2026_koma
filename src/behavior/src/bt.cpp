@@ -7,6 +7,8 @@
 #include <behavior/path_goal_position.hpp>
 #include <behavior/path_waypoint_position.hpp>
 #include <behavior/pursuit.hpp>
+#include <behavior/target_ball_position.hpp>
+#include <behavior/while_do_else_break.hpp>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
@@ -21,6 +23,9 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
 
   // server: localization/path_plan
   path_goal_position_srv_ = this->create_client<inrof2026_koma_type::srv::PoseStamped>("goal_pose");
+
+  // server: ball_detection/dbscan
+  target_ball_position_srv_ = this->create_client<inrof2026_koma_type::srv::BallPosition>("target_ball_pose");
 
   // action
   // server: localization/pursuit
@@ -129,6 +134,29 @@ bool koma::BTNode::is_pursuit_runing() const
     return is_pursuit_running_.load();
 }
 
+std::optional<inrof2026_koma_type::srv::BallPosition::Response> koma::BTNode::target_ball_position() {
+    while(!target_ball_position_srv_->wait_for_service(1s)) {
+        if (!rclcpp::ok()) break;
+        RCLCPP_WARN(this->get_logger(), "target_ball_pose is not available");
+    }
+
+    std::shared_ptr<inrof2026_koma_type::srv::BallPosition_Request> request = std::make_shared<inrof2026_koma_type::srv::BallPosition::Request>();
+    rclcpp::Client<inrof2026_koma_type::srv::BallPosition>::FutureAndRequestId result_future = target_ball_position_srv_->async_send_request(request);
+
+    if (rclcpp::spin_until_future_complete(
+            this->get_node_base_interface(),
+            result_future,
+            std::chrono::seconds(1))
+        == rclcpp::FutureReturnCode::SUCCESS)
+    {
+        std::shared_ptr<inrof2026_koma_type::srv::BallPosition_Response> response = result_future.get();
+        return *response;
+    } else {
+        RCLCPP_WARN(this->get_logger(), "target_ball_position service call failed or timed out");
+        return std::nullopt;
+    }
+}
+
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -153,6 +181,14 @@ int main(int argc, char * argv[])
       return std::make_unique<koma::BTPursuit>(name, config, ros_node);
     };
   factory.registerBuilder<koma::BTPursuit>("pursuit", builder_pursuit);
+
+  BT::NodeBuilder builder_target_ball_position = 
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::TargetBallPosition>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::TargetBallPosition>("target_ball_position", builder_target_ball_position);
+
+  factory.registerNodeType<koma::WhileDoElseBreakNode>("WhileDoElseBreak");
 
   std::string package_path = ament_index_cpp::get_package_share_directory("inrof2026_koma");
   factory.registerBehaviorTreeFromFile(package_path + "/config/koma_bt.xml");

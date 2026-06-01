@@ -19,7 +19,7 @@ public:
   void path_waypoint_position(double x, double y);
   void path_goal_position(double x, double y, double theta);
 
-  void target_ball_position(double x, double y);
+  std::optional<inrof2026_koma_type::srv::BallPosition::Response> target_ball_position();
 
   // service getter
   inrof2026_koma_type::srv::PoseStamped::Response current_robot_position();
@@ -43,6 +43,7 @@ private:
   // service
   rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedPtr path_waypoint_position_srv_;
   rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedPtr path_goal_position_srv_;
+  rclcpp::Client<inrof2026_koma_type::srv::BallPosition>::SharedPtr target_ball_position_srv_;
 
   // action
   rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_act_;

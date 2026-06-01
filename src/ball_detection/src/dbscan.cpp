@@ -45,7 +45,7 @@ koma::BallDetect::BallDetect(const rclcpp::NodeOptions & options)
 
   // service
   srv_ball_pose_ = this->create_service<inrof2026_koma_type::srv::BallPosition>(
-    "ball_detect",
+    "target_ball_pose",
     std::bind(
       &koma::BallDetect::ballPoseCallback, this, std::placeholders::_1, std::placeholders::_2));
 }

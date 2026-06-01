@@ -21,6 +21,8 @@ add_library(bt_lib SHARED
   src/path_waypoint_position.cpp
   src/path_goal_position.cpp
   src/pursuit.cpp
+  src/target_ball_pose.cpp
+  src/while_do_else_break.cpp
 )
 target_include_directories(bt_lib
   PUBLIC
