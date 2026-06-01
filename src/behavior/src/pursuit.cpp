@@ -10,7 +10,6 @@ koma::BTPursuit::BTPursuit(
     ros_node_(ros_node){}
 
 BT::NodeStatus koma::BTPursuit::onStart() {
-    RCLCPP_INFO(this->ros_node_->get_logger(), "Start Pursuit");
     this->ros_node_->start_path_pursuit();
     return BT::NodeStatus::RUNNING;
 }

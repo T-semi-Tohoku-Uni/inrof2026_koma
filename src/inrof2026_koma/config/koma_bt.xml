@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
-  <BehaviorTree ID="main">
+  <BehaviorTree ID="free_ball">
     <Sequence>
       <Sleep msec="5"/>
       <waypoint x="0.3"
@@ -9,6 +9,13 @@
                      y="2.0"
                      theta="-1.57"/>
       <pursuit/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="main">
+    <Sequence>
+      <SubTree ID="free_ball"
+               _autoremap="false"/>
     </Sequence>
   </BehaviorTree>
 

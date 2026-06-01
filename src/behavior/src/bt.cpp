@@ -88,6 +88,7 @@ void koma::BTNode::start_path_pursuit() {
     send_goal_options.result_callback = std::bind(&BTNode::result_callback, this, std::placeholders::_1);
 
     pursuit_act_->async_send_goal(goal_msg, send_goal_options);
+    is_pursuit_running_.store(true);
 }
 
 void koma::BTNode::pursuit_goal_response_callback(
