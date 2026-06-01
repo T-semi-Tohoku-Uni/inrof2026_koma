@@ -55,6 +55,9 @@ void koma::PathPlanner::goal_pose_callback(
     start_point = waypoint_array_[i];
   }
 
+  // clear waypoint
+  waypoint_array_.clear();
+
   nav_msgs::msg::Path path_msg;
   path_msg.header.stamp = this->get_clock()->now();
   path_msg.header.frame_id = "map";

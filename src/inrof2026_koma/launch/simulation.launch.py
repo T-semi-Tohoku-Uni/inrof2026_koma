@@ -533,6 +533,13 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    path_ball_position = Node(
+        package="planning",
+        executable="ball_plan",
+        output="screen",
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     foxglove_bridge = Node(
         package="foxglove_bridge",
         executable="foxglove_bridge",
@@ -602,6 +609,7 @@ def generate_launch_description():
         dummy_joint,
         ball_detect,
         bt,
+        path_ball_position,
         *ball_spawn_entity_list
         # foxglove_bridge
     ])

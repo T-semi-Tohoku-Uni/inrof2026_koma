@@ -23,6 +23,7 @@ add_library(bt_lib SHARED
   src/pursuit.cpp
   src/target_ball_pose.cpp
   src/while_do_else_break.cpp
+  src/path_ball_position.cpp
 )
 target_include_directories(bt_lib
   PUBLIC

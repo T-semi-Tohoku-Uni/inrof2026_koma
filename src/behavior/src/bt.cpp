@@ -9,6 +9,7 @@
 #include <behavior/pursuit.hpp>
 #include <behavior/target_ball_position.hpp>
 #include <behavior/while_do_else_break.hpp>
+#include <behavior/path_ball_position.hpp>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
@@ -26,6 +27,8 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
 
   // server: ball_detection/dbscan
   target_ball_position_srv_ = this->create_client<inrof2026_koma_type::srv::BallPosition>("target_ball_pose");
+
+  path_ball_position_srv_ = this->create_client<inrof2026_koma_type::srv::PoseStamped>("path_ball");
 
   // action
   // server: localization/pursuit
@@ -157,6 +160,26 @@ std::optional<inrof2026_koma_type::srv::BallPosition::Response> koma::BTNode::ta
     }
 }
 
+void koma::BTNode::path_ball_position(double x, double y) {
+    // check action server available
+    while (!this->path_ball_position_srv_->wait_for_service(1s))
+    {
+        if (!rclcpp::ok()) break;
+        RCLCPP_WARN(this->get_logger(), "path_ball_position_srv_ is not available");
+    }
+
+    std::shared_ptr<inrof2026_koma_type::srv::PoseStamped_Request> request = std::make_shared<inrof2026_koma_type::srv::PoseStamped::Request>();
+    request->pose_stamped.pose.position.x = x;
+    request->pose_stamped.pose.position.y = y;
+
+    rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::FutureAndRequestId result_future = path_ball_position_srv_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(
+            this->get_node_base_interface(),
+            result_future,
+            std::chrono::seconds(1))
+        == rclcpp::FutureReturnCode::SUCCESS){}
+}
+
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -187,6 +210,12 @@ int main(int argc, char * argv[])
       return std::make_unique<koma::TargetBallPosition>(name, config, ros_node);
     };
   factory.registerBuilder<koma::TargetBallPosition>("target_ball_position", builder_target_ball_position);
+
+  BT::NodeBuilder builder_path_ball_position = 
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::PathBallPosition>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::PathBallPosition>("path_ball", builder_path_ball_position);
 
   factory.registerNodeType<koma::WhileDoElseBreakNode>("WhileDoElseBreak");
 

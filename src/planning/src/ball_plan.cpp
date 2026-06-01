@@ -11,7 +11,7 @@ BallPathNode::BallPathNode(const rclcpp::NodeOptions & options) : Node("ball_pat
   path_pub_ = create_publisher<nav_msgs::msg::Path>("path", pathQos);
 
   srv_gen_route_ = this->create_service<inrof2026_koma_type::srv::PoseStamped>(
-    "generate_ball_path",
+    "path_ball",
     std::bind(&BallPathNode::genBallPath, this, std::placeholders::_1, std::placeholders::_2));
 
   rclcpp::QoS poseArrowQos(rclcpp::KeepLast(10));
