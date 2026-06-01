@@ -154,7 +154,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r -s -v 4 {world_file_path}'])]
+        launch_arguments=[('gz_args', [f' -r -v 4 {world_file_path}'])]
     )
 
 
