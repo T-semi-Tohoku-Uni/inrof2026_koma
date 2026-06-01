@@ -154,7 +154,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r -s --headless-rendering -v 4 {world_file_path}'])]
+        launch_arguments=[('gz_args', [f' -r -s -v 4 {world_file_path}'])]
     )
 
 
@@ -203,11 +203,18 @@ def generate_launch_description():
 
     laser_scan_link = """
     <link name="ldlidar_base"/>
+    <link name="ldlidar_scan"/>
 
     <joint name="base_link_to_ldlidar_base" type="fixed">
         <parent link="base_link"/>
         <child link="ldlidar_base"/>
         <origin xyz="0.0765 0 -0.030" rpy="0 0 0"/>
+    </joint>
+
+    <joint name="ldlidar_base_to_scan" type="fixed">
+        <parent link="ldlidar_base"/>
+        <child link="ldlidar_scan"/>
+        <origin xyz="0 0 0" rpy="0 0 1.5708"/>
     </joint>
     """
     robot_desc = robot_desc.replace(
@@ -216,9 +223,9 @@ def generate_launch_description():
     )
 
     laser_scan_plugin = """
-    <gazebo reference="ldlidar_base">
+    <gazebo reference="ldlidar_scan">
         <sensor name="ldlidar" type="gpu_lidar">
-            <ignition_frame_id>ldlidar_base</ignition_frame_id>
+            <ignition_frame_id>ldlidar_scan</ignition_frame_id>
             <topic>/ldlidar_node/scan</topic>
             <update_rate>10</update_rate>
 
@@ -227,8 +234,8 @@ def generate_launch_description():
                 <horizontal>
                     <samples>360</samples>
                     <resolution>1.0</resolution>
-                    <min_angle>-1.3</min_angle>
-                    <max_angle> 1.3</max_angle>
+                    <min_angle> 3.925 </min_angle>
+                    <max_angle> 5.495 </max_angle>
                 </horizontal>
                 <vertical>
                     <samples>1</samples>
@@ -541,7 +548,7 @@ def generate_launch_description():
     ball_y_min = 0.60
     ball_y_max = 1.80
     for i_x in range(2):
-        for i_y in range(1):
+        for i_y in range(4):
             region_x_min = ball_x_min + (ball_x_max-ball_x_min)*i_x/2
             region_x_max = ball_x_min + (ball_x_max-ball_x_min)*(i_x+1)/2
             region_y_min = ball_y_min + (ball_y_max-ball_y_min)*i_y/4

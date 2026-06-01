@@ -161,9 +161,6 @@ private:
   std::vector<koma::Circle> ball_;
   sensor_msgs::msg::PointCloud2 circle2PointCloud2(std::vector<koma::Circle> ball_position);
 
-  // env
-  bool is_sim_;
-
   // tf
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;

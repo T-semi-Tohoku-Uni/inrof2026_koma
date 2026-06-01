@@ -48,13 +48,6 @@ koma::BallDetect::BallDetect(const rclcpp::NodeOptions & options)
     "ball_detect",
     std::bind(
       &koma::BallDetect::ballPoseCallback, this, std::placeholders::_1, std::placeholders::_2));
-
-  const char * sim = std::getenv("WITH_SIM");
-  if (!sim || std::string(sim) != "1")
-    is_sim_ = false;
-  else
-    is_sim_ = true;
-  RCLCPP_INFO(this->get_logger(), "WITH SIM env is %d", is_sim_);
 }
 
 void koma::BallDetect::ballPoseCallback(
@@ -363,17 +356,16 @@ koma::PointCloud koma::BallDetect::scan2Point(const sensor_msgs::msg::LaserScan 
     double r, theta;
     r = scan.ranges[i];
     if (std::isnan(r) || r < scan.range_min || scan.range_max < r) continue;
-    if (is_sim_)
-      theta = scan.angle_min + ((std::double_t)(i)) * scan.angle_increment;
-    else {
-      theta = scan.angle_min + ((std::double_t)(i)) * scan.angle_increment - 3.0 * M_PI / 2.0;
-      // normalize
-      if (theta > M_PI) theta -= M_2_PI;
-      if (theta < -M_PI) theta += M_2_PI;
 
-      if (theta < -M_PI_2 + this->LIDAR_THTRSHOLD_) continue;
-      if (theta > M_PI_2 - this->LIDAR_THTRSHOLD_) continue;
-    }
+    theta = scan.angle_min + ((std::double_t)(i)) * scan.angle_increment - 3.0 * M_PI / 2.0;
+    if (theta > M_PI) theta -= M_PI*2;
+    if (theta < -M_PI) theta += M_PI*2;
+
+    if (theta < -M_PI_2 + this->LIDAR_THTRSHOLD_) continue;
+    if (theta > M_PI_2 - this->LIDAR_THTRSHOLD_) continue;
+
+    // theta = scan.angle_min + ((std::double_t)(i)) * scan.angle_increment;
+
     // convert origin
     try {
       geometry_msgs::msg::PointStamped point_st;
