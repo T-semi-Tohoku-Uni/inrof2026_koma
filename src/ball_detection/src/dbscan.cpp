@@ -358,8 +358,8 @@ koma::PointCloud koma::BallDetect::scan2Point(const sensor_msgs::msg::LaserScan 
     if (std::isnan(r) || r < scan.range_min || scan.range_max < r) continue;
 
     theta = scan.angle_min + ((std::double_t)(i)) * scan.angle_increment - 3.0 * M_PI / 2.0;
-    if (theta > M_PI) theta -= M_PI*2;
-    if (theta < -M_PI) theta += M_PI*2;
+    if (theta > M_PI) theta -= M_PI * 2;
+    if (theta < -M_PI) theta += M_PI * 2;
 
     if (theta < -M_PI_2 + this->LIDAR_THTRSHOLD_) continue;
     if (theta > M_PI_2 - this->LIDAR_THTRSHOLD_) continue;

@@ -268,7 +268,8 @@ std::vector<double> koma::MCL::caculate_likelihood_field_model(
     }
 
     std::double_t theta_lidar;
-    theta_lidar = scan_->angle_min + (static_cast<double>(i))*scan_->angle_increment - 3.0*M_PI/2.0;
+    theta_lidar =
+      scan_->angle_min + (static_cast<double>(i)) * scan_->angle_increment - 3.0 * M_PI / 2.0;
     // theta_lidar = scan_->angle_min + (static_cast<double>(i)) * scan_->angle_increment;
 
     // } else {
