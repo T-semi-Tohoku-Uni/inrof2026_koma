@@ -130,7 +130,7 @@ void BallPathNode::genBallPath(
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<yasarobo2025_26::BallPathNode>());
+  rclcpp::spin(std::make_shared<koma::BallPathNode>());
   rclcpp::shutdown();
   return 0;
 }
