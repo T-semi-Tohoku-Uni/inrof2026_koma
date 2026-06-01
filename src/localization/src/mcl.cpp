@@ -98,11 +98,10 @@ void koma::MCL::update_particles()
   std::double_t dy2 = delta.angular.z * delta.angular.z;
 
   for (size_t i = 0; i < this->particles_.size(); i++) {
-    std::double_t dx = delta.linear.x + randNormal(odom_noise_1_ * dd2 + odom_noise_2_ * dy2);
-    std::double_t dy = delta.linear.y + randNormal(odom_noise_1_ * dd2 + odom_noise_2_ * dy2);
-    ;
-    std::double_t dtheta = delta.angular.z + +randNormal(odom_noise_3_ * dd2 + odom_noise_4_ * dy2);
-    ;
+    std::double_t dx = delta.linear.x + randNormal( std::sqrt(odom_noise_1_ * dd2 + odom_noise_2_ * dy2));//ルート取らないといけなくない？
+    std::double_t dy = delta.linear.y + randNormal( std::sqrt(odom_noise_1_ * dd2 + odom_noise_2_ * dy2));
+    std::double_t dtheta = delta.angular.z + +randNormal( std::sqrt(odom_noise_3_ * dd2 + odom_noise_4_ * dy2));
+    
 
     geometry_msgs::msg::Pose update_particle_pose;
     geometry_msgs::msg::Pose particle_pose = particles_[i].position;
@@ -376,6 +375,87 @@ void koma::MCL::resetParticlesDistribution(double noise_x, double noise_y, doubl
   }
 }
 
+// void koma::MCL::read_map(std::filesystem::path & map_path)
+// {
+//   try {
+//     RCLCPP_INFO(this->get_logger(), "map path is %s", map_path.string().c_str());
+
+//     // load setting from map.yaml
+//     YAML::Node lconf = YAML::LoadFile((map_path / "map.yaml").string());
+//     map_resolution_ = lconf["resolution"].as<double>();
+
+//     cv::Mat map_img = cv::imread((map_path / "map.pgm").string(), 0);
+//     map_width_ = map_img.cols;
+//     map_height_ = map_img.rows;
+
+   
+//     cv::Mat binary_map_img(map_height_, map_width_, CV_8UC1);
+//     for (int v = 0; v < map_height_; v++) {
+//       for (int u = 0; u < map_width_; u++) {
+//         uchar val = map_img.at<uchar>(v, u);
+     
+//         if (val == 0) {
+//           binary_map_img.at<uchar>(v, u) = 0;   // 障害物
+//         } else {
+//           binary_map_img.at<uchar>(v, u) = 255; // 自由空間
+//         }
+//       }
+//     }
+
+//     cv::Mat dist_field_out(map_height_, map_width_, CV_32FC1);
+//     cv::distanceTransform(binary_map_img, dist_field_out, cv::DIST_L2, 5);
+
+   
+//     cv::Mat inverted_map_img;
+//     cv::bitwise_not(binary_map_img, inverted_map_img);
+//     cv::Mat dist_field_in(map_height_, map_width_, CV_32FC1);
+//     cv::distanceTransform(inverted_map_img, dist_field_in, cv::DIST_L2, 5);
+
+  
+//     dist_field_ = cv::Mat(map_height_, map_width_, CV_64FC1);
+//     for (int v = 0; v < map_height_; v++) {
+//       for (int u = 0; u < map_width_; u++) {
+//         float d_out = dist_field_out.at<float>(v, u);
+//         float d_in  = dist_field_in.at<float>(v, u);
+        
+//         // 外側ならプラス、内側ならマイナス
+//         double sdf_pixel = static_cast<double>(d_out - d_in);
+//         dist_field_.at<double>(v, u) = sdf_pixel * map_resolution_;
+//       }
+//     }
+
+//     double min_val, max_val;
+//     cv::minMaxLoc(dist_field_, &min_val, &max_val);
+//     double max_abs_val = std::max(std::abs(min_val), std::abs(max_val)) + 1e-6;
+
+//     cv::Mat sdf_color_img(map_height_, map_width_, CV_8UC3);
+//     for (int v = 0; v < map_height_; v++) {
+//       for (int u = 0; u < map_width_; u++) {
+//         double d = dist_field_.at<double>(v, u);
+//         double ratio = std::abs(d) / max_abs_val;
+//         int intensity = 255 - static_cast<int>(ratio * 255.0);
+//         intensity = std::max(0, std::min(255, intensity));
+
+//         cv::Vec3b color;
+//         if (d > 1e-9) {
+//           color = cv::Vec3b(255, intensity, intensity);
+//         } else if (d < -1e-9) {
+//           color = cv::Vec3b(intensity, intensity, 255);
+//         } else {
+//           color = cv::Vec3b(255, 255, 255);
+//         }
+//         sdf_color_img.at<cv::Vec3b>(v, u) = color;
+//       }
+//     }
+//     cv::imwrite("distField_highlight.png", sdf_color_img);
+//     RCLCPP_INFO(this->get_logger(), "Saved colored SDF image to distField_highlight.png");
+
+//   } catch (const YAML::Exception & e) {
+//     RCLCPP_ERROR(this->get_logger(), "%s", e.what());
+//     throw std::runtime_error("Failed to koma::MCL::read_map");
+//   }
+// }
+
 void koma::MCL::read_map(std::filesystem::path & map_path)
 {
   try {
@@ -428,6 +508,7 @@ void koma::MCL::read_map(std::filesystem::path & map_path)
     throw std::runtime_error("Failed to koma::MCL::read_map");
   }
 }
+
 
 int main(int argc, char * argv[])
 {
