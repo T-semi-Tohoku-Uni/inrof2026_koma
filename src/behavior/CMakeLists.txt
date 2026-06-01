@@ -20,6 +20,7 @@ find_package(rclcpp_action REQUIRED)
 add_library(bt_lib SHARED
   src/path_waypoint_position.cpp
   src/path_goal_position.cpp
+  src/pursuit.cpp
 )
 target_include_directories(bt_lib
   PUBLIC

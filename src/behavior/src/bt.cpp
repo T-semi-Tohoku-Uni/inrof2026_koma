@@ -6,18 +6,25 @@
 #include <behavior/bt.hpp>
 #include <behavior/path_goal_position.hpp>
 #include <behavior/path_waypoint_position.hpp>
+#include <behavior/pursuit.hpp>
+
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
 
 koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", options)
 {
+  // service
   // server: localization/path_plan
   path_waypoint_position_srv_ =
     this->create_client<inrof2026_koma_type::srv::PoseStamped>("waypoint");
 
   // server: localization/path_plan
   path_goal_position_srv_ = this->create_client<inrof2026_koma_type::srv::PoseStamped>("goal_pose");
+
+  // action
+  // server: localization/pursuit
+  pursuit_act_ = rclcpp_action::create_client<inrof2026_koma_type::action::Pursuit> (this, "pursuit_command");
 }
 
 void koma::BTNode::path_waypoint_position(double x, double y)
@@ -68,6 +75,59 @@ void koma::BTNode::path_goal_position(double x, double y, double theta)
   }
 }
 
+void koma::BTNode::start_path_pursuit() {
+    while (!pursuit_act_->wait_for_action_server(1s)){
+        if (!rclcpp::ok()) return;
+        RCLCPP_WARN(this->get_logger(), "pursuit not available");
+    }
+
+    auto goal_msg = inrof2026_koma_type::action::Pursuit::Goal();
+    auto send_goal_options = rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SendGoalOptions();
+    send_goal_options.goal_response_callback = std::bind(&BTNode::pursuit_goal_response_callback, this, std::placeholders::_1);
+    send_goal_options.feedback_callback = std::bind(&BTNode::pursuit_feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
+    send_goal_options.result_callback = std::bind(&BTNode::result_callback, this, std::placeholders::_1);
+
+    pursuit_act_->async_send_goal(goal_msg, send_goal_options);
+}
+
+void koma::BTNode::pursuit_goal_response_callback(
+    rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::SharedPtr goal_handle
+) {
+     if (!goal_handle) {
+        is_pursuit_running_.store(false);
+        RCLCPP_ERROR(this->get_logger(), "Pursuit goal was rejected by action server.");
+        return;
+    }
+
+    is_pursuit_running_.store(true);
+    RCLCPP_INFO(this->get_logger(), "Start pursuit.");
+}
+
+void koma::BTNode::pursuit_feedback_callback(
+    rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::SharedPtr goal_handle, 
+    const std::shared_ptr<const inrof2026_koma_type::action::Pursuit::Feedback> feedback
+) {
+    (void)goal_handle;
+    (void)feedback;
+}
+
+void koma::BTNode::result_callback(
+    const rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::WrappedResult result
+){
+    is_pursuit_running_.store(false);
+
+    if (!result.result)  {
+        RCLCPP_WARN(this->get_logger(), "Pursuit action returned null result.");
+    };
+    RCLCPP_INFO(this->get_logger(), "Pursuit complete.");
+}
+
+
+bool koma::BTNode::is_pursuit_runing() const
+{
+    return is_pursuit_running_.load();
+}
+
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -75,17 +135,23 @@ int main(int argc, char * argv[])
   std::shared_ptr<koma::BTNode> ros_node = std::make_shared<koma::BTNode>();
   BT::BehaviorTreeFactory factory;
 
-  BT::NodeBuilder path_waypoint_position =
+  BT::NodeBuilder builder_path_waypoint_position =
     [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
       return std::make_unique<koma::PathWaypointPosition>(name, config, ros_node);
     };
-  factory.registerBuilder<koma::PathWaypointPosition>("waypoint", path_waypoint_position);
+  factory.registerBuilder<koma::PathWaypointPosition>("waypoint", builder_path_waypoint_position);
 
-  BT::NodeBuilder path_goal_position =
+  BT::NodeBuilder builder_path_goal_position =
     [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
       return std::make_unique<koma::PathGoalPosition>(name, config, ros_node);
     };
-  factory.registerBuilder<koma::PathGoalPosition>("goal_position", path_goal_position);
+  factory.registerBuilder<koma::PathGoalPosition>("goal_position",   builder_path_goal_position);
+
+  BT::NodeBuilder builder_pursuit = 
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::BTPursuit>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::BTPursuit>("pursuit", builder_pursuit);
 
   std::string package_path = ament_index_cpp::get_package_share_directory("inrof2026_koma");
   factory.registerBehaviorTreeFromFile(package_path + "/config/koma_bt.xml");

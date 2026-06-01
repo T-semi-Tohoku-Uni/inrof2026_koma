@@ -2,6 +2,7 @@
 #include <inrof2026_koma_type/action/pursuit.hpp>
 #include <inrof2026_koma_type/srv/ball_position.hpp>
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
+#include <inrof2026_koma_type/action/pursuit.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
@@ -12,7 +13,7 @@ class BTNode : public rclcpp::Node
 public:
   BTNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-  bool is_runing();
+  bool is_pursuit_runing() const;
 
   // service setter
   void path_waypoint_position(double x, double y);
@@ -37,7 +38,13 @@ public:
       result);
 
 private:
+  std::atomic_bool is_pursuit_running_{false};
+
+  // service
   rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedPtr path_waypoint_position_srv_;
   rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedPtr path_goal_position_srv_;
+
+  // action
+  rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_act_;
 };
 }  // namespace koma
