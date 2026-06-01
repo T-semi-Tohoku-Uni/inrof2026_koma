@@ -3,7 +3,7 @@
 koma::Joy2Vel::Joy2Vel(const rclcpp::NodeOptions & options) : Node("joy2vel", options)
 {
   cmd_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
-    "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
+    "twist_command", rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile());
   joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
     "joy", rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile(),
     std::bind(&koma::Joy2Vel::callback, this, std::placeholders::_1));
