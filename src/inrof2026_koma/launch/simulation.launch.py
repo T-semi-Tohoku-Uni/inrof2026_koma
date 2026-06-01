@@ -144,6 +144,12 @@ def generate_launch_description():
         "komarm.urdf"
     )
 
+    ball_urdf_path = os.path.join(
+        simulation_package_dir,
+        "urdf",
+        "ball.urdf"
+    )
+
     # Gazebo node
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
@@ -196,11 +202,11 @@ def generate_launch_description():
     )
 
     laser_scan_link = """
-    <link name="laser_scan_link"/>
+    <link name="ldlidar_base"/>
 
-    <joint name="base_link_to_laser_scan_link" type="fixed">
+    <joint name="base_link_to_ldlidar_base" type="fixed">
         <parent link="base_link"/>
-        <child link="laser_scan_link"/>
+        <child link="ldlidar_base"/>
         <origin xyz="0.0765 0 -0.030" rpy="0 0 0"/>
     </joint>
     """
@@ -210,9 +216,9 @@ def generate_launch_description():
     )
 
     laser_scan_plugin = """
-    <gazebo reference="laser_scan_link">
+    <gazebo reference="ldlidar_base">
         <sensor name="ldlidar" type="gpu_lidar">
-            <ignition_frame_id>laser_scan_link</ignition_frame_id>
+            <ignition_frame_id>ldlidar_base</ignition_frame_id>
             <topic>/ldlidar_node/scan</topic>
             <update_rate>10</update_rate>
 
@@ -283,7 +289,7 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_1</joint_name>
         <topic>/komarm/revolute_1/cmd_pos</topic>
-        <p_gain>5.0</p_gain>
+        <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
         <d_gain>10.0</d_gain>
         </plugin>
@@ -500,6 +506,16 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    ball_detect = Node(
+        package="ball_detection",
+        executable="dbscan",
+        output="screen",
+        parameters=[{
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
+        }],
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     foxglove_bridge = Node(
         package="foxglove_bridge",
         executable="foxglove_bridge",
@@ -518,6 +534,39 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    # spawn ball on field
+    ball_spawn_entity_list = []
+    ball_x_min = 0.98
+    ball_x_max = 1.70
+    ball_y_min = 0.60
+    ball_y_max = 1.80
+    for i_x in range(2):
+        for i_y in range(1):
+            region_x_min = ball_x_min + (ball_x_max-ball_x_min)*i_x/2
+            region_x_max = ball_x_min + (ball_x_max-ball_x_min)*(i_x+1)/2
+            region_y_min = ball_y_min + (ball_y_max-ball_y_min)*i_y/4
+            region_y_max = ball_y_min + (ball_y_max-ball_y_min)*(i_y+1)/4
+
+            for _ in range(1):
+                ball_x = random.uniform(region_x_min, region_x_max)
+                ball_y = random.uniform(region_y_min, region_y_max)
+                ball_spawn_entity_list.append(
+                    Node(
+                        package='ros_gz_sim',
+                        executable='create',
+                        output='screen',
+                        arguments=[
+                            '-file', str(ball_urdf_path),
+                            '-name', 'ball',
+                            '-x', str(ball_x),
+                            '-y', str(ball_y),
+                            '-z', str(z),
+                            '-allow_renaming', 'true'
+                        ],
+                    )
+                )
+
+
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         models_path_env,
@@ -534,5 +583,7 @@ def generate_launch_description():
         planner,
         pursuit,
         dummy_joint,
+        ball_detect,
+        *ball_spawn_entity_list
         # foxglove_bridge
     ])
