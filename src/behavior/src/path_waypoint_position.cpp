@@ -1,36 +1,37 @@
-#include <behavior/path_waypoint_position.hpp>
 #include <behavior/bt.hpp>
+#include <behavior/path_waypoint_position.hpp>
 
-koma::PathWaypointPosition::PathWaypointPosition(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<koma::BTNode> ros_node):
-    BT::SyncActionNode(name, config),
-    ros_node_(ros_node) {}
-
-BT::PortsList koma::PathWaypointPosition::providedPorts() {
-    return {
-        BT::InputPort<double> ("x"),
-        BT::InputPort<double> ("y")
-    };
+koma::PathWaypointPosition::PathWaypointPosition(
+  const std::string & name, const BT::NodeConfig & config, std::shared_ptr<koma::BTNode> ros_node)
+: BT::SyncActionNode(name, config), ros_node_(ros_node)
+{
 }
 
-BT::NodeStatus koma::PathWaypointPosition::tick() {
-    BT::Expected<double> tmp_x = getInput<double>("x");
-    BT::Expected<double> tmp_y = getInput<double>("y");
+BT::PortsList koma::PathWaypointPosition::providedPorts()
+{
+  return {BT::InputPort<double>("x"), BT::InputPort<double>("y")};
+}
 
-    if (!tmp_x) {
-        throw BT::RuntimeError("missing required input x: ", tmp_x.error());
-    } 
-    if (!tmp_y) {
-        throw BT::RuntimeError("missing required input x: ", tmp_y.error());
-    }
+BT::NodeStatus koma::PathWaypointPosition::tick()
+{
+  BT::Expected<double> tmp_x = getInput<double>("x");
+  BT::Expected<double> tmp_y = getInput<double>("y");
 
-    double x = tmp_x.value();
-    double y = tmp_y.value();
+  if (!tmp_x) {
+    throw BT::RuntimeError("missing required input x: ", tmp_x.error());
+  }
+  if (!tmp_y) {
+    throw BT::RuntimeError("missing required input x: ", tmp_y.error());
+  }
 
-    if (this->ros_node_ == nullptr) {
-        throw BT::RuntimeError("ros_node is null ptr");
-    }
+  double x = tmp_x.value();
+  double y = tmp_y.value();
 
-    this->ros_node_->path_waypoint_position(x, y);
+  if (this->ros_node_ == nullptr) {
+    throw BT::RuntimeError("ros_node is null ptr");
+  }
 
-    return BT::NodeStatus::SUCCESS;
+  this->ros_node_->path_waypoint_position(x, y);
+
+  return BT::NodeStatus::SUCCESS;
 }
