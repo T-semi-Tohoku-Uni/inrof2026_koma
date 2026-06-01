@@ -2,7 +2,6 @@
 #include <inrof2026_koma_type/action/pursuit.hpp>
 #include <inrof2026_koma_type/srv/ball_position.hpp>
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
-#include <inrof2026_koma_type/action/pursuit.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
