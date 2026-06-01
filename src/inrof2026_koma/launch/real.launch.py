@@ -87,7 +87,7 @@ def generate_launch_description():
     )
 
     uart_bridge = Node(
-        package="urat_bridge",
+        package="uart_bridge",
         executable="motor",
         output="screen"
     )
