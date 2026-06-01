@@ -45,7 +45,7 @@ koma::BallDetect::BallDetect(const rclcpp::NodeOptions & options)
 
   // service
   srv_ball_pose_ = this->create_service<inrof2026_koma_type::srv::BallPosition>(
-    "ball_detect",
+    "target_ball_pose",
     std::bind(
       &koma::BallDetect::ballPoseCallback, this, std::placeholders::_1, std::placeholders::_2));
 }
@@ -100,6 +100,7 @@ std::optional<geometry_msgs::msg::Pose> koma::BallDetect::detect()
     */
   // convert LaserScan to PointCloud, point_cloud origin is field.
   PointCloud point_cloud = scan2Point(*scan_);
+  if (point_cloud.points.empty()) return std::nullopt;
   // construct KD-tree
   koma::KdTree tree(2, point_cloud, nanoflann::KDTreeSingleIndexAdaptorParams(1));
   tree.buildIndex();

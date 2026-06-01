@@ -154,7 +154,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch'), '/gz_sim.launch.py']),
-        launch_arguments=[('gz_args', [f' -r -v 4 {world_file_path}'])]
+        launch_arguments=[('gz_args', [f' -r 4 {world_file_path}'])]
     )
 
 
@@ -523,6 +523,23 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    bt = Node(
+        package="behavior",
+        executable="bt",
+        output="screen",
+        parameters=[{
+            "config_path": os.path.join(inrof2026_koma_package_dir, "config", "koma_bt.xml")
+        }],
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
+    path_ball_position = Node(
+        package="planning",
+        executable="ball_plan",
+        output="screen",
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     foxglove_bridge = Node(
         package="foxglove_bridge",
         executable="foxglove_bridge",
@@ -591,6 +608,8 @@ def generate_launch_description():
         pursuit,
         dummy_joint,
         ball_detect,
+        bt,
+        path_ball_position,
         *ball_spawn_entity_list
         # foxglove_bridge
     ])
