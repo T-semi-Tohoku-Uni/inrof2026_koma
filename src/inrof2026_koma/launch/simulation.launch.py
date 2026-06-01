@@ -523,6 +523,16 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    bt = Node(
+        package="behavior",
+        executable="bt",
+        output="screen",
+        parameters=[{
+            "config_path": os.path.join(inrof2026_koma_package_dir, "config", "koma_bt.xml")
+        }],
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     foxglove_bridge = Node(
         package="foxglove_bridge",
         executable="foxglove_bridge",
@@ -591,6 +601,7 @@ def generate_launch_description():
         pursuit,
         dummy_joint,
         ball_detect,
+        bt,
         *ball_spawn_entity_list
         # foxglove_bridge
     ])
