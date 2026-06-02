@@ -234,6 +234,86 @@ def generate_launch_description():
         ],
     )
 
+    mcl = Node(
+        package="localization",
+        executable="mcl",
+        name="mcl",
+        parameters=[{
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/")
+        }],
+        output="screen",
+    )
+
+    odom_tf_broadcaster = Node(
+        package="localization",
+        executable="broadcaster",
+        output="screen",
+    )
+
+    planner = Node(
+        package="planning",
+        executable="path_plan",
+        name="path_plan",
+        output="screen",
+        parameters=[{
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
+            "initial_x": x,
+            "initial_y": y,
+            "initial_z": z,
+            "initial_theta": theta
+        }],
+    )
+
+    pursuit = Node(
+        package="planning",
+        executable="pursuit",
+        name="pursuit",
+        output="screen",
+        parameters=[{
+            "max_linear_speed": 0.10,
+            "max_angular_speed": 0.7,
+            "max_linear_tolerance": 0.20,
+            "max_theta_tolerance": 0.10,
+            "max_reaching_distance": 0.05,
+            "max_reaching_theta": 0.10,
+            "lookahead_distance": 0.20,
+            "resampleThreshold": 0.10,
+            "Kp_tan": 1.0,
+            "Ki_tan": 0.0,
+            "Kd_tan": 0.0,
+            "Kp_normal": 1.0,
+            "Ki_normal": 0.00,
+            "Kd_normal": 0.00,
+            "Kp_theta": 1.0,
+            "Ki_theta": 0.00,
+            "Kd_theta": 0.00,
+        }],
+    ) 
+
+    ball_detect = Node(
+        package="ball_detection",
+        executable="dbscan",
+        output="screen",
+        parameters=[{
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
+        }],
+    )
+
+    bt = Node(
+        package="behavior",
+        executable="bt",
+        output="screen",
+        parameters=[{
+            "config_path": os.path.join(inrof2026_koma_package_dir, "config", "koma_bt.xml")
+        }],
+    )
+
+    path_ball_position = Node(
+        package="planning",
+        executable="ball_plan",
+        output="screen",
+    )
+
 
     return LaunchDescription([
         models_path_env,
@@ -243,7 +323,14 @@ def generate_launch_description():
         static_from_map_to_odom,
         catch_influence,
         joint_manager,
-        # uart_bridge,
+        uart_bridge,
+        mcl,
+        planner,
+        pursuit,
         # joy2vel,
         # joy_node
+        ball_detect,
+        bt,
+        path_ball_position,
+        odom_tf_broadcaster
     ])

@@ -68,6 +68,23 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+add_executable(broadcaster src/broadcaster.cpp)
+ament_target_dependencies(broadcaster 
+  rclcpp 
+  sensor_msgs
+  geometry_msgs
+  tf2_ros
+)
+target_include_directories(broadcaster
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  broadcaster
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 
 install(DIRECTORY include
   DESTINATION share/${PROJECT_NAME}
