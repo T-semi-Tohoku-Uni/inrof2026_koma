@@ -91,9 +91,9 @@ def generate_launch_description():
         executable="motor",
         output="screen",
         parameters=[{
-            "Kp_linear": 0.0,
-            "Kp_angular": 0.0,
-            "max_linear_acceleration": 0.5,
+            "Kp_linear": 0.1,
+            "Kp_angular": 0.05,
+            "max_linear_acceleration": 5.0,
             "max_angular_acceleration": 10.0
         }]
     )
