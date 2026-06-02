@@ -32,7 +32,7 @@ def generate_launch_description():
     weight_path = str(Path(komarm_package_dir) / "weight" / "policy.pt")
 
     # lidar setting
-    ldlider_params = str(Path(inrof2026_koma_package_dir) / "config" / "ldlidar_settings.yaml")
+    ldlidar_params = str(Path(inrof2026_koma_package_dir) / "config" / "ldlidar_settings.yaml")
     ldlidar_launch = str(Path(lidar_package_dir) / "launch" / "ldlidar_with_mgr.launch.py")
 
     # Get workspace dir
@@ -318,12 +318,6 @@ def generate_launch_description():
         package="planning",
         executable="ball_plan",
         output="screen",
-    )
-
-
-
-    ldlidar_params = PathJoinSubstitution(
-        [FindPackageShare("yasarobo2025_26"), "config", "ldlidar_settings.yaml"]
     )
 
     ldlidar_with_mgr = IncludeLaunchDescription(
