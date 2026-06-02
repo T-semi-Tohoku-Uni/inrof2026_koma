@@ -198,14 +198,17 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
+                "port_1_2": "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.1:1.0",
+                "port_3_4": "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.2:1.0",
+                "port_5_6": "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.3:1.0",
             #     "servo_1_min": -math.pi/2,
             #     "servo_1_max":  math.pi/2,
 
             #     "servo_2_min": 0.0,
             #     "servo_2_max": math.pi,
-            "is_servo_2_reverse": True,
-            "is_servo_3_reverse": True,
-            "is_servo_4_reverse": True,
+                "is_servo_2_reverse": True,
+                "is_servo_3_reverse": True,
+                "is_servo_4_reverse": True,
             # "is_servo_4_reverse": True,
 
             #     "servo_3_min": 0.0,
