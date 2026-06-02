@@ -232,12 +232,12 @@ def generate_launch_description():
                 "model_path": weight_path
             }
         ],
-        remappings=[('clock', '/world/inrof/clock')]
     )
 
 
     return LaunchDescription([
-        launch_ros.actions.SetParameter(name='use_sim_time', value=True),
+        models_path_env,
+        libtorch_env,
         node_robot_state_publisher,
         map_server,
         static_from_map_to_odom,
