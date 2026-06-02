@@ -89,7 +89,13 @@ def generate_launch_description():
     uart_bridge = Node(
         package="uart_bridge",
         executable="motor",
-        output="screen"
+        output="screen",
+        parameters=[{
+            "Kp_linear": 0.1,
+            "Kp_angular": 0.05,
+            "max_linear_acceleration": 0.5,
+            "max_angular_acceleration": 10.0
+        }]
     )
 
     joy2vel = Node(
