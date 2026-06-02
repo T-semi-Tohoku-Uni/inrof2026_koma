@@ -4,8 +4,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, EnvironmentVariable
+from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 import launch_ros
 from pathlib import Path
 
@@ -264,6 +265,19 @@ def generate_launch_description():
         }],
     )
 
+    ldlidar_params = PathJoinSubstitution(
+        [FindPackageShare("yasarobo2025_26"), "config", "ldlidar_settings.yaml"]
+    )
+
+    ldlidar_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [FindPackageShare("ldlidar_node"), "launch", "ldlidar_with_mgr.launch.py"]
+            )
+        ),
+        launch_arguments={"params_file": ldlidar_params}.items(),
+    )
+
     pursuit = Node(
         package="planning",
         executable="pursuit",
@@ -332,5 +346,6 @@ def generate_launch_description():
         ball_detect,
         bt,
         path_ball_position,
-        odom_tf_broadcaster
+        odom_tf_broadcaster,
+        ldlidar_node
     ])
