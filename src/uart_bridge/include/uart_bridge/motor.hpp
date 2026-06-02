@@ -8,6 +8,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
 
+using namespace std::chrono_literals;
+
 namespace koma
 {
 typedef union {
