@@ -4,7 +4,9 @@ koma::BallDetect::BallDetect(const rclcpp::NodeOptions & options)
 : Node("ball_detect_node", options), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
 {
   // parameter
-  this->declare_parameter<std::string>("frame_id", "ldlidar_base");
+  this->declare_parameter<std::string>("lidar_frame_id", "ldlidar_base");
+  this->declare_parameter<std::string>("odom_frame_id", "odom");
+  this->declare_parameter<double>("ball_radius", 0.03);
   this->declare_parameter<double>("eps", 0.1);
   this->declare_parameter<int>("min_pts", 10);
   this->declare_parameter<double>("diagonal_threshold", 0.1);
@@ -12,7 +14,9 @@ koma::BallDetect::BallDetect(const rclcpp::NodeOptions & options)
   this->declare_parameter<double>("diff_threshold", 1e-8);
   this->declare_parameter<double>("lidar_threshold", 1.0 / 5.0 * M_PI);
   this->declare_parameter<double>("radius_threshold", 0.1);
-  this->get_parameter("frame_id", frame_id_);
+  this->get_parameter("lidar_frame_id", lidar_frame_id_);
+  this->get_parameter("odom_frame_id", odom_frame_id_);
+  this->get_parameter("ball_radius", ball_radius_);
   this->get_parameter("eps", EPS_);
   this->get_parameter("min_pts", MIN_PTS_);
   this->get_parameter("diagonal_threshold", DIAGONAL_THTRSHOLD_);
@@ -64,9 +68,10 @@ void koma::BallDetect::ballPoseCallback(
   // save response
   response->detect = true;
   response->pose_stamped.header.stamp = this->get_clock()->now();
-  response->pose_stamped.header.frame_id = frame_id_;
+  response->pose_stamped.header.frame_id = lidar_frame_id_;
   response->pose_stamped.pose.position.x = ball_pose.value().position.x;
   response->pose_stamped.pose.position.y = ball_pose.value().position.y;
+  response->pose_stamped.pose.position.z = ball_radius_;
 
   RCLCPP_INFO(
     this->get_logger(), "Closest ball is (x, y)=(%f, %f)", response->pose_stamped.pose.position.x,
@@ -347,7 +352,7 @@ koma::PointCloud koma::BallDetect::scan2Point(const sensor_msgs::msg::LaserScan 
   geometry_msgs::msg::TransformStamped transform_stamped;
   try {
     // get tf
-    transform_stamped = tf_buffer_.lookupTransform("odom", frame_id_, tf2::TimePointZero);
+    transform_stamped = tf_buffer_.lookupTransform(odom_frame_id_, lidar_frame_id_, tf2::TimePointZero);
   } catch (tf2::TransformException & ex) {
     RCLCPP_WARN(this->get_logger(), "Transform lookup failed: %s", ex.what());
     return point_cloud;
@@ -370,7 +375,7 @@ koma::PointCloud koma::BallDetect::scan2Point(const sensor_msgs::msg::LaserScan 
     // convert origin
     try {
       geometry_msgs::msg::PointStamped point_st;
-      point_st.header.frame_id = frame_id_;
+      point_st.header.frame_id = lidar_frame_id_;
       point_st.header.stamp = this->now();
       point_st.point.x = r * cos(theta);
       point_st.point.y = r * sin(theta);

@@ -1,0 +1,8 @@
+# Input
+geometry_msgs/PoseStamped target_hand_position
+---
+# Result
+bool success
+---
+# Feedback
+geometry_msgs/PoseStamped current_hand_position

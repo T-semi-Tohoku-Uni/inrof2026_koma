@@ -160,6 +160,7 @@ private:
   // ball
   std::vector<koma::Circle> ball_;
   sensor_msgs::msg::PointCloud2 circle2PointCloud2(std::vector<koma::Circle> ball_position);
+  double ball_radius_;
 
   // tf
   tf2_ros::Buffer tf_buffer_;
@@ -167,7 +168,9 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   // lidar frame
-  std::string frame_id_;
+  std::string lidar_frame_id_;
+  // odom frame
+  std::string odom_frame_id_;
 
   // field
   koma::Field field_;

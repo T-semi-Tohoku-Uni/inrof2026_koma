@@ -1,4 +1,5 @@
 #include "komarm/catch_influence.hpp"
+#include <cmath>
 
 // 入力22次元　ジョイントの位置、速度１０次元、ハンドの先端の位置７次元、１つ前のアクション５次元
 // 出力5次元　アクション５次元　
@@ -12,8 +13,43 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 {
   RCLCPP_INFO(this->get_logger(), "CatchInfluence node has been started.");
 
-  // create a timer for the control loop
-  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
+  // default position
+  default_position_ = this->declare_parameter<std::vector<double>>(
+      "default_position",
+      std::vector<double>{0.0, -1.3, 0.0, 1.57, 0.0, 0.0}
+  );
+
+  // joint names
+  joint_names_ = this->declare_parameter<std::vector<std::string>>(
+      "joint_names",
+      std::vector<std::string>{
+          "Revolute_1",
+          "Revolute_2",
+          "Revolute_3",
+          "Revolute_4",
+          "Revolute_5",
+          "Revolute_6"
+      }
+  );
+
+  end_effector_link_ = this->declare_parameter<std::string>(
+    "end_effector_link",
+    "end_effector"
+  );
+
+  base_link_ = this->declare_parameter<std::string>(
+    "base_link",
+    "base_link"
+  );
+
+  reach_th_ = this->declare_parameter<double>(
+    "reach_th",
+    0.01
+  );
+
+  // initialize tf buffer
+  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   // Initialize publishers and subscribers
   target_joint_pub_ = this->create_publisher<sensor_msgs::msg::JointState>(
@@ -23,17 +59,21 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     "joint_states", rclcpp::SensorDataQoS(),
     std::bind(&CatchInfluence::joint_callback, this, std::placeholders::_1));
 
-  // hand_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
-  //     "hand_pose", rclcpp::SensorDataQoS(), std::bind(&CatchInfluence::hand_callback, this, std::placeholders::_1)
-  // );
-  hand_srv_ = this->create_service<inrof2026_koma_type::srv::PoseStamped>(
-    "hand_pose",
-    std::bind(&CatchInfluence::hand_callback, this, std::placeholders::_1, std::placeholders::_2));
+  // Initialize action server
+  arm_control_act_ = rclcpp_action::create_server<inrof2026_koma_type::action::ArmControl>(
+    this, "arm_command",
+    std::bind(&koma::CatchInfluence::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&koma::CatchInfluence::handle_cancel, this, std::placeholders::_1),
+    std::bind(&koma::CatchInfluence::handle_accepted, this, std::placeholders::_1)
+  );
 
-  // Initialize previous action
+  // Initialize joint states and pre action
+  target_joint_state_ = sensor_msgs::msg::JointState();
+  target_joint_state_.name = joint_names_;
+  target_joint_state_.position = default_position_;
+
   pre_action_ = sensor_msgs::msg::JointState();
-  pre_action_.name = {"Revolute_1", "Revolute_2", "Revolute_3",
-                      "Revolute_4", "Revolute_5", "Revolute_6"};
+  pre_action_.name = joint_names_;
   pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Load the model
@@ -43,7 +83,21 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   module_ = load_model(model_path_);
   //inference mode
   module_.eval();
+
+  // timer setting
+  // create a timer for the control loop
+  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
+  // create a timer for joint commnad send
+  joint_command_send_timer_ = this->create_wall_timer(
+    30ms,
+    std::bind(&koma::CatchInfluence::joint_command_send_callback, this)
+  );
+
   RCLCPP_INFO(this->get_logger(), "Model loaded successfully.");
+}
+
+void koma::CatchInfluence::joint_command_send_callback() {
+  target_joint_pub_->publish(target_joint_state_);
 }
 
 void CatchInfluence::joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
@@ -52,13 +106,50 @@ void CatchInfluence::joint_callback(const sensor_msgs::msg::JointState::SharedPt
   has_cur_joint_state_ = true;
 }
 
-void CatchInfluence::hand_callback(
-  const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Request> request,
-  const std::shared_ptr<inrof2026_koma_type::srv::PoseStamped::Response> Response)
+rclcpp_action::GoalResponse koma::CatchInfluence::handle_goal(
+  const rclcpp_action::GoalUUID & uuid,
+  std::shared_ptr<const inrof2026_koma_type::action::ArmControl::Goal> goal)
 {
-  RCLCPP_INFO(this->get_logger(), "Change hand pose");
-  cur_hand_pose_ = request->pose_stamped;
-  has_cur_hand_pose_ = true;
+  (void)uuid;
+  if (goal_handle_) {
+    return rclcpp_action::GoalResponse::REJECT;
+  }
+  RCLCPP_INFO(this->get_logger(), "Received a new goal request. Accepting.");
+  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+}
+
+rclcpp_action::CancelResponse koma::CatchInfluence::handle_cancel(
+  const std::shared_ptr<rclcpp_action::ServerGoalHandle<inrof2026_koma_type::action::ArmControl>>
+    goal_handle)
+{
+  goal_handle_.reset();
+  return rclcpp_action::CancelResponse::ACCEPT;
+}
+
+void koma::CatchInfluence::handle_accepted(
+  const std::shared_ptr<rclcpp_action::ServerGoalHandle<inrof2026_koma_type::action::ArmControl>>
+    goal_handle)
+{
+  goal_handle_ = goal_handle;
+
+  // target ball position based odom frame. convert position based to base_link
+  geometry_msgs::msg::PoseStamped target_ball_pose_odom_frame;
+  target_ball_pose_odom_frame.header.frame_id = "odom";
+  target_ball_pose_odom_frame.header.stamp = this->get_clock()->now();
+  target_ball_pose_odom_frame.pose = goal_handle->get_goal()->target_hand_position.pose;
+
+  geometry_msgs::msg::PoseStamped pose_base_link;
+  try {
+    pose_base_link = tf_buffer_->transform(
+      target_ball_pose_odom_frame,
+      "base_link",
+      tf2::durationFromSec(0.1)
+    );
+    target_ball_position_ = pose_base_link.pose;
+  } catch (const tf2::TransformException & ex) {
+    RCLCPP_WARN(this->get_logger(), "Transform odom to base_link failed: %s", ex.what());
+    return;
+  }
 }
 
 //define the function that loads the parameters of the model
@@ -98,14 +189,57 @@ void CatchInfluence::control_loop()
   //publish action
   //pre action = action
 
+  if (!goal_handle_) return;
+
   if (!has_cur_joint_state_) {
     RCLCPP_WARN(this->get_logger(), "cur_joint_state is empty");
     return;
   }
-  if (!has_cur_hand_pose_) {
-    RCLCPP_WARN(this->get_logger(), "cur_hand_pose is empty");
+
+  // transform hand position from joint states and feedback
+  try {
+  
+    geometry_msgs::msg::TransformStamped tf = tf_buffer_->lookupTransform(
+      "base_link",
+      end_effector_link_,
+      tf2::TimePointZero
+    );
+
+    cur_gripper_position_.position.x = tf.transform.translation.x;
+    cur_gripper_position_.position.y = tf.transform.translation.y;
+    cur_gripper_position_.position.z = tf.transform.translation.z;
+    cur_gripper_position_.orientation = tf.transform.rotation;
+  } catch (const tf2::TransformException & ex) {
+    RCLCPP_WARN(this->get_logger(), "TF lookup failed: %s", ex.what());
     return;
   }
+
+  // judge hand position
+  double position_err = std::hypot(
+    cur_gripper_position_.position.x - target_ball_position_.position.x, 
+    cur_gripper_position_.position.y - target_ball_position_.position.y, 
+    cur_gripper_position_.position.z - target_ball_position_.position.z
+  );
+  if (reach_th_ > position_err) {
+    auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
+    result_msg->success = true;
+    goal_handle_->succeed(result_msg);
+    goal_handle_.reset();
+    return;
+  }
+
+  // publish feedback
+  std::shared_ptr<inrof2026_koma_type::action::ArmControl_Feedback> feed_back = std::make_shared<inrof2026_koma_type::action::ArmControl::Feedback>();
+  feed_back->current_hand_position.pose = cur_gripper_position_;
+  feed_back->current_hand_position.header.frame_id = base_link_;
+  feed_back->current_hand_position.header.stamp = this->get_clock()->now();
+  goal_handle_->publish_feedback(feed_back);
+
+  RCLCPP_INFO(this->get_logger(), "%lf, %lf, %lf", 
+    target_ball_position_.position.x,
+    target_ball_position_.position.y,
+    target_ball_position_.position.z
+  );
 
   //create states
   torch::Tensor obs = torch::tensor(
@@ -127,13 +261,9 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.velocity[5],
 
                           /* target arm position */
-                          cur_hand_pose_.pose.position.x,
-                          cur_hand_pose_.pose.position.y,
-                          cur_hand_pose_.pose.position.z,
-                          cur_hand_pose_.pose.orientation.w,
-                          cur_hand_pose_.pose.orientation.x,
-                          cur_hand_pose_.pose.orientation.y,
-                          cur_hand_pose_.pose.orientation.z,
+                          target_ball_position_.position.x,
+                          target_ball_position_.position.y,
+                          target_ball_position_.position.z,
 
                           /* pre action */
                           pre_action_.position[0],
@@ -150,20 +280,13 @@ void CatchInfluence::control_loop()
   torch::Tensor action = inference(obs).squeeze(0);
 
   // post compute
-  sensor_msgs::msg::JointState target_joint;
-  target_joint.header.stamp = this->get_clock()->now();
-  target_joint.name = {"Revolute_1", "Revolute_2", "Revolute_3",
-                       "Revolute_4", "Revolute_5", "Revolute_6"};
-  target_joint.position.resize(target_joint.name.size());
+  target_joint_state_.header.stamp = this->get_clock()->now();
   // TODO
-  for (size_t i = 0; i < target_joint.name.size(); i++) {
+  for (size_t i = 0; i < target_joint_state_.name.size(); i++) {
     double raw = action[i].item<double>();
-    target_joint.position[i] = 0.5 * raw;
+    target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
     pre_action_.position[i] = raw;
   }
-
-  //publish action
-  target_joint_pub_->publish(target_joint);
 }
 }  // namespace koma
 

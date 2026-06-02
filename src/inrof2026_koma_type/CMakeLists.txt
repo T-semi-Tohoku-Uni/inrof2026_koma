@@ -20,6 +20,7 @@ set(srv_files
 
 set(action_files
   "action/Pursuit.action"
+  "action/ArmControl.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
