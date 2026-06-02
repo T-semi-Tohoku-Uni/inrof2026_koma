@@ -25,10 +25,15 @@ def generate_launch_description():
     simulation_package_dir = get_package_share_directory("simulation")
     komarm_package_dir = get_package_share_directory("komarm")
     field_package_dir = get_package_share_directory("field")
+    lidar_package_dir = get_package_share_directory("ldlidar_node")
 
     # libtorch path
     libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
     weight_path = str(Path(komarm_package_dir) / "weight" / "policy.pt")
+
+    # lidar setting
+    ldlider_params = str(Path(inrof2026_koma_package_dir) / "config" / "ldlidar_settings.yaml")
+    ldlidar_launch = str(Path(lidar_package_dir) / "launch" / "ldlidar_with_mgr.launch.py")
 
     # Get workspace dir
     ws_root = Path(komarm_package_dir).parents[3]
@@ -265,19 +270,6 @@ def generate_launch_description():
         }],
     )
 
-    ldlidar_params = PathJoinSubstitution(
-        [FindPackageShare("yasarobo2025_26"), "config", "ldlidar_settings.yaml"]
-    )
-
-    ldlidar_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [FindPackageShare("ldlidar_node"), "launch", "ldlidar_with_mgr.launch.py"]
-            )
-        ),
-        launch_arguments={"params_file": ldlidar_params}.items(),
-    )
-
     pursuit = Node(
         package="planning",
         executable="pursuit",
@@ -329,6 +321,17 @@ def generate_launch_description():
     )
 
 
+
+    ldlidar_params = PathJoinSubstitution(
+        [FindPackageShare("yasarobo2025_26"), "config", "ldlidar_settings.yaml"]
+    )
+
+    ldlidar_with_mgr = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(ldlidar_launch),
+        launch_arguments={"params_file": ldlidar_params}.items(),
+    )
+
+
     return LaunchDescription([
         models_path_env,
         libtorch_env,
@@ -347,5 +350,5 @@ def generate_launch_description():
         bt,
         path_ball_position,
         odom_tf_broadcaster,
-        ldlidar_node
+        ldlidar_with_mgr
     ])
