@@ -15,16 +15,16 @@ koma::TwistManager::TwistManager(const rclcpp::NodeOptions & options)
 
   auto feedbackQ = rclcpp::QoS(rclcpp::KeepLast(10));
   pub_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", feedbackQ);
-  receive_timer_ = this->create_wall_timer(
-    10ms, std::bind(&koma::TwistManager::receive_vel_callback, this));
+  receive_timer_ =
+    this->create_wall_timer(10ms, std::bind(&koma::TwistManager::receive_vel_callback, this));
   rclcpp::QoS sendQ(rclcpp::KeepLast(10));
   sub_ = this->create_subscription<geometry_msgs::msg::Twist>(
     "twist_command", sendQ,
     std::bind(&koma::TwistManager::acceleration_control, this, std::placeholders::_1));
   // TODO
   control_timer_ = this->create_wall_timer(
-    std::chrono::duration_cast<std::chrono::nanoseconds>(
-    std::chrono::duration<double>(dt_)), std::bind(&koma::TwistManager::cascade_control, this));
+    std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(dt_)),
+    std::bind(&koma::TwistManager::cascade_control, this));
 }
 
 void koma::TwistManager::acceleration_control(geometry_msgs::msg::Twist::SharedPtr msg)
