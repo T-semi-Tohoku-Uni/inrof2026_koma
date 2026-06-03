@@ -4,3 +4,4 @@ install/
 libtorch/
 
 *.png
+.DS_Store
