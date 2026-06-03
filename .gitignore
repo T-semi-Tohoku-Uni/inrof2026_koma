@@ -5,3 +5,5 @@ libtorch/
 
 *.png
 .DS_Store
+.pixi/*
+!.pixi/config.toml
