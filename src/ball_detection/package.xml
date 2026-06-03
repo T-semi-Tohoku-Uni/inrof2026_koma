@@ -9,9 +9,21 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>yaml-cpp</depend>
+  <depend>nanoflann</depend>
+  <depend>eigen</depend> <depend>opencv</depend> <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+  <build_depend>inrof2026_koma_type</build_depend>
+  <build_export_depend>inrof2026_koma_type</build_export_depend>
+  <exec_depend>inrof2026_koma_type</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <depend>inrof2026_koma_type</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
