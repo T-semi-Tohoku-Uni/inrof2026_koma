@@ -113,7 +113,7 @@ def generate_launch_description():
 
     laser_scan_link = """
     <link name="ldlidar_base"/>
-    <link name="ldlidar_scan"/>
+    <link name="ldlidar_link"/>
 
     <joint name="base_link_to_ldlidar_base" type="fixed">
         <parent link="base_link"/>
@@ -123,7 +123,7 @@ def generate_launch_description():
 
     <joint name="ldlidar_base_to_scan" type="fixed">
         <parent link="ldlidar_base"/>
-        <child link="ldlidar_scan"/>
+        <child link="ldlidar_link"/>
         <origin xyz="0 0 0" rpy="0 0 1.5708"/>
     </joint>
     """
