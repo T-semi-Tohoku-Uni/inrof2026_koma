@@ -26,7 +26,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.IMAGE_TAR }}
-          key: docker-image-${{ runner.os }}-${{ hashFiles('docker/ros/Dockerfile', 'docker/ros/**') }}
+          key: docker-image-${{ runner.os }}-${{ hashFiles('docker/Dockerfile', 'docker/**') }}
 
       - name: Load Docker image from cache
         if: steps.docker-image-cache.outputs.cache-hit == 'true'
@@ -38,8 +38,8 @@ jobs:
         run: |
           docker build \
             -t "${IMAGE_NAME}:latest" \
-            -f docker/ros/Dockerfile \
-            docker/ros
+            -f docker/Dockerfile \
+            docker
 
       - name: Save Docker image to cache
         if: steps.docker-image-cache.outputs.cache-hit != 'true'
