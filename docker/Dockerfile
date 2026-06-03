@@ -20,10 +20,3 @@ RUN git clone https://github.com/BehaviorTree/BehaviorTree.CPP.git /tmp/Behavior
     rm -rf /tmp/BehaviorTree.CPP
 
 WORKDIR /work/inrof2026_koma
-
-# Install libtorch
-RUN apt-get install -y wget unzip libopenblas-dev
-RUN cd src/komarm && \
-    wget https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-2.7.0%2Bcpu.zip && \
-    unzip libtorch-cxx11-abi-shared-with-deps-2.7.0+cpu.zip && \
-    rm -rf libtorch-cxx11-abi-shared-with-deps-2.7.0+cpu.zip
