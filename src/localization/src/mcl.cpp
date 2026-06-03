@@ -130,29 +130,40 @@ void koma::MCL::caculate_measurement_model()
   likelihood_table.reserve(particle_num_);
 
   for (std::size_t i = 0; i < particles_.size(); i++) {
-    std::double_t likelihood = 0.0;
-    // 尤度場モデル
     likelihood_table.push_back(std::move(caculate_likelihood_field_model(particles_[i].position)));
   }
 
-  std::double_t w_sum = 0;
-  for (std::size_t i = 0; i < likelihood_table.size(); i++) {
-    std::double_t w = 0;
-    for (std::size_t j = 0; j < likelihood_table.size(); j++) {
-      std::double_t loglikefood_sum = 0;
-      for (std::size_t k = 0; k < likelihood_table[i].size(); k++) {
-        // if (std::isnan(likelihood_table[j][k]) || std::isnan(likelihood_table[i][k])) continue;
-        // if (likelihood_table[j][k]<1e-12 || likelihood_table[i][k]<1e-12) continue;
-        loglikefood_sum += std::log(likelihood_table[j][k] / likelihood_table[i][k]);
-        // RCLCPP_INFO(this->get_logger(), "j=%d k=%d %.4f", j, k, likelihood_table[j][k]);
-      }
-      w += std::exp(loglikefood_sum);
+  std::vector<double> total_log_likelihood(particle_num_, 0.0);
+  for (std::size_t i = 0; i < particle_num_; i++) {
+    for (std::size_t k = 0; k < likelihood_table[i].size(); k++) {
+      // 1e-10などで床打ちして log(0) を防ぐ
+      total_log_likelihood[i] += std::log(std::max(likelihood_table[i][k], 1e-10));
     }
-    w = 1 / w;
-    particles_[i].likelihood = w;
-    w_sum += w * w;
   }
-  effective_sample_size_ = 1.0 / w_sum;
+
+  double max_log_likelihood = -std::numeric_limits<double>::infinity();
+  for (std::size_t i = 0; i < particle_num_; i++) {
+    if (total_log_likelihood[i] > max_log_likelihood) {
+      max_log_likelihood = total_log_likelihood[i];
+    }
+  }
+
+  std::vector<double> linear_weights(particle_num_, 0.0);
+  double w_sum = 0.0;
+
+  for (std::size_t i = 0; i < particle_num_; i++) {
+    linear_weights[i] = std::exp(total_log_likelihood[i] - max_log_likelihood);
+    w_sum += linear_weights[i];
+  }
+
+  double w_sq_sum = 0.0;
+  for (std::size_t i = 0; i < particle_num_; i++) {
+    double normalized_w = linear_weights[i] / w_sum;
+    particles_[i].likelihood = normalized_w;
+    w_sq_sum += normalized_w * normalized_w;
+  }
+
+  effective_sample_size_ = 1.0 / w_sq_sum;
 }
 
 void koma::MCL::estimate_pose()
