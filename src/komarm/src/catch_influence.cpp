@@ -284,7 +284,7 @@ void CatchInfluence::control_loop()
   // TODO
   for (size_t i = 0; i < target_joint_state_.name.size(); i++) {
     double raw = action[i].item<double>();
-    target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
+    // target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
     pre_action_.position[i] = raw;
   }
 }
