@@ -1,9 +1,6 @@
 #include "komarm/catch_influence.hpp"
 #include <cmath>
 
-// 入力22次元　ジョイントの位置、速度１０次元、ハンドの先端の位置７次元、１つ前のアクション５次元
-// 出力5次元　アクション５次元　
-
 namespace koma
 {
 
@@ -235,22 +232,25 @@ void CatchInfluence::control_loop()
   feed_back->current_hand_position.header.stamp = this->get_clock()->now();
   goal_handle_->publish_feedback(feed_back);
 
-  RCLCPP_INFO(this->get_logger(), "%lf, %lf, %lf", 
+  RCLCPP_INFO(this->get_logger(), "(%lf, %lf, %lf), (%lf, %lf, %lf)", 
     target_ball_position_.position.x,
     target_ball_position_.position.y,
-    target_ball_position_.position.z
+    target_ball_position_.position.z,
+    cur_gripper_position_.position.x,
+    cur_gripper_position_.position.y,
+    cur_gripper_position_.position.z
   );
 
   //create states
   torch::Tensor obs = torch::tensor(
                         {
                           /* joint position */
-                          cur_joint_state_.position[0],
-                          cur_joint_state_.position[1],
-                          cur_joint_state_.position[2],
-                          cur_joint_state_.position[3],
-                          cur_joint_state_.position[4],
-                          cur_joint_state_.position[5],
+                          cur_joint_state_.position[0] - default_position_[0],
+                          cur_joint_state_.position[1] - default_position_[1],
+                          cur_joint_state_.position[2] - default_position_[2],
+                          cur_joint_state_.position[3] - default_position_[3],
+                          cur_joint_state_.position[4] - default_position_[4],
+                          cur_joint_state_.position[5] - default_position_[5],
 
                           /* joint vel */
                           cur_joint_state_.velocity[0],
