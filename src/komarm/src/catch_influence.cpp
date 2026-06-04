@@ -26,6 +26,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
           "Revolute_4",
           "Revolute_5",
           "Revolute_6"
+
       }
   );
 
@@ -83,10 +84,10 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // timer setting
   // create a timer for the control loop
-  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
+  control_timer_ = this->create_wall_timer(20ms, std::bind(&CatchInfluence::control_loop, this));
   // create a timer for joint commnad send
   joint_command_send_timer_ = this->create_wall_timer(
-    20ms,
+    10ms,
     std::bind(&koma::CatchInfluence::joint_command_send_callback, this)
   );
 
@@ -217,13 +218,13 @@ void CatchInfluence::control_loop()
     cur_gripper_position_.position.y - target_ball_position_.position.y, 
     cur_gripper_position_.position.z - target_ball_position_.position.z
   );
-  if (reach_th_ > position_err) {
-    auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
-    result_msg->success = true;
-    goal_handle_->succeed(result_msg);
-    goal_handle_.reset();
-    return;
-  }
+  // if (reach_th_ > position_err) {
+  //   auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
+  //   result_msg->success = true;
+  //   goal_handle_->succeed(result_msg);
+  //   goal_handle_.reset();
+  //   return;
+  // }
 
   // publish feedback
   std::shared_ptr<inrof2026_koma_type::action::ArmControl_Feedback> feed_back = std::make_shared<inrof2026_koma_type::action::ArmControl::Feedback>();
@@ -231,15 +232,6 @@ void CatchInfluence::control_loop()
   feed_back->current_hand_position.header.frame_id = base_link_;
   feed_back->current_hand_position.header.stamp = this->get_clock()->now();
   goal_handle_->publish_feedback(feed_back);
-
-  RCLCPP_INFO(this->get_logger(), "(%lf, %lf, %lf), (%lf, %lf, %lf)", 
-    target_ball_position_.position.x,
-    target_ball_position_.position.y,
-    target_ball_position_.position.z,
-    cur_gripper_position_.position.x,
-    cur_gripper_position_.position.y,
-    cur_gripper_position_.position.z
-  );
 
   //create states
   torch::Tensor obs = torch::tensor(
@@ -251,6 +243,7 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.position[3] - default_position_[3],
                           cur_joint_state_.position[4] - default_position_[4],
                           cur_joint_state_.position[5] - default_position_[5],
+                          // cur_joint_state_.position[5] - default_position_[5],
 
                           /* joint vel */
                           cur_joint_state_.velocity[0],
@@ -282,8 +275,15 @@ void CatchInfluence::control_loop()
   target_joint_state_.header.stamp = this->get_clock()->now();
   // TODO
   for (size_t i = 0; i < target_joint_state_.name.size(); i++) {
-    double raw = action[i].item<double>();
-    target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
+    double raw;
+    raw = action[i].item<double>();
+
+    if (i == 5) {
+      target_joint_state_.position[i] = -0.4;
+    } else {
+      target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
+    }
+    // target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
     pre_action_.position[i] = raw;
   }
 }
