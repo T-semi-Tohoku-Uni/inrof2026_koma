@@ -83,7 +83,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // timer setting
   // create a timer for the control loop
-  control_timer_ = this->create_wall_timer(20ms, std::bind(&CatchInfluence::control_loop, this));
+  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
   // create a timer for joint commnad send
   joint_command_send_timer_ = this->create_wall_timer(
     20ms,
