@@ -653,6 +653,6 @@ def generate_launch_description():
         bt,
         path_ball_position,
         catch_influence,
-        *ball_spawn_entity_list
+        # *ball_spawn_entity_list
         # foxglove_bridge
     ])

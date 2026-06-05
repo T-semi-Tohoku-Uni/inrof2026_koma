@@ -46,6 +46,7 @@
               <goal_position x="0.25"
                              y="0.25"
                              theta="-1.57"/>
+              <pursuit/>
             </Sequence>
           </WhileDoElseBreak>
         </Sequence>
