@@ -84,7 +84,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // timer setting
   // create a timer for the control loop
-  control_timer_ = this->create_wall_timer(20ms, std::bind(&CatchInfluence::control_loop, this));
+  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
   // create a timer for joint commnad send
   joint_command_send_timer_ = this->create_wall_timer(
     10ms,
@@ -233,6 +233,8 @@ void CatchInfluence::control_loop()
   feed_back->current_hand_position.header.stamp = this->get_clock()->now();
   goal_handle_->publish_feedback(feed_back);
 
+  RCLCPP_INFO(this->get_logger(), "%lf %lf", target_ball_position_.position.x, target_ball_position_.position.y);
+
   //create states
   torch::Tensor obs = torch::tensor(
                         {
@@ -245,17 +247,17 @@ void CatchInfluence::control_loop()
                           cur_joint_state_.position[5] - default_position_[5],
                           // cur_joint_state_.position[5] - default_position_[5],
 
-                          /* joint vel */
-                          cur_joint_state_.velocity[0],
-                          cur_joint_state_.velocity[1],
-                          cur_joint_state_.velocity[2],
-                          cur_joint_state_.velocity[3],
-                          cur_joint_state_.velocity[4],
-                          cur_joint_state_.velocity[5],
+                          // /* joint vel */
+                          // cur_joint_state_.velocity[0],
+                          // cur_joint_state_.velocity[1],
+                          // cur_joint_state_.velocity[2],
+                          // cur_joint_state_.velocity[3],
+                          // cur_joint_state_.velocity[4],
+                          // cur_joint_state_.velocity[5],
 
-                          /* target arm position */
-                          target_ball_position_.position.x,
-                          target_ball_position_.position.y,
+                          // /* target arm position */
+                          // target_ball_position_.position.x,
+                          // target_ball_position_.position.y,
 
                           /* pre action */
                           pre_action_.position[0],
@@ -280,6 +282,8 @@ void CatchInfluence::control_loop()
 
     if (i == 5) {
       target_joint_state_.position[i] = -0.4;
+    } else if (i == 0) {
+      target_joint_state_.position[i] = 0.0;
     } else {
       target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
     }
