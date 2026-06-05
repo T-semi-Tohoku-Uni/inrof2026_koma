@@ -14,7 +14,6 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
-  <depend>inrof2026_koma_type</depend>
   <depend>libnanoflann-dev</depend>
 
   <export>
