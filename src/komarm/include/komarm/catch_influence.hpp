@@ -44,6 +44,8 @@ private:
   std::string end_effector_link_;
   std::string base_link_;
   geometry_msgs::msg::PointStamped offset_point_;
+  double open_command_;
+  double close_command_;
   double reach_th_;
 
   // for transform

@@ -45,6 +45,17 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     0.01
   );
 
+  open_command_ = this->declare_parameter<double>(
+    "open_command",
+    -0.4
+  );
+
+  close_command_ = this->declare_parameter<double>(
+    "close_command",
+    -0.4
+  );
+  
+
   // initialize tf buffer
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -281,13 +292,11 @@ void CatchInfluence::control_loop()
     raw = action[i].item<double>();
 
     if (i == 5) {
-      target_joint_state_.position[i] = -0.4;
-    } else if (i == 0) {
-      target_joint_state_.position[i] = 0.0;
+      // TODO: hard code for gripper open/close
+      target_joint_state_.position[i] = open_command_;
     } else {
       target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
     }
-    // target_joint_state_.position[i] = 0.5 * raw + default_position_[i];
     pre_action_.position[i] = raw;
   }
 }
