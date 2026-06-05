@@ -848,7 +848,7 @@ bool koma::FeetechSerial::send_action_command()
     RCLCPP_ERROR(logger, "tcdrain failed after ACTION: %s", std::strerror(errno));
     return false;
   }
-  
+
   return true;
 }
 

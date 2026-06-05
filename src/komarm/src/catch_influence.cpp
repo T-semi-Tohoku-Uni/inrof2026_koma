@@ -1,4 +1,5 @@
 #include "komarm/catch_influence.hpp"
+
 #include <cmath>
 
 namespace koma
@@ -12,49 +13,25 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // default position
   default_position_ = this->declare_parameter<std::vector<double>>(
-      "default_position",
-      std::vector<double>{0.0, -1.3, 0.0, 1.57, 0.0, 0.0}
-  );
+    "default_position", std::vector<double>{0.0, -1.3, 0.0, 1.57, 0.0, 0.0});
 
   // joint names
   joint_names_ = this->declare_parameter<std::vector<std::string>>(
-      "joint_names",
-      std::vector<std::string>{
-          "Revolute_1",
-          "Revolute_2",
-          "Revolute_3",
-          "Revolute_4",
-          "Revolute_5",
-          "Revolute_6"
+    "joint_names",
+    std::vector<std::string>{
+      "Revolute_1", "Revolute_2", "Revolute_3", "Revolute_4", "Revolute_5", "Revolute_6"
 
-      }
-  );
+    });
 
-  end_effector_link_ = this->declare_parameter<std::string>(
-    "end_effector_link",
-    "end_effector"
-  );
+  end_effector_link_ = this->declare_parameter<std::string>("end_effector_link", "end_effector");
 
-  base_link_ = this->declare_parameter<std::string>(
-    "base_link",
-    "base_link"
-  );
+  base_link_ = this->declare_parameter<std::string>("base_link", "base_link");
 
-  reach_th_ = this->declare_parameter<double>(
-    "reach_th",
-    0.01
-  );
+  reach_th_ = this->declare_parameter<double>("reach_th", 0.01);
 
-  open_command_ = this->declare_parameter<double>(
-    "open_command",
-    -0.4
-  );
+  open_command_ = this->declare_parameter<double>("open_command", -0.4);
 
-  close_command_ = this->declare_parameter<double>(
-    "close_command",
-    -0.4
-  );
-  
+  close_command_ = this->declare_parameter<double>("close_command", -0.4);
 
   // initialize tf buffer
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -71,10 +48,10 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   // Initialize action server
   arm_control_act_ = rclcpp_action::create_server<inrof2026_koma_type::action::ArmControl>(
     this, "arm_command",
-    std::bind(&koma::CatchInfluence::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(
+      &koma::CatchInfluence::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
     std::bind(&koma::CatchInfluence::handle_cancel, this, std::placeholders::_1),
-    std::bind(&koma::CatchInfluence::handle_accepted, this, std::placeholders::_1)
-  );
+    std::bind(&koma::CatchInfluence::handle_accepted, this, std::placeholders::_1));
 
   // Initialize joint states and pre action
   target_joint_state_ = sensor_msgs::msg::JointState();
@@ -98,14 +75,13 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
   // create a timer for joint commnad send
   joint_command_send_timer_ = this->create_wall_timer(
-    10ms,
-    std::bind(&koma::CatchInfluence::joint_command_send_callback, this)
-  );
+    10ms, std::bind(&koma::CatchInfluence::joint_command_send_callback, this));
 
   RCLCPP_INFO(this->get_logger(), "Model loaded successfully.");
 }
 
-void koma::CatchInfluence::joint_command_send_callback() {
+void koma::CatchInfluence::joint_command_send_callback()
+{
   target_joint_pub_->publish(target_joint_state_);
 }
 
@@ -149,11 +125,8 @@ void koma::CatchInfluence::handle_accepted(
 
   geometry_msgs::msg::PoseStamped pose_base_link;
   try {
-    pose_base_link = tf_buffer_->transform(
-      target_ball_pose_odom_frame,
-      "base_link",
-      tf2::durationFromSec(0.1)
-    );
+    pose_base_link =
+      tf_buffer_->transform(target_ball_pose_odom_frame, "base_link", tf2::durationFromSec(0.1));
     target_ball_position_ = pose_base_link.pose;
   } catch (const tf2::TransformException & ex) {
     RCLCPP_WARN(this->get_logger(), "Transform odom to base_link failed: %s", ex.what());
@@ -207,12 +180,8 @@ void CatchInfluence::control_loop()
 
   // transform hand position from joint states and feedback
   try {
-  
-    geometry_msgs::msg::TransformStamped tf = tf_buffer_->lookupTransform(
-      "base_link",
-      end_effector_link_,
-      tf2::TimePointZero
-    );
+    geometry_msgs::msg::TransformStamped tf =
+      tf_buffer_->lookupTransform("base_link", end_effector_link_, tf2::TimePointZero);
 
     cur_gripper_position_.position.x = tf.transform.translation.x;
     cur_gripper_position_.position.y = tf.transform.translation.y;
@@ -225,10 +194,9 @@ void CatchInfluence::control_loop()
 
   // judge hand position
   double position_err = std::hypot(
-    cur_gripper_position_.position.x - target_ball_position_.position.x, 
-    cur_gripper_position_.position.y - target_ball_position_.position.y, 
-    cur_gripper_position_.position.z - target_ball_position_.position.z
-  );
+    cur_gripper_position_.position.x - target_ball_position_.position.x,
+    cur_gripper_position_.position.y - target_ball_position_.position.y,
+    cur_gripper_position_.position.z - target_ball_position_.position.z);
   // if (reach_th_ > position_err) {
   //   auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
   //   result_msg->success = true;
@@ -238,13 +206,16 @@ void CatchInfluence::control_loop()
   // }
 
   // publish feedback
-  std::shared_ptr<inrof2026_koma_type::action::ArmControl_Feedback> feed_back = std::make_shared<inrof2026_koma_type::action::ArmControl::Feedback>();
+  std::shared_ptr<inrof2026_koma_type::action::ArmControl_Feedback> feed_back =
+    std::make_shared<inrof2026_koma_type::action::ArmControl::Feedback>();
   feed_back->current_hand_position.pose = cur_gripper_position_;
   feed_back->current_hand_position.header.frame_id = base_link_;
   feed_back->current_hand_position.header.stamp = this->get_clock()->now();
   goal_handle_->publish_feedback(feed_back);
 
-  RCLCPP_INFO(this->get_logger(), "%lf %lf", target_ball_position_.position.x, target_ball_position_.position.y);
+  RCLCPP_INFO(
+    this->get_logger(), "%lf %lf", target_ball_position_.position.x,
+    target_ball_position_.position.y);
 
   //create states
   torch::Tensor obs = torch::tensor(

@@ -352,7 +352,8 @@ koma::PointCloud koma::BallDetect::scan2Point(const sensor_msgs::msg::LaserScan 
   geometry_msgs::msg::TransformStamped transform_stamped;
   try {
     // get tf
-    transform_stamped = tf_buffer_.lookupTransform(odom_frame_id_, lidar_frame_id_, tf2::TimePointZero);
+    transform_stamped =
+      tf_buffer_.lookupTransform(odom_frame_id_, lidar_frame_id_, tf2::TimePointZero);
   } catch (tf2::TransformException & ex) {
     RCLCPP_WARN(this->get_logger(), "Transform lookup failed: %s", ex.what());
     return point_cloud;

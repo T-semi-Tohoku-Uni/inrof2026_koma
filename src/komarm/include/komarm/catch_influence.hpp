@@ -1,16 +1,16 @@
 #pragma once
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 #include <torch/script.h>
 #include <torch/torch.h>
 
 #include <chrono>
-#include <inrof2026_koma_type/srv/pose_stamped.hpp>
-#include <inrof2026_koma_type/action/arm_control.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
 #include <geometry_msgs/msg/pose.hpp>
+#include <inrof2026_koma_type/action/arm_control.hpp>
+#include <inrof2026_koma_type/srv/pose_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
@@ -33,7 +33,7 @@ private:
 
   // current arm states
   geometry_msgs::msg::Pose cur_gripper_position_;
-  
+
   // target
   geometry_msgs::msg::Pose target_ball_position_;
   sensor_msgs::msg::JointState target_joint_state_;

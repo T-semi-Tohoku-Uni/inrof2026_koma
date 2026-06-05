@@ -1,10 +1,10 @@
 #include "localization/broadcaster.hpp"
+
 #include <functional>
 
 #include "geometry_msgs/msg/transform_stamped.hpp"
 
-OdomTfBroadcasterNode::OdomTfBroadcasterNode()
-: Node("odom_tf_broadcaster")
+OdomTfBroadcasterNode::OdomTfBroadcasterNode() : Node("odom_tf_broadcaster")
 {
   this->declare_parameter<std::string>("parent_frame", "odom");
   this->declare_parameter<std::string>("child_frame", "base_footprint");
@@ -12,20 +12,16 @@ OdomTfBroadcasterNode::OdomTfBroadcasterNode()
   parent_frame_ = this->get_parameter("parent_frame").as_string();
   child_frame_ = this->get_parameter("child_frame").as_string();
 
-  tf_broadcaster_ =
-    std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+  tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
   pose_sub_ = this->create_subscription<geometry_msgs::msg::Pose>(
-    "pose",
-    rclcpp::QoS(10),
-    std::bind(&OdomTfBroadcasterNode::position_callback, this, std::placeholders::_1)
-  );
+    "pose", rclcpp::QoS(10),
+    std::bind(&OdomTfBroadcasterNode::position_callback, this, std::placeholders::_1));
 
   RCLCPP_INFO(this->get_logger(), "OdomTfBroadcasterNode has been started.");
 }
 
-void OdomTfBroadcasterNode::position_callback(
-  const geometry_msgs::msg::Pose::SharedPtr msg)
+void OdomTfBroadcasterNode::position_callback(const geometry_msgs::msg::Pose::SharedPtr msg)
 {
   geometry_msgs::msg::TransformStamped tf_msg;
 
@@ -40,7 +36,6 @@ void OdomTfBroadcasterNode::position_callback(
 
   tf_broadcaster_->sendTransform(tf_msg);
 }
-
 
 int main(int argc, char ** argv)
 {
