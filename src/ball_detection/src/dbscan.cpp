@@ -464,7 +464,7 @@ sensor_msgs::msg::PointCloud2 koma::BallDetect::point2PointCloud2(
     for (const koma::Point & p : cluster.second) {
       *iter_x = p.getX();
       *iter_y = p.getY();
-      *iter_z = pose_->position.z;
+      *iter_z = pose_ ? pose_->position.z : 0.0;;
 
       auto color = cluster_colors[cluster_id];
       *iter_r = color[0];

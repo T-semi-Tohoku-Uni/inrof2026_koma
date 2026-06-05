@@ -650,7 +650,7 @@ def generate_launch_description():
         pursuit,
         dummy_joint,
         ball_detect,
-        # bt,
+        bt,
         path_ball_position,
         catch_influence,
         *ball_spawn_entity_list
