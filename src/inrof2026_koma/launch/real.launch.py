@@ -335,14 +335,14 @@ def generate_launch_description():
         catch_influence,
         joint_manager,
         uart_bridge,
-        mcl,
-        planner,
-        pursuit,
+        # mcl,
+        # planner,
+        # pursuit,
         # joy2vel,
         # joy_node
-        ball_detect,
-        bt,
-        path_ball_position,
+        # ball_detect,
+        # bt,
+        # path_ball_position,
         odom_tf_broadcaster,
-        ldlidar_with_mgr
+        # ldlidar_with_mgr
     ])
