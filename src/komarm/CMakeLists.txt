@@ -21,6 +21,7 @@ find_package(visualization_msgs REQUIRED)
 find_package(feetech_servo REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 
 add_executable(catch_influence src/catch_influence.cpp)
 target_include_directories(catch_influence PUBLIC include)
@@ -32,6 +33,7 @@ ament_target_dependencies(catch_influence
   rclcpp_action
   tf2_ros
   tf2_geometry_msgs
+  std_srvs
 )
 target_link_libraries(catch_influence "${TORCH_LIBRARIES}")
 target_compile_options(catch_influence PRIVATE "${TORCH_CXX_FLAGS}")

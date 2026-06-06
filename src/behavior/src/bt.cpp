@@ -10,6 +10,8 @@
 #include <behavior/pursuit.hpp>
 #include <behavior/target_ball_position.hpp>
 #include <behavior/while_do_else_break.hpp>
+#include <behavior/arm_ee_open.hpp>
+#include <behavior/arm_ee_close.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
@@ -29,6 +31,10 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
     this->create_client<inrof2026_koma_type::srv::BallPosition>("target_ball_pose");
 
   path_ball_position_srv_ = this->create_client<inrof2026_koma_type::srv::PoseStamped>("path_ball");
+
+  // server: komarm/catch_influence
+  arm_ee_open_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_open");
+  arm_ee_close_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_close");
 
   // action
   // server: localization/pursuit
@@ -185,6 +191,42 @@ void koma::BTNode::path_ball_position(double x, double y)
   }
 }
 
+void koma::BTNode::arm_ee_open() {
+  while (!this->arm_ee_open_srv_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) break;
+    RCLCPP_WARN(this->get_logger(), "arm_ee_open_srv_ is not available");
+  }
+
+  std::shared_ptr<std_srvs::srv::Trigger_Request> request = 
+    std::make_shared<std_srvs::srv::Trigger::Request>();
+
+  rclcpp::Client<std_srvs::srv::Trigger>::FutureAndRequestId result_future =
+    arm_ee_open_srv_->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(
+      this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
+    rclcpp::FutureReturnCode::SUCCESS) {
+  }
+}
+
+void koma::BTNode::arm_ee_close() {
+  while (!this->arm_ee_close_srv_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) break;
+    RCLCPP_WARN(this->get_logger(), "arm_ee_close_srv_ is not available");
+  }
+
+  std::shared_ptr<std_srvs::srv::Trigger_Request> request = 
+    std::make_shared<std_srvs::srv::Trigger::Request>();
+
+  rclcpp::Client<std_srvs::srv::Trigger>::FutureAndRequestId result_future =
+    arm_ee_close_srv_->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(
+      this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
+    rclcpp::FutureReturnCode::SUCCESS) {
+  }
+}
+
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -216,6 +258,22 @@ int main(int argc, char * argv[])
     };
   factory.registerBuilder<koma::TargetBallPosition>(
     "target_ball_position", builder_target_ball_position);
+
+  BT::NodeBuilder builder_target_arm_ee_open = 
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::ArmEEOpen>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::ArmEEOpen>(
+    "arm_ee_open", builder_target_arm_ee_open
+  );
+
+  BT::NodeBuilder builder_target_arm_ee_close = 
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::ArmEEClose>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::ArmEEClose>(
+    "arm_ee_close", builder_target_arm_ee_close
+  );
 
   BT::NodeBuilder builder_path_ball_position =
     [ros_node](const std::string & name, const BT::NodeConfiguration & config) {

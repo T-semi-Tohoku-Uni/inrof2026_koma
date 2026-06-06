@@ -136,6 +136,11 @@ def generate_launch_description():
         ],
     )
 
+    colorized_output_env = SetEnvironmentVariable(
+        name='RCUTILS_COLORIZED_OUTPUT',
+        value='1',
+    )
+
     # get file path
     world_file_path = os.path.join(
         field_package_dir,
@@ -636,6 +641,7 @@ def generate_launch_description():
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         models_path_env,
         libtorch_env,
+        colorized_output_env,
         gazebo,
         node_robot_state_publisher,
         gz_spawn_entity,
@@ -653,6 +659,6 @@ def generate_launch_description():
         bt,
         path_ball_position,
         catch_influence,
-        # *ball_spawn_entity_list
+        *ball_spawn_entity_list
         # foxglove_bridge
     ])

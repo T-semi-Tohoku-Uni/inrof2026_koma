@@ -22,6 +22,7 @@
                          y="2.00"
                          theta="-1.57"/>
           <pursuit/>
+          <arm_ee_open/>
           <WhileDoElseBreak>
             <target_ball_position x="{x}"
                                   y="{y}"/>
@@ -29,6 +30,7 @@
               <path_ball x="{x}"
                          y="{y}"/>
               <pursuit/>
+              <arm_ee_close/>
               <path_ball x="1.34"
                          y="2.00"/>
               <pursuit/>
@@ -58,6 +60,10 @@
   <TreeNodesModel>
     <Control ID="WhileDoElseBreak"
              editable="true"/>
+    <Action ID="arm_ee_close"
+            editable="true"/>
+    <Action ID="arm_ee_open"
+            editable="true"/>
     <Action ID="goal_position"
             editable="true">
       <input_port name="x"/>

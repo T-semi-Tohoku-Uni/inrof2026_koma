@@ -31,7 +31,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   open_command_ = this->declare_parameter<double>("open_command", -0.4);
 
-  close_command_ = this->declare_parameter<double>("close_command", -0.4);
+  close_command_ = this->declare_parameter<double>("close_command", 0.4);
 
   // initialize tf buffer
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -44,6 +44,20 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   joint_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
     "joint_states", rclcpp::SensorDataQoS(),
     std::bind(&CatchInfluence::joint_callback, this, std::placeholders::_1));
+
+  // Initialize service
+  arm_ee_open_srv_ = this->create_service<std_srvs::srv::Trigger>(
+    "arm_ee_open",
+    std::bind(
+      &CatchInfluence::arm_ee_open_callback, this, std::placeholders::_1, std::placeholders::_2
+    )
+  );
+  arm_ee_close_srv_ = this->create_service<std_srvs::srv::Trigger>(
+    "arm_ee_close",
+    std::bind(
+      &CatchInfluence::arm_ee_close_callback, this, std::placeholders::_1, std::placeholders::_2
+    )
+  );
 
   // Initialize action server
   arm_control_act_ = rclcpp_action::create_server<inrof2026_koma_type::action::ArmControl>(
@@ -78,6 +92,22 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     10ms, std::bind(&koma::CatchInfluence::joint_command_send_callback, this));
 
   RCLCPP_INFO(this->get_logger(), "Model loaded successfully.");
+}
+
+void koma::CatchInfluence::arm_ee_open_callback(
+  const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+  std::shared_ptr<std_srvs::srv::Trigger::Response> response
+) {
+  target_joint_state_.position[5] = open_command_;
+  response->success = true;
+}
+
+void koma::CatchInfluence::arm_ee_close_callback(
+    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response
+) {
+  target_joint_state_.position[5] = close_command_;
+  response->success = true;
 }
 
 void koma::CatchInfluence::joint_command_send_callback()
