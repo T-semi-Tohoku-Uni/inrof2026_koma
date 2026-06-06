@@ -245,7 +245,17 @@ def generate_launch_description():
         executable="mcl",
         name="mcl",
         parameters=[{
-            "map_path": os.path.join(inrof2026_koma_package_dir, "map/")
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
+            "particle_num": 100,
+            "initial_x": x,
+            "initial_y": y,
+            "initial_theta": theta,
+            "odom_noise_1": 2.0,
+            "odom_noise_2": 2.0,
+            "odom_noise_3": 2.0,
+            "odom_noise_4": 10.0,
+            "resample_th": 0.9,
+            "scan_step": 5,
         }],
         output="screen",
     )
