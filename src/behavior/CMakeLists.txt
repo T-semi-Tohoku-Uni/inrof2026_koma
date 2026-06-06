@@ -27,6 +27,7 @@ add_library(bt_lib SHARED
   src/path_ball_position.cpp
   src/arm_ee_open.cpp
   src/arm_ee_close.cpp
+  src/arm_control.cpp
 )
 target_include_directories(bt_lib
   PUBLIC

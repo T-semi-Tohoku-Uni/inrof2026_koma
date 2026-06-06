@@ -11,7 +11,6 @@ BT::PortsList koma::PathBallPosition::providedPorts()
   return {
     BT::InputPort<double>("x"),
     BT::InputPort<double>("y"),
-    BT::InputPort<bool>("is_return"),
   };
 }
 
@@ -25,7 +24,7 @@ BT::NodeStatus koma::PathBallPosition::tick()
     throw BT::RuntimeError("missing required input x: ", tmp_x.error());
   }
   if (!tmp_y) {
-    throw BT::RuntimeError("missing required input x: ", tmp_y.error());
+    throw BT::RuntimeError("missing required input y: ", tmp_y.error());
   }
 
   double x = tmp_x.value();

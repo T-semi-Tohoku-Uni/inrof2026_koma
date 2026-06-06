@@ -25,12 +25,17 @@
           <arm_ee_open/>
           <WhileDoElseBreak>
             <target_ball_position x="{x}"
-                                  y="{y}"/>
+                                  y="{y}"
+                                  z="{z}"/>
             <Sequence>
               <path_ball x="{x}"
                          y="{y}"/>
               <pursuit/>
+              <arm_control x="{x}"
+                           y="{y}"
+                           z="{z}"/>
               <arm_ee_close/>
+              <Sleep msec="5000"/>
               <path_ball x="1.34"
                          y="2.00"/>
               <pursuit/>
@@ -60,6 +65,12 @@
   <TreeNodesModel>
     <Control ID="WhileDoElseBreak"
              editable="true"/>
+    <Action ID="arm_control"
+            editable="true">
+      <input_port name="x"/>
+      <input_port name="y"/>
+      <input_port name="z"/>
+    </Action>
     <Action ID="arm_ee_close"
             editable="true"/>
     <Action ID="arm_ee_open"
@@ -81,6 +92,7 @@
             editable="true">
       <output_port name="x"/>
       <output_port name="y"/>
+      <output_port name="z"/>
     </Action>
     <Action ID="waypoint"
             editable="true">

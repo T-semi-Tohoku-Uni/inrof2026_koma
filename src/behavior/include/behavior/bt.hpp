@@ -1,5 +1,6 @@
 #pragma once
 #include <inrof2026_koma_type/action/pursuit.hpp>
+#include <inrof2026_koma_type/action/arm_control.hpp>
 #include <inrof2026_koma_type/srv/ball_position.hpp>
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -14,6 +15,7 @@ public:
   BTNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   bool is_pursuit_runing() const;
+  bool is_arm_control_running() const;
 
   // service setter
   void path_waypoint_position(double x, double y);
@@ -30,6 +32,7 @@ public:
   // TODO: ball color
 
   // action
+  // pursuit
   void start_path_pursuit();
   void pursuit_goal_response_callback(
     rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::SharedPtr goal_handle);
@@ -39,9 +42,20 @@ public:
   void result_callback(
     const rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::WrappedResult
       result);
+  // arm control
+  void start_arm_control(double x, double y, double z);
+  void arm_goal_response_callback(
+    rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle);
+  void arm_feedback_callback(
+    rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle,
+    const std::shared_ptr<const inrof2026_koma_type::action::ArmControl::Feedback> feedback);
+  void arm_result_callback(
+    const rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::WrappedResult
+      result);
 
 private:
   std::atomic_bool is_pursuit_running_{false};
+  std::atomic_bool is_arm_control_runing_{false};
 
   // service
   rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedPtr path_waypoint_position_srv_;
@@ -53,5 +67,6 @@ private:
 
   // action
   rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_act_;
+  rclcpp_action::Client<inrof2026_koma_type::action::ArmControl>::SharedPtr arm_control_act_;
 };
 }  // namespace koma

@@ -27,11 +27,11 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   base_link_ = this->declare_parameter<std::string>("base_link", "base_link");
 
-  reach_th_ = this->declare_parameter<double>("reach_th", 0.01);
+  reach_th_ = this->declare_parameter<double>("reach_th", 0.05);
 
   open_command_ = this->declare_parameter<double>("open_command", -0.4);
 
-  close_command_ = this->declare_parameter<double>("close_command", 0.4);
+  close_command_ = this->declare_parameter<double>("close_command", 1.0);
 
   // initialize tf buffer
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -227,13 +227,19 @@ void CatchInfluence::control_loop()
     cur_gripper_position_.position.x - target_ball_position_.position.x,
     cur_gripper_position_.position.y - target_ball_position_.position.y,
     cur_gripper_position_.position.z - target_ball_position_.position.z);
-  // if (reach_th_ > position_err) {
-  //   auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
-  //   result_msg->success = true;
-  //   goal_handle_->succeed(result_msg);
-  //   goal_handle_.reset();
-  //   return;
-  // }
+  RCLCPP_INFO(this->get_logger(), "%lf", position_err);
+
+  if (
+    std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) > reach_th_ &&
+    std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) > reach_th_ &&
+    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z)
+  ) {
+    auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
+    result_msg->success = true;
+    goal_handle_->succeed(result_msg);
+    goal_handle_.reset();
+    return;
+  }
 
   // publish feedback
   std::shared_ptr<inrof2026_koma_type::action::ArmControl_Feedback> feed_back =
@@ -244,8 +250,8 @@ void CatchInfluence::control_loop()
   goal_handle_->publish_feedback(feed_back);
 
   RCLCPP_INFO(
-    this->get_logger(), "%lf %lf", target_ball_position_.position.x,
-    target_ball_position_.position.y);
+    this->get_logger(), "%lf %lf %lf %lf %lf %lf", target_ball_position_.position.x,
+    target_ball_position_.position.y, target_ball_position_.position.z, cur_gripper_position_.position.x, cur_gripper_position_.position.y, cur_gripper_position_.position.z);
 
   //create states
   torch::Tensor obs = torch::tensor(
@@ -260,16 +266,16 @@ void CatchInfluence::control_loop()
                           // cur_joint_state_.position[5] - default_position_[5],
 
                           // /* joint vel */
-                          // cur_joint_state_.velocity[0],
-                          // cur_joint_state_.velocity[1],
-                          // cur_joint_state_.velocity[2],
-                          // cur_joint_state_.velocity[3],
-                          // cur_joint_state_.velocity[4],
-                          // cur_joint_state_.velocity[5],
+                          cur_joint_state_.velocity[0],
+                          cur_joint_state_.velocity[1],
+                          cur_joint_state_.velocity[2],
+                          cur_joint_state_.velocity[3],
+                          cur_joint_state_.velocity[4],
+                          cur_joint_state_.velocity[5],
 
                           // /* target arm position */
-                          // target_ball_position_.position.x,
-                          // target_ball_position_.position.y,
+                          target_ball_position_.position.x,
+                          target_ball_position_.position.y,
 
                           /* pre action */
                           pre_action_.position[0],

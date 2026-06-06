@@ -68,10 +68,10 @@ void koma::BallDetect::ballPoseCallback(
   // save response
   response->detect = true;
   response->pose_stamped.header.stamp = this->get_clock()->now();
-  response->pose_stamped.header.frame_id = lidar_frame_id_;
+  response->pose_stamped.header.frame_id = odom_frame_id_;
   response->pose_stamped.pose.position.x = ball_pose.value().position.x;
   response->pose_stamped.pose.position.y = ball_pose.value().position.y;
-  response->pose_stamped.pose.position.z = ball_radius_;
+  response->pose_stamped.pose.position.z = ball_pose.value().position.z;
 
   RCLCPP_INFO(
     this->get_logger(), "Closest ball is (x, y)=(%f, %f)", response->pose_stamped.pose.position.x,
@@ -176,8 +176,21 @@ std::optional<geometry_msgs::msg::Pose> koma::BallDetect::findClosestBall(
     }
   }
 
+  // Get ball z position
+  // Get odom -> base_footprint transform and calculate ball position in odom frame
+  double ball_z;
+  try {
+    geometry_msgs::msg::TransformStamped transform_stamped;
+    transform_stamped = tf_buffer_.lookupTransform(odom_frame_id_, lidar_frame_id_, tf2::TimePointZero);
+    ball_z = transform_stamped.transform.translation.z;
+  } catch (tf2::TransformException & ex) {
+    RCLCPP_WARN(this->get_logger(), "Could not transform ball position from %s to %s: %s", lidar_frame_id_.c_str(), odom_frame_id_.c_str(), ex.what());
+    ball_z = pose_->position.z;
+  }
+
   closest_ball.position.x = ball[closest_index].getX();
   closest_ball.position.y = ball[closest_index].getY();
+  closest_ball.position.z = ball_z;
   closest_ball.orientation.x = 0.0;
   closest_ball.orientation.y = 0.0;
   closest_ball.orientation.z = 0.0;
