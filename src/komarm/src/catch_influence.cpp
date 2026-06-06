@@ -230,9 +230,9 @@ void CatchInfluence::control_loop()
   RCLCPP_INFO(this->get_logger(), "%lf", position_err);
 
   if (
-    std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) > reach_th_ &&
-    std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) > reach_th_ &&
-    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) > reach_th_
+    std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) < reach_th_ &&
+    std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) < reach_th_ &&
+    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) < reach_th_
   ) {
     auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
     result_msg->success = true;
