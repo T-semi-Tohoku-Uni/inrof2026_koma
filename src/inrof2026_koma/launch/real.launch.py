@@ -252,8 +252,8 @@ def generate_launch_description():
             "initial_theta": theta,
             "odom_noise_1": 2.0,
             "odom_noise_2": 2.0,
-            "odom_noise_3": 2.0,
-            "odom_noise_4": 10.0,
+            "odom_noise_3": 0.1,
+            "odom_noise_4": 0.1,
             "resample_th": 0.9,
             "scan_step": 5,
         }],
@@ -328,6 +328,9 @@ def generate_launch_description():
         package="planning",
         executable="ball_plan",
         output="screen",
+        parameters=[{
+            "shorten": 0.30,
+        }],
     )
 
     ldlidar_with_mgr = IncludeLaunchDescription(
