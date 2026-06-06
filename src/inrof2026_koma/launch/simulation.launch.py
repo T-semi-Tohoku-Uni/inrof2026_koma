@@ -568,6 +568,9 @@ def generate_launch_description():
         package="planning",
         executable="ball_plan",
         output="screen",
+        parameters=[{
+            "shorten": 0.30,
+        }],
         remappings=[('clock', '/world/inrof/clock')]
     )
 
