@@ -229,7 +229,7 @@ void koma::Pursuit::control_loop()
       path_[current_waypoint_index_].pose.position.y - robot_pose_.position.y);
   }
 
-  if ((linear_goal_distance < max_reaching_distance_)) {  //&& theta_goal < max_reaching_theta) {
+  if ((linear_goal_distance < max_reaching_distance_) && theta_goal < max_reaching_theta_) {
     //goal reached
     RCLCPP_INFO(this->get_logger(), "Goal reached.");
     publish_zero_velocity();
