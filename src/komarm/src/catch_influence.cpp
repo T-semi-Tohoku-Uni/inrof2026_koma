@@ -28,7 +28,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   base_link_ = this->declare_parameter<std::string>("base_link", "base_link");
 
   x_reach_th_ = this->declare_parameter<double>("x_reach_th", 0.01);
-  y_reach_th_ = this->declare_parameter<double>("y_reach_th", 0.01  );
+  y_reach_th_ = this->declare_parameter<double>("y_reach_th", 0.01);
   z_reach_th_ = this->declare_parameter<double>("z_reach_th", 0.05);
 
   open_command_ = this->declare_parameter<double>("open_command", -0.4);

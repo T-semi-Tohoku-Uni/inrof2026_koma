@@ -15,10 +15,10 @@ import math
 import random
 
 def generate_launch_description():
-    x = 1.34
-    y = 0.75
+    x = 0.25
+    y = 0.25
     z = 0.30
-    theta = 0.0
+    theta = math.pi/2
 
     # get each package dir
     inrof2026_koma_package_dir = get_package_share_directory("inrof2026_koma")
@@ -235,7 +235,9 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
-                "model_path": weight_path
+                "model_path": weight_path,
+                "x_reach_th": 0.05,
+                "y_reach_th": 0.025,
             }
         ],
     )
@@ -291,7 +293,7 @@ def generate_launch_description():
             "max_linear_tolerance": 0.20,
             "max_theta_tolerance": 0.10,
             "max_reaching_distance": 0.05,
-            "max_reaching_theta": 0.10,
+            "max_reaching_theta": 0.01,
             "lookahead_distance": 0.20,
             "resampleThreshold": 0.10,
             "Kp_tan": 1.0,
@@ -300,7 +302,7 @@ def generate_launch_description():
             "Kp_normal": 1.0,
             "Ki_normal": 0.00,
             "Kd_normal": 0.00,
-            "Kp_theta": 1.0,
+            "Kp_theta": 5.0,
             "Ki_theta": 0.00,
             "Kd_theta": 0.00,
         }],
