@@ -47,7 +47,9 @@ private:
   geometry_msgs::msg::PointStamped offset_point_;
   double open_command_;
   double close_command_;
-  double reach_th_;
+  double x_reach_th_;
+  double y_reach_th_;
+  double z_reach_th_;
 
   // for transform
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

@@ -27,7 +27,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   base_link_ = this->declare_parameter<std::string>("base_link", "base_link");
 
-  reach_th_ = this->declare_parameter<double>("reach_th", 0.05);
+  x_reach_th_ = this->declare_parameter<double>("x_reach_th", 0.01);
+  y_reach_th_ = this->declare_parameter<double>("y_reach_th", 0.01);
+  z_reach_th_ = this->declare_parameter<double>("z_reach_th", 0.05);
 
   open_command_ = this->declare_parameter<double>("open_command", -0.4);
 
@@ -82,7 +84,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   // timer setting
   // create a timer for the control loop
-  control_timer_ = this->create_wall_timer(100ms, std::bind(&CatchInfluence::control_loop, this));
+  control_timer_ = this->create_wall_timer(20ms, std::bind(&CatchInfluence::control_loop, this));
   // create a timer for joint commnad send
   joint_command_send_timer_ = this->create_wall_timer(
     10ms, std::bind(&koma::CatchInfluence::joint_command_send_callback, this));
@@ -219,16 +221,10 @@ void CatchInfluence::control_loop()
   }
 
   // judge hand position
-  double position_err = std::hypot(
-    cur_gripper_position_.position.x - target_ball_position_.position.x,
-    cur_gripper_position_.position.y - target_ball_position_.position.y,
-    cur_gripper_position_.position.z - target_ball_position_.position.z);
-  RCLCPP_INFO(this->get_logger(), "%lf", position_err);
-
   if (
-    std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) < reach_th_ &&
-    std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) < reach_th_ &&
-    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) < reach_th_) {
+    std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) < x_reach_th_ &&
+    std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) < y_reach_th_ &&
+    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) < z_reach_th_) {
     auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
     result_msg->success = true;
     goal_handle_->succeed(result_msg);
