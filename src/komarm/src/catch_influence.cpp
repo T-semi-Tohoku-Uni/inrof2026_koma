@@ -221,12 +221,6 @@ void CatchInfluence::control_loop()
   }
 
   // judge hand position
-  double position_err = std::hypot(
-    cur_gripper_position_.position.x - target_ball_position_.position.x,
-    cur_gripper_position_.position.y - target_ball_position_.position.y,
-    cur_gripper_position_.position.z - target_ball_position_.position.z);
-  RCLCPP_INFO(this->get_logger(), "%lf", position_err);
-
   if (
     std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) < x_reach_th_ &&
     std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) < y_reach_th_ &&
