@@ -94,8 +94,8 @@ void koma::MCL::update_particles()
   delta.angular.z = cmd_vel_.angular.z * control_loop_cycle_;
 
   // L2 error
-  std::double_t dd2 = std::sqrt(delta.linear.x * delta.linear.x + delta.linear.y * delta.linear.y);
-  std::double_t dy2 = std::sqrt(delta.angular.z * delta.angular.z);
+  std::double_t dd2 = delta.linear.x * delta.linear.x + delta.linear.y * delta.linear.y;
+  std::double_t dy2 = delta.angular.z * delta.angular.z;
 
   for (size_t i = 0; i < this->particles_.size(); i++) {
     std::double_t dx =
