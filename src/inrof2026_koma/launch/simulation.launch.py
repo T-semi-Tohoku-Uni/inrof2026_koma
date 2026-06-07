@@ -488,7 +488,11 @@ def generate_launch_description():
         executable="mcl",
         name="mcl",
         parameters=[{
-            "map_path": os.path.join(inrof2026_koma_package_dir, "map/")
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
+            "odom_noise_1": 0.1,
+            "odom_noise_2": 0.1,
+            "odom_noise_3": 0.1,
+            "odom_noise_4": 0.1,
         }],
         output="screen",
         remappings=[('clock', '/world/inrof/clock')]
