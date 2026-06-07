@@ -6,9 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /RobotModel1
         - /RobotModel1/Description Topic1
-        - /Map1
         - /Map1/Topic1
         - /Map1/Update Topic1
         - /Map1/Position1
@@ -31,8 +29,10 @@ Panels:
         - /PointCloud23/Topic1
         - /MarkerArray1
         - /Marker3
+        - /Marker4
+        - /Marker4/Topic1
       Splitter Ratio: 0.5
-    Tree Height: 1079
+    Tree Height: 732
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -86,26 +86,21 @@ Visualization Manager:
       Enabled: true
       Links:
         All Links Enabled: true
+        DZ47B_63_circuit_breaker_holder_v3_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
-        LD19_with_mounter_v17_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         Link Tree Style: Links in Alphabetic Order
-        alm_1_v4_1:
+        arm_bracket_temp_v12_1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        alm_1_v4_2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        alm_with_lidar_v6_1:
+        arm_root_v4_1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -119,27 +114,12 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        chassis_unit_v18_1:
+        hand_finger_v7_1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        chassis_unit_v18_2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        chassis_unit_v18_3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        fun_adapter_v2_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        fun_v13_1:
+        hand_unit_v3_1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -148,6 +128,41 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        lipo_bracket_v5_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        pitch_1_test_v3_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        pitch_2_test_v3_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        raspi4_bracket_v1_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        raspi4_v2_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        roll_1_test_v3_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        roll_2_test_v3_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -178,63 +193,19 @@ Visualization Manager:
       Use Timestamp: false
       Value: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        LD19_with_mounter_v17_1:
-          Value: false
-        alm_1_v4_1:
-          Value: false
-        alm_1_v4_2:
-          Value: false
-        alm_with_lidar_v6_1:
-          Value: false
-        base_footprint:
-          Value: false
-        base_link:
-          Value: true
-        chassis_unit_v18_1:
-          Value: false
-        chassis_unit_v18_2:
-          Value: false
-        chassis_unit_v18_3:
-          Value: false
-        fun_adapter_v2_1:
-          Value: false
-        fun_v13_1:
-          Value: false
-        ldlidar_base:
-          Value: false
-        map:
-          Value: false
-        odom:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                alm_1_v4_1:
-                  chassis_unit_v18_1:
-                    alm_with_lidar_v6_1:
-                      LD19_with_mounter_v17_1:
-                        ldlidar_base:
-                          {}
-                      chassis_unit_v18_2:
-                        alm_1_v4_2:
-                          fun_adapter_v2_1:
-                            fun_v13_1:
-                              {}
-                  chassis_unit_v18_3:
-                    {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -370,7 +341,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /route
+        Value: /path
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -444,7 +415,7 @@ Visualization Manager:
       Enabled: true
       Name: MarkerArray
       Namespaces:
-        path_orientations: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -469,8 +440,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        goal_point_arrow: true
-        way_point_arrow: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -478,6 +448,19 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /pose_arrow_marker
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        field: true
+      Topic:
+        Depth: 5
+        Durability Policy: Transient Local
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /field_marker
       Value: true
   Enabled: true
   Global Options:
@@ -525,33 +508,33 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 0.013965021818876266
+      Distance: 0.4105556905269623
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.8664988279342651
-        Y: 1.673463225364685
-        Z: 1.4222626686096191
+        X: -0.7405123710632324
+        Y: -0.5016036629676819
+        Z: 1.800881266593933
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8147961497306824
+      Pitch: 0.7697961926460266
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.438592553138733
+      Yaw: 3.7385921478271484
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1376
+  Height: 1029
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000156000004c2fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed0000026f00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000004c2000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000004c2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003d000004c2000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000d2a0000003efc0100000002fb0000000800540069006d0065010000000000000d2a000002fb00fffffffb0000000800540069006d0065010000000000000450000000000000000000000ab9000004c200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000015600000367fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed0000026f00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000367000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f00000367fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003d00000367000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065010000000000000780000002fb00fffffffb0000000800540069006d006501000000000000045000000000000000000000050f0000036700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -560,6 +543,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 3370
+  Width: 1920
   X: 70
   Y: 27

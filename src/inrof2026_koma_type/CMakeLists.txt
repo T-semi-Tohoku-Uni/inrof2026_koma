@@ -15,10 +15,17 @@ find_package(geometry_msgs REQUIRED)
 
 set(srv_files
   "srv/PoseStamped.srv"
+  "srv/BallPosition.srv"
+)
+
+set(action_files
+  "action/Pursuit.action"
+  "action/ArmControl.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}
+  ${action_files}
   DEPENDENCIES
     geometry_msgs
 )

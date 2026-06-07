@@ -7,7 +7,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://field/meshes/InrofField.stl</uri>
+            <uri>model://inrof_field/meshes/InrofField.stl</uri>
           </mesh>
         </geometry>
         <surface>
@@ -23,7 +23,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://field/meshes/InrofField.dae</uri>
+            <uri>model://inrof_field/meshes/InrofField.dae</uri>
           </mesh>
         </geometry>
       </visual>

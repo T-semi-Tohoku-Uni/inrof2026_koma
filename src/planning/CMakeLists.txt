@@ -7,9 +7,87 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(inrof2026_koma_type REQUIRED)
+find_package(visualization_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+add_executable(path_plan src/path_plan.cpp)
+ament_target_dependencies(path_plan
+  rclcpp
+  inrof2026_koma_type
+  geometry_msgs
+  nav_msgs
+  tf2
+  tf2_geometry_msgs
+  OpenCV
+)
+target_link_libraries(path_plan
+  ${YAML_CPP_LIBRARIES}
+)
+target_include_directories(path_plan
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  path_plan
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(ball_plan src/ball_plan.cpp)
+ament_target_dependencies(ball_plan
+  rclcpp
+  inrof2026_koma_type
+  geometry_msgs
+  nav_msgs
+  tf2
+  tf2_geometry_msgs
+  visualization_msgs
+)
+target_include_directories(ball_plan
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  ball_plan
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+add_executable(pursuit src/pursuit.cpp)
+ament_target_dependencies(pursuit
+  rclcpp
+  inrof2026_koma_type
+  geometry_msgs
+  nav_msgs
+  tf2
+  tf2_geometry_msgs
+)
+target_include_directories(pursuit
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+install(TARGETS
+  pursuit
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include
+  DESTINATION share/${PROJECT_NAME}
+)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
