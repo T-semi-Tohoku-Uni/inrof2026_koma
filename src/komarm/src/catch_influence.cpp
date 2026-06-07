@@ -27,7 +27,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   base_link_ = this->declare_parameter<std::string>("base_link", "base_link");
 
-  reach_th_ = this->declare_parameter<double>("reach_th", 0.05);
+  x_reach_th_ = this->declare_parameter<double>("x_reach_th", 0.01);
+  y_reach_th_ = this->declare_parameter<double>("y_reach_th", 0.01  );
+  z_reach_th_ = this->declare_parameter<double>("z_reach_th", 0.05);
 
   open_command_ = this->declare_parameter<double>("open_command", -0.4);
 
@@ -226,9 +228,9 @@ void CatchInfluence::control_loop()
   RCLCPP_INFO(this->get_logger(), "%lf", position_err);
 
   if (
-    std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) < reach_th_ &&
-    std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) < reach_th_ &&
-    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) < reach_th_) {
+    std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) < x_reach_th_ &&
+    std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) < y_reach_th_ &&
+    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) < z_reach_th_) {
     auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
     result_msg->success = true;
     goal_handle_->succeed(result_msg);
