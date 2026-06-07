@@ -329,7 +329,7 @@ def generate_launch_description():
         executable="ball_plan",
         output="screen",
         parameters=[{
-            "shorten": 0.28,
+            "shorten": 0.26,
         }],
     )
 
