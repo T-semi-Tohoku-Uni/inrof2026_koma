@@ -1,3 +1,6 @@
 [submodule "src/komarm/inrof2026_koma_urdf"]
 	path = src/inrof2026_koma/inrof2026_koma_urdf
 	url = git@github.com:T-semi-Tohoku-Uni/inrof2026_koma_urdf.git
+[submodule "src/ldrobot-lidar-ros2"]
+	path = src/ldrobot-lidar-ros2
+	url = git@github.com:keigo1216/ldrobot-lidar-ros2.git

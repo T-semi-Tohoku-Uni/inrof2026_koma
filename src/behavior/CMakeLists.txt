@@ -12,6 +12,7 @@ find_package(inrof2026_koma_type REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(std_srvs REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -24,6 +25,9 @@ add_library(bt_lib SHARED
   src/target_ball_pose.cpp
   src/while_do_else_break.cpp
   src/path_ball_position.cpp
+  src/arm_ee_open.cpp
+  src/arm_ee_close.cpp
+  src/arm_control.cpp
 )
 target_include_directories(bt_lib
   PUBLIC
@@ -34,6 +38,7 @@ ament_target_dependencies(bt_lib
   rclcpp_action
   behaviortree_cpp
   inrof2026_koma_type
+  std_srvs
 )
 install(TARGETS bt_lib DESTINATION lib/${PROJECT_NAME})
 
@@ -44,6 +49,7 @@ ament_target_dependencies(bt
   inrof2026_koma_type
   behaviortree_cpp
   tf2_geometry_msgs
+  std_srvs
 )
 target_include_directories(bt
   PUBLIC

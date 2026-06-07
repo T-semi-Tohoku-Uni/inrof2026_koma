@@ -1,0 +1,14 @@
+[workspace]
+authors = ["shibatakeigo <sagankeigo17@gmail.com>"]
+channels = ["robostack-staging", "conda-forge"]
+name = "inrof2026_koma"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+ros-humble-desktop = ">=0.10.0,<0.11"
+
+[activation]
+scripts = ["activate.sh"]
