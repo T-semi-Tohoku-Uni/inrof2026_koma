@@ -31,9 +31,6 @@
               <path_ball x="{x}"
                          y="{y}"/>
               <pursuit/>
-              <target_ball_position x="{x}"
-                                    y="{y}"
-                                    z="{z}"/>
               <arm_control x="{x}"
                            y="{y}"
                            z="{z}"/>
