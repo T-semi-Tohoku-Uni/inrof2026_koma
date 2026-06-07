@@ -18,7 +18,7 @@ git config --local core.hooksPath .githooks
 
 ## プログラムのフォーマット設定
 ```bash
-find ./src \( -path './src/*/include/*.hpp' -o -path './src/*/src/*.cpp' \) -print0 | xargs -0 ament_clang_format --reformat
+find ./src \( -path './src/*/include/*.hpp' -o -path './src/*/src/*.cpp' \) $(git submodule status | awk '{print "! -path ./" $2 "/*"}') -print0 | xargs -0 ament_clang_format
 ```
 ## libtorchのダウンロード
 x86環境の場合
