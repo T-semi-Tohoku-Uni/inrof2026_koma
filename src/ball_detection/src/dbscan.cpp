@@ -181,10 +181,13 @@ std::optional<geometry_msgs::msg::Pose> koma::BallDetect::findClosestBall(
   double ball_z;
   try {
     geometry_msgs::msg::TransformStamped transform_stamped;
-    transform_stamped = tf_buffer_.lookupTransform(odom_frame_id_, lidar_frame_id_, tf2::TimePointZero);
+    transform_stamped =
+      tf_buffer_.lookupTransform(odom_frame_id_, lidar_frame_id_, tf2::TimePointZero);
     ball_z = transform_stamped.transform.translation.z;
   } catch (tf2::TransformException & ex) {
-    RCLCPP_WARN(this->get_logger(), "Could not transform ball position from %s to %s: %s", lidar_frame_id_.c_str(), odom_frame_id_.c_str(), ex.what());
+    RCLCPP_WARN(
+      this->get_logger(), "Could not transform ball position from %s to %s: %s",
+      lidar_frame_id_.c_str(), odom_frame_id_.c_str(), ex.what());
     ball_z = pose_->position.z;
   }
 
@@ -477,7 +480,8 @@ sensor_msgs::msg::PointCloud2 koma::BallDetect::point2PointCloud2(
     for (const koma::Point & p : cluster.second) {
       *iter_x = p.getX();
       *iter_y = p.getY();
-      *iter_z = pose_ ? pose_->position.z : 0.0;;
+      *iter_z = pose_ ? pose_->position.z : 0.0;
+      ;
 
       auto color = cluster_colors[cluster_id];
       *iter_r = color[0];

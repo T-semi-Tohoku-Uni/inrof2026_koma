@@ -27,5 +27,9 @@ jobs:
 
       - name: format test
         run: |
-            source /opt/ros/humble/setup.bash
-            ament_clang_format ./src
+          source /opt/ros/humble/setup.bash
+          find ./src \
+            \( -path './src/*/include/*.hpp' -o -path './src/*/src/*.cpp' \) \
+            $(git submodule status | awk '{print "! -path ./" $2 "/*"}') \
+            -print0 \
+          | xargs -0 ament_clang_format

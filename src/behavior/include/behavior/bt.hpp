@@ -1,6 +1,6 @@
 #pragma once
-#include <inrof2026_koma_type/action/pursuit.hpp>
 #include <inrof2026_koma_type/action/arm_control.hpp>
+#include <inrof2026_koma_type/action/pursuit.hpp>
 #include <inrof2026_koma_type/srv/ball_position.hpp>
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -45,7 +45,8 @@ public:
   // arm control
   void start_arm_control(double x, double y, double z);
   void arm_goal_response_callback(
-    rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle);
+    rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr
+      goal_handle);
   void arm_feedback_callback(
     rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle,
     const std::shared_ptr<const inrof2026_koma_type::action::ArmControl::Feedback> feedback);

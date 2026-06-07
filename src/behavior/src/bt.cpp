@@ -3,6 +3,9 @@
 #include <behaviortree_cpp/loggers/groot2_publisher.h>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <behavior/arm_control.hpp>
+#include <behavior/arm_ee_close.hpp>
+#include <behavior/arm_ee_open.hpp>
 #include <behavior/bt.hpp>
 #include <behavior/path_ball_position.hpp>
 #include <behavior/path_goal_position.hpp>
@@ -10,9 +13,6 @@
 #include <behavior/pursuit.hpp>
 #include <behavior/target_ball_position.hpp>
 #include <behavior/while_do_else_break.hpp>
-#include <behavior/arm_ee_open.hpp>
-#include <behavior/arm_ee_close.hpp>
-#include <behavior/arm_control.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
@@ -42,7 +42,8 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
   pursuit_act_ =
     rclcpp_action::create_client<inrof2026_koma_type::action::Pursuit>(this, "pursuit_command");
   // server: komarm/catch_influence
-  arm_control_act_ = rclcpp_action::create_client<inrof2026_koma_type::action::ArmControl>(this, "arm_command");
+  arm_control_act_ =
+    rclcpp_action::create_client<inrof2026_koma_type::action::ArmControl>(this, "arm_command");
 }
 
 void koma::BTNode::path_waypoint_position(double x, double y)
@@ -97,7 +98,8 @@ void koma::BTNode::path_goal_position(double x, double y, double theta)
 /*
   arm control
 */
-void koma::BTNode::start_arm_control(double x, double y, double z) {
+void koma::BTNode::start_arm_control(double x, double y, double z)
+{
   while (!arm_control_act_->wait_for_action_server(1s)) {
     if (!rclcpp::ok()) return;
     RCLCPP_WARN(this->get_logger(), "arm control not available");
@@ -108,11 +110,11 @@ void koma::BTNode::start_arm_control(double x, double y, double z) {
     rclcpp_action::Client<inrof2026_koma_type::action::ArmControl>::SendGoalOptions();
   send_goal_options.goal_response_callback =
     std::bind(&BTNode::arm_goal_response_callback, this, std::placeholders::_1);
-  send_goal_options.feedback_callback = std::bind(
-    &BTNode::arm_feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
+  send_goal_options.feedback_callback =
+    std::bind(&BTNode::arm_feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
   send_goal_options.result_callback =
     std::bind(&BTNode::arm_result_callback, this, std::placeholders::_1);
-  
+
   goal_msg.target_hand_position.pose.position.x = x;
   goal_msg.target_hand_position.pose.position.y = y;
   goal_msg.target_hand_position.pose.position.z = z;
@@ -121,8 +123,8 @@ void koma::BTNode::start_arm_control(double x, double y, double z) {
   is_arm_control_runing_.store(true);
 }
 void koma::BTNode::arm_goal_response_callback(
-  rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle
-) {
+  rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle)
+{
   if (!goal_handle) {
     is_arm_control_runing_.store(false);
     RCLCPP_ERROR(this->get_logger(), "arm control goal was rejected by action server.");
@@ -133,8 +135,8 @@ void koma::BTNode::arm_goal_response_callback(
   RCLCPP_INFO(this->get_logger(), "Start arm control.");
 }
 void koma::BTNode::arm_feedback_callback(
-    rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle,
-    const std::shared_ptr<const inrof2026_koma_type::action::ArmControl::Feedback> feedback)
+  rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::ArmControl>::SharedPtr goal_handle,
+  const std::shared_ptr<const inrof2026_koma_type::action::ArmControl::Feedback> feedback)
 {
   (void)goal_handle;
   (void)feedback;
@@ -257,13 +259,14 @@ void koma::BTNode::path_ball_position(double x, double y)
   }
 }
 
-void koma::BTNode::arm_ee_open() {
+void koma::BTNode::arm_ee_open()
+{
   while (!this->arm_ee_open_srv_->wait_for_service(1s)) {
     if (!rclcpp::ok()) break;
     RCLCPP_WARN(this->get_logger(), "arm_ee_open_srv_ is not available");
   }
 
-  std::shared_ptr<std_srvs::srv::Trigger_Request> request = 
+  std::shared_ptr<std_srvs::srv::Trigger_Request> request =
     std::make_shared<std_srvs::srv::Trigger::Request>();
 
   rclcpp::Client<std_srvs::srv::Trigger>::FutureAndRequestId result_future =
@@ -275,13 +278,14 @@ void koma::BTNode::arm_ee_open() {
   }
 }
 
-void koma::BTNode::arm_ee_close() {
+void koma::BTNode::arm_ee_close()
+{
   while (!this->arm_ee_close_srv_->wait_for_service(1s)) {
     if (!rclcpp::ok()) break;
     RCLCPP_WARN(this->get_logger(), "arm_ee_close_srv_ is not available");
   }
 
-  std::shared_ptr<std_srvs::srv::Trigger_Request> request = 
+  std::shared_ptr<std_srvs::srv::Trigger_Request> request =
     std::make_shared<std_srvs::srv::Trigger::Request>();
 
   rclcpp::Client<std_srvs::srv::Trigger>::FutureAndRequestId result_future =
@@ -325,21 +329,17 @@ int main(int argc, char * argv[])
   factory.registerBuilder<koma::TargetBallPosition>(
     "target_ball_position", builder_target_ball_position);
 
-  BT::NodeBuilder builder_target_arm_ee_open = 
+  BT::NodeBuilder builder_target_arm_ee_open =
     [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
       return std::make_unique<koma::ArmEEOpen>(name, config, ros_node);
     };
-  factory.registerBuilder<koma::ArmEEOpen>(
-    "arm_ee_open", builder_target_arm_ee_open
-  );
+  factory.registerBuilder<koma::ArmEEOpen>("arm_ee_open", builder_target_arm_ee_open);
 
-  BT::NodeBuilder builder_target_arm_ee_close = 
+  BT::NodeBuilder builder_target_arm_ee_close =
     [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
       return std::make_unique<koma::ArmEEClose>(name, config, ros_node);
     };
-  factory.registerBuilder<koma::ArmEEClose>(
-    "arm_ee_close", builder_target_arm_ee_close
-  );
+  factory.registerBuilder<koma::ArmEEClose>("arm_ee_close", builder_target_arm_ee_close);
 
   BT::NodeBuilder builder_path_ball_position =
     [ros_node](const std::string & name, const BT::NodeConfiguration & config) {

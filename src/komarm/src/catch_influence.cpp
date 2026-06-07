@@ -49,15 +49,11 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   arm_ee_open_srv_ = this->create_service<std_srvs::srv::Trigger>(
     "arm_ee_open",
     std::bind(
-      &CatchInfluence::arm_ee_open_callback, this, std::placeholders::_1, std::placeholders::_2
-    )
-  );
+      &CatchInfluence::arm_ee_open_callback, this, std::placeholders::_1, std::placeholders::_2));
   arm_ee_close_srv_ = this->create_service<std_srvs::srv::Trigger>(
     "arm_ee_close",
     std::bind(
-      &CatchInfluence::arm_ee_close_callback, this, std::placeholders::_1, std::placeholders::_2
-    )
-  );
+      &CatchInfluence::arm_ee_close_callback, this, std::placeholders::_1, std::placeholders::_2));
 
   // Initialize action server
   arm_control_act_ = rclcpp_action::create_server<inrof2026_koma_type::action::ArmControl>(
@@ -96,16 +92,16 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
 void koma::CatchInfluence::arm_ee_open_callback(
   const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-  std::shared_ptr<std_srvs::srv::Trigger::Response> response
-) {
+  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
   target_joint_state_.position[5] = open_command_;
   response->success = true;
 }
 
 void koma::CatchInfluence::arm_ee_close_callback(
-    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-    std::shared_ptr<std_srvs::srv::Trigger::Response> response
-) {
+  const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
   target_joint_state_.position[5] = close_command_;
   response->success = true;
 }
@@ -232,8 +228,7 @@ void CatchInfluence::control_loop()
   if (
     std::abs(cur_gripper_position_.position.x - target_ball_position_.position.x) < reach_th_ &&
     std::abs(cur_gripper_position_.position.y - target_ball_position_.position.y) < reach_th_ &&
-    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) < reach_th_
-  ) {
+    std::abs(cur_gripper_position_.position.z - target_ball_position_.position.z) < reach_th_) {
     auto result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
     result_msg->success = true;
     goal_handle_->succeed(result_msg);
@@ -251,7 +246,9 @@ void CatchInfluence::control_loop()
 
   RCLCPP_INFO(
     this->get_logger(), "%lf %lf %lf %lf %lf %lf", target_ball_position_.position.x,
-    target_ball_position_.position.y, target_ball_position_.position.z, cur_gripper_position_.position.x, cur_gripper_position_.position.y, cur_gripper_position_.position.z);
+    target_ball_position_.position.y, target_ball_position_.position.z,
+    cur_gripper_position_.position.x, cur_gripper_position_.position.y,
+    cur_gripper_position_.position.z);
 
   //create states
   torch::Tensor obs = torch::tensor(

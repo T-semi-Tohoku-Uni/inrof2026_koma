@@ -1,5 +1,5 @@
-#include <behavior/bt.hpp>
 #include <behavior/arm_control.hpp>
+#include <behavior/bt.hpp>
 
 koma::ArmControl::ArmControl(
   const std::string & name, const BT::NodeConfiguration & config, std::shared_ptr<BTNode> ros_node)
@@ -7,13 +7,13 @@ koma::ArmControl::ArmControl(
 {
 }
 
-BT::PortsList koma::ArmControl::providedPorts() {
-    return {BT::InputPort<double>("x"), BT::InputPort<double>("y"), BT::InputPort<double>("z")};
+BT::PortsList koma::ArmControl::providedPorts()
+{
+  return {BT::InputPort<double>("x"), BT::InputPort<double>("y"), BT::InputPort<double>("z")};
 }
 
 BT::NodeStatus koma::ArmControl::onStart()
 {
-
   BT::Expected<double> tmp_x = getInput<double>("x");
   BT::Expected<double> tmp_y = getInput<double>("y");
   BT::Expected<double> tmp_z = getInput<double>("z");
@@ -46,6 +46,7 @@ BT::NodeStatus koma::ArmControl::onRunning()
   }
 }
 
-void koma::ArmControl::onHalted() {
-    RCLCPP_INFO(this->ros_node_->get_logger(), "interrupt Arm control");
+void koma::ArmControl::onHalted()
+{
+  RCLCPP_INFO(this->ros_node_->get_logger(), "interrupt Arm control");
 }

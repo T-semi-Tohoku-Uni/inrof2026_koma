@@ -11,8 +11,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <std_srvs/srv/trigger.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
 
@@ -72,13 +72,11 @@ private:
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_ee_open_srv_;
   void arm_ee_open_callback(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-    std::shared_ptr<std_srvs::srv::Trigger::Response> response
-  );
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_ee_close_srv_;
   void arm_ee_close_callback(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-    std::shared_ptr<std_srvs::srv::Trigger::Response> response
-  );
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
   //action server
   rclcpp_action::Server<inrof2026_koma_type::action::ArmControl>::SharedPtr arm_control_act_;

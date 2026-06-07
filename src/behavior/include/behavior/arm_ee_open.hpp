@@ -3,14 +3,17 @@
 
 namespace koma
 {
-    class BTNode;
+class BTNode;
 
-    class ArmEEOpen: public BT::SyncActionNode {
-        public:
-            ArmEEOpen(const std::string & name, const BT::NodeConfig & config, std::shared_ptr<BTNode> ros_node);
-            static BT::PortsList providedPorts();
-            BT::NodeStatus tick() override;
-        private:
-            std::shared_ptr<BTNode> ros_node_;
-    };
-}
+class ArmEEOpen : public BT::SyncActionNode
+{
+public:
+  ArmEEOpen(
+    const std::string & name, const BT::NodeConfig & config, std::shared_ptr<BTNode> ros_node);
+  static BT::PortsList providedPorts();
+  BT::NodeStatus tick() override;
+
+private:
+  std::shared_ptr<BTNode> ros_node_;
+};
+}  // namespace koma
