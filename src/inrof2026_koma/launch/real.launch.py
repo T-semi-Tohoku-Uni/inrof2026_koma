@@ -15,10 +15,10 @@ import math
 import random
 
 def generate_launch_description():
-    x = 0.25
-    y = 0.25
+    x = 1.34
+    y = 0.75
     z = 0.30
-    theta = math.pi/2
+    theta = 0.0
 
     # get each package dir
     inrof2026_koma_package_dir = get_package_share_directory("inrof2026_koma")
@@ -250,10 +250,10 @@ def generate_launch_description():
             "initial_x": x,
             "initial_y": y,
             "initial_theta": theta,
-            "odom_noise_1": 2.0,
-            "odom_noise_2": 2.0,
-            "odom_noise_3": 0.1,
-            "odom_noise_4": 0.1,
+            "odom_noise_1": 10.0,
+            "odom_noise_2": 0.01,
+            "odom_noise_3": 1.0,
+            "odom_noise_4": 12.0,
             "resample_th": 0.9,
             "scan_step": 5,
         }],
@@ -345,17 +345,17 @@ def generate_launch_description():
         node_robot_state_publisher,
         map_server,
         static_from_map_to_odom,
-        catch_influence,
-        joint_manager,
+        # catch_influence,
+        # joint_manager,
         uart_bridge,
         mcl,
-        planner,
-        pursuit,
+        # planner,
+        # pursuit,
         joy2vel,
         joy_node,
         ball_detect,
-        bt,
-        path_ball_position,
+        # bt,
+        # path_ball_position,
         odom_tf_broadcaster,
         ldlidar_with_mgr
     ])
