@@ -6,6 +6,7 @@
 #include <behavior/arm_control.hpp>
 #include <behavior/arm_ee_close.hpp>
 #include <behavior/arm_ee_open.hpp>
+#include <behavior/arm_default_pose.hpp>
 #include <behavior/bt.hpp>
 #include <behavior/path_ball_position.hpp>
 #include <behavior/path_goal_position.hpp>
@@ -36,6 +37,7 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
   // server: komarm/catch_influence
   arm_ee_open_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_open");
   arm_ee_close_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_close");
+  arm_default_pose_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_default_pose");
 
   // action
   // server: localization/pursuit
@@ -297,6 +299,25 @@ void koma::BTNode::arm_ee_close()
   }
 }
 
+void koma::BTNode::arm_default_pose()
+{
+  while (!this->arm_default_pose_srv_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) break;
+    RCLCPP_WARN(this->get_logger(), "arm_default_pose_srv_ is not available");
+  }
+
+  std::shared_ptr<std_srvs::srv::Trigger_Request> request =
+    std::make_shared<std_srvs::srv::Trigger::Request>();
+
+  rclcpp::Client<std_srvs::srv::Trigger>::FutureAndRequestId result_future =
+    arm_default_pose_srv_->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(
+      this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
+    rclcpp::FutureReturnCode::SUCCESS) {
+  }
+}
+
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -352,6 +373,12 @@ int main(int argc, char * argv[])
       return std::make_unique<koma::ArmControl>(name, config, ros_node);
     };
   factory.registerBuilder<koma::ArmControl>("arm_control", builder_arm_control);
+
+  BT::NodeBuilder builder_arm_default_pose =
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::ArmDefaultPose>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::ArmDefaultPose>("arm_default_pose", builder_arm_default_pose);
 
   factory.registerNodeType<koma::WhileDoElseBreakNode>("WhileDoElseBreak");
 
