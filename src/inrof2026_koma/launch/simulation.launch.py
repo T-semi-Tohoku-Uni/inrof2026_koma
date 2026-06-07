@@ -106,6 +106,7 @@ def generate_launch_description():
 
     # libtorch path
     libtorch_lib = str(Path(komarm_package_dir) / 'libtorch' / 'lib')
+    weight_path = str(Path(komarm_package_dir) / "weight" / "policy.pt")
 
     # Get workspace dir
     ws_root = Path(komarm_package_dir).parents[3]
@@ -124,6 +125,20 @@ def generate_launch_description():
             ':',
             models_path,
         ],
+    )
+
+    libtorch_env = SetEnvironmentVariable(
+        name='LD_LIBRARY_PATH',
+        value=[
+            libtorch_lib,
+            ':',
+            EnvironmentVariable('LD_LIBRARY_PATH', default_value=''),
+        ],
+    )
+
+    colorized_output_env = SetEnvironmentVariable(
+        name='RCUTILS_COLORIZED_OUTPUT',
+        value='1',
     )
 
     # get file path
@@ -203,7 +218,7 @@ def generate_launch_description():
 
     laser_scan_link = """
     <link name="ldlidar_base"/>
-    <link name="ldlidar_scan"/>
+    <link name="ldlidar_link"/>
 
     <joint name="base_link_to_ldlidar_base" type="fixed">
         <parent link="base_link"/>
@@ -213,7 +228,7 @@ def generate_launch_description():
 
     <joint name="ldlidar_base_to_scan" type="fixed">
         <parent link="ldlidar_base"/>
-        <child link="ldlidar_scan"/>
+        <child link="ldlidar_link"/>
         <origin xyz="0 0 0" rpy="0 0 1.5708"/>
     </joint>
     """
@@ -223,9 +238,9 @@ def generate_launch_description():
     )
 
     laser_scan_plugin = """
-    <gazebo reference="ldlidar_scan">
+    <gazebo reference="ldlidar_link">
         <sensor name="ldlidar" type="gpu_lidar">
-            <ignition_frame_id>ldlidar_scan</ignition_frame_id>
+            <ignition_frame_id>ldlidar_link</ignition_frame_id>
             <topic>/ldlidar_node/scan</topic>
             <update_rate>10</update_rate>
 
@@ -296,9 +311,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_1</joint_name>
         <topic>/komarm/revolute_1/cmd_pos</topic>
-        <p_gain>50.0</p_gain>
+        <p_gain>70.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>10.0</d_gain>
+        <d_gain>40.0</d_gain>
         </plugin>
 
         <plugin
@@ -316,9 +331,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_3</joint_name>
         <topic>/komarm/revolute_3/cmd_pos</topic>
-        <p_gain>50.0</p_gain>
+        <p_gain>200.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.01</d_gain>
+        <d_gain>1.0</d_gain>
         </plugin>
 
         <plugin
@@ -326,9 +341,9 @@ def generate_launch_description():
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>Revolute_4</joint_name>
         <topic>/komarm/revolute_4/cmd_pos</topic>
-        <p_gain>50.0</p_gain>
+        <p_gain>200.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.01</d_gain>
+        <d_gain>1.0</d_gain>
         </plugin>
 
         <plugin
@@ -338,7 +353,7 @@ def generate_launch_description():
         <topic>/komarm/revolute_5/cmd_pos</topic>
         <p_gain>50.0</p_gain>
         <i_gain>0.0</i_gain>
-        <d_gain>0.01</d_gain>
+        <d_gain>0.1</d_gain>
         </plugin>
 
         <plugin
@@ -357,10 +372,26 @@ def generate_launch_description():
         joint_position_controller_plugin + "\n</robot>",
     )
 
+    # add end effector link
+    end_effector_link = """
+    <link name="end_effector"/>
+
+    <joint name="end_effector_link" type="fixed">
+        <parent link="hand_unit_v3_1"/>
+        <child link="end_effector"/>
+        <origin xyz="0.1 0 0.02" rpy="0 0 0"/>
+    </joint>
+    """
+    robot_desc = robot_desc.replace(
+        "</robot>",
+        end_effector_link + "\n</robot>",
+    )
+
+
     robot_desc = set_joint_effort_velocity_limits(
         robot_desc,
         effort=1.5,
-        velocity=4.0,
+        velocity=2.0,
     )
 
     params = {"robot_description": robot_desc}
@@ -537,6 +568,9 @@ def generate_launch_description():
         package="planning",
         executable="ball_plan",
         output="screen",
+        parameters=[{
+            "shorten": 0.30,
+        }],
         remappings=[('clock', '/world/inrof/clock')]
     )
 
@@ -558,6 +592,21 @@ def generate_launch_description():
         remappings=[('clock', '/world/inrof/clock')]
     )
 
+    catch_influence = Node(
+        package="komarm",
+        executable="catch_influence",
+        output="screen",
+        parameters=[
+            {
+                "model_path": weight_path,
+                "default_position": [
+                    0.0, -1.3, 0.0, 1.57, 0.0, 0.0
+                ]
+            }
+        ],
+        remappings=[('clock', '/world/inrof/clock')]
+    )
+
     # spawn ball on field
     ball_spawn_entity_list = []
     ball_x_min = 0.98
@@ -565,7 +614,7 @@ def generate_launch_description():
     ball_y_min = 0.60
     ball_y_max = 1.80
     for i_x in range(2):
-        for i_y in range(4):
+        for i_y in range(2):
             region_x_min = ball_x_min + (ball_x_max-ball_x_min)*i_x/2
             region_x_max = ball_x_min + (ball_x_max-ball_x_min)*(i_x+1)/2
             region_y_min = ball_y_min + (ball_y_max-ball_y_min)*i_y/4
@@ -594,6 +643,8 @@ def generate_launch_description():
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=True),
         models_path_env,
+        libtorch_env,
+        colorized_output_env,
         gazebo,
         node_robot_state_publisher,
         gz_spawn_entity,
@@ -610,6 +661,7 @@ def generate_launch_description():
         ball_detect,
         bt,
         path_ball_position,
+        catch_influence,
         *ball_spawn_entity_list
         # foxglove_bridge
     ])

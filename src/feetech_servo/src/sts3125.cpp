@@ -156,10 +156,6 @@ bool koma::FeetechSerial::send_write_state_command(int servo_id, uint16_t positi
 
   if (!write_packet(tx, sizeof(tx))) return false;
 
-  RCLCPP_INFO(
-    logger, "WRITE position command sent: id=%u position=%u",
-    static_cast<unsigned>(servo_id_uint8_t), static_cast<unsigned>(goal_position));
-
   return true;
 }
 
@@ -852,8 +848,6 @@ bool koma::FeetechSerial::send_action_command()
     RCLCPP_ERROR(logger, "tcdrain failed after ACTION: %s", std::strerror(errno));
     return false;
   }
-
-  RCLCPP_INFO(logger, "ACTION command sent");
 
   return true;
 }

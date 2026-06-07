@@ -7,7 +7,7 @@ koma::TargetBallPosition::TargetBallPosition(
 
 BT::PortsList koma::TargetBallPosition::providedPorts()
 {
-  return {BT::OutputPort<double>("x"), BT::OutputPort<double>("y")};
+  return {BT::OutputPort<double>("x"), BT::OutputPort<double>("y"), BT::OutputPort<double>("z")};
 }
 
 BT::NodeStatus koma::TargetBallPosition::tick()
@@ -18,10 +18,12 @@ BT::NodeStatus koma::TargetBallPosition::tick()
   if (!target_ball_position->detect) return BT::NodeStatus::FAILURE;
   setOutput("x", target_ball_position->pose_stamped.pose.position.x);
   setOutput("y", target_ball_position->pose_stamped.pose.position.y);
+  setOutput("z", target_ball_position->pose_stamped.pose.position.z);
   RCLCPP_INFO(
-    ros_node_->get_logger(), "Ball found (x, y) = (%lf, %lf)",
+    ros_node_->get_logger(), "Ball found (x, y, z) = (%lf, %lf, %lf)",
     target_ball_position->pose_stamped.pose.position.x,
-    target_ball_position->pose_stamped.pose.position.y);
+    target_ball_position->pose_stamped.pose.position.y,
+    target_ball_position->pose_stamped.pose.position.z);
   return BT::NodeStatus::SUCCESS;
 }
 
