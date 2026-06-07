@@ -58,9 +58,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
       &CatchInfluence::arm_ee_close_callback, this, std::placeholders::_1, std::placeholders::_2));
 
   arm_default_pose_srv_ = this->create_service<std_srvs::srv::Trigger>(
-    "arm_default_pose",
-    std::bind(
-      &CatchInfluence::arm_default_pose_callback, this, std::placeholders::_1, std::placeholders::_2));
+    "arm_default_pose", std::bind(
+                          &CatchInfluence::arm_default_pose_callback, this, std::placeholders::_1,
+                          std::placeholders::_2));
 
   // Initialize action server
   arm_control_act_ = rclcpp_action::create_server<inrof2026_koma_type::action::ArmControl>(
