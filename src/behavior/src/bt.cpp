@@ -382,8 +382,27 @@ int main(int argc, char * argv[])
 
   factory.registerNodeType<koma::WhileDoElseBreakNode>("WhileDoElseBreak");
 
-  std::string package_path = ament_index_cpp::get_package_share_directory("inrof2026_koma");
-  factory.registerBehaviorTreeFromFile(package_path + "/config/koma_bt.xml");
+  ros_node->declare_parameter<std::string>("config_path", "");
+
+  std::string config_path;
+  ros_node->get_parameter("config_path", config_path);
+
+  if (config_path.empty()) {
+    RCLCPP_ERROR(
+      ros_node->get_logger(),
+      "Parameter 'config_path' is empty. Please set config_path from launch file."
+    );
+    rclcpp::shutdown();
+    return 1;
+  }
+
+  RCLCPP_INFO(
+    ros_node->get_logger(),
+    "Loading behavior tree config: %s",
+    config_path.c_str()
+  );
+  
+  factory.registerBehaviorTreeFromFile(config_path);
   BT::Tree tree = factory.createTree("main");
 
   BT::Groot2Publisher groot2_publisher(tree);
