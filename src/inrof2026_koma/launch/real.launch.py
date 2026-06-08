@@ -331,7 +331,8 @@ def generate_launch_description():
         executable="ball_plan",
         output="screen",
         parameters=[{
-            "shorten": 0.26,
+            "shorten": 0.28,
+            "theta_offset": math.pi/5.0,
         }],
     )
 
