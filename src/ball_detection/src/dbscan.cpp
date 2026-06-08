@@ -188,7 +188,7 @@ std::optional<geometry_msgs::msg::Pose> koma::BallDetect::findClosestBall(
     RCLCPP_WARN(
       this->get_logger(), "Could not transform ball position from %s to %s: %s",
       lidar_frame_id_.c_str(), odom_frame_id_.c_str(), ex.what());
-    ball_z = pose_->position.z;
+    ball_z = pose_ ? pose_->position.z : 0.0;;
   }
 
   closest_ball.position.x = ball[closest_index].getX();
@@ -620,7 +620,7 @@ sensor_msgs::msg::PointCloud2 koma::BallDetect::circle2PointCloud2(
       float angle = 2.0 * M_PI * i / NUM_POINTS;
       *iter_x = _b.getX() + _b.getR() * std::cos(angle);
       *iter_y = _b.getY() + _b.getR() * std::sin(angle);
-      *iter_z = pose_->position.z;
+      *iter_z = pose_ ? pose_->position.z : 0.0;;
 
       *iter_r = red;
       *iter_g = green;
@@ -630,7 +630,7 @@ sensor_msgs::msg::PointCloud2 koma::BallDetect::circle2PointCloud2(
     // 中心点
     *iter_x = _b.getX();
     *iter_y = _b.getY();
-    *iter_z = pose_->position.z;
+    *iter_z = pose_ ? pose_->position.z : 0.0;;
     *iter_r = red;
     *iter_g = green;
     *iter_b = blue;
