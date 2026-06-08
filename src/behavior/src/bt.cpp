@@ -167,6 +167,14 @@ void koma::BTNode::start_path_pursuit()
     RCLCPP_WARN(this->get_logger(), "pursuit not available");
   }
 
+  // when is_pursuit_running_ is true, cancel the current pursuit goal
+  if (pursuit_goal_handle_) {
+    RCLCPP_INFO(this->get_logger(), "Canceling current pursuit goal");
+    pursuit_act_->async_cancel_goal(pursuit_goal_handle_);
+  }
+
+  is_pursuit_goal_pending_.store(true);
+
   auto goal_msg = inrof2026_koma_type::action::Pursuit::Goal();
   auto send_goal_options =
     rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SendGoalOptions();
@@ -176,22 +184,20 @@ void koma::BTNode::start_path_pursuit()
     &BTNode::pursuit_feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
   send_goal_options.result_callback =
     std::bind(&BTNode::result_callback, this, std::placeholders::_1);
-
+  
   pursuit_act_->async_send_goal(goal_msg, send_goal_options);
-  is_pursuit_running_.store(true);
 }
 
 void koma::BTNode::pursuit_goal_response_callback(
   rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::SharedPtr goal_handle)
 {
   if (!goal_handle) {
-    is_pursuit_running_.store(false);
     RCLCPP_ERROR(this->get_logger(), "Pursuit goal was rejected by action server.");
     return;
   }
-
-  is_pursuit_running_.store(true);
-  RCLCPP_INFO(this->get_logger(), "Start pursuit.");
+  pursuit_goal_handle_ = goal_handle;
+  is_pursuit_goal_pending_.store(false);
+  RCLCPP_INFO(this->get_logger(), "Received pursuit goal response. Goal accepted.");
 }
 
 void koma::BTNode::pursuit_feedback_callback(
@@ -205,15 +211,31 @@ void koma::BTNode::pursuit_feedback_callback(
 void koma::BTNode::result_callback(
   const rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::WrappedResult result)
 {
-  is_pursuit_running_.store(false);
+  if (
+    pursuit_goal_handle_ &&
+    pursuit_goal_handle_->get_goal_id() == result.goal_id)
+  {
+    pursuit_goal_handle_.reset();
+  } else {
+    RCLCPP_WARN(
+      this->get_logger(),
+      "Received result for an old pursuit goal. Ignoring handle reset.");
+  }
+
+  if (result.code == rclcpp_action::ResultCode::SUCCEEDED) {
+    RCLCPP_INFO(this->get_logger(), "Pursuit succeeded.");
+  } else if (result.code == rclcpp_action::ResultCode::CANCELED) {
+    RCLCPP_INFO(this->get_logger(), "Pursuit canceled.");
+  } else if (result.code == rclcpp_action::ResultCode::ABORTED) {
+    RCLCPP_WARN(this->get_logger(), "Pursuit aborted.");
+  }
 
   if (!result.result) {
     RCLCPP_WARN(this->get_logger(), "Pursuit action returned null result.");
-  };
-  RCLCPP_INFO(this->get_logger(), "Pursuit complete.");
+  }
 }
 
-bool koma::BTNode::is_pursuit_runing() const { return is_pursuit_running_.load(); }
+bool koma::BTNode::is_pursuit_running() const { return pursuit_goal_handle_ != nullptr || is_pursuit_goal_pending_.load(); }
 
 std::optional<inrof2026_koma_type::srv::BallPosition::Response> koma::BTNode::target_ball_position()
 {

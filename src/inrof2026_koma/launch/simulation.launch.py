@@ -261,7 +261,7 @@ def generate_launch_description():
                 </scan>
                 <range>
                 <min>0.02</min>
-                <max>12.0</max>
+                <max>1.0</max>
                 <resolution>0.015</resolution>
                 </range>
             </ray>
