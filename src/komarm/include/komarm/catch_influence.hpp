@@ -79,6 +79,10 @@ private:
   void arm_ee_close_callback(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_default_pose_srv_;
+  void arm_default_pose_callback(
+    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
   //action server
   rclcpp_action::Server<inrof2026_koma_type::action::ArmControl>::SharedPtr arm_control_act_;

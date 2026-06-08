@@ -36,6 +36,7 @@
                            z="{z}"/>
               <arm_ee_close/>
               <Sleep msec="5000"/>
+              <arm_default_pose/>
               <path_ball x="1.34"
                          y="2.00"/>
               <pursuit/>
@@ -45,9 +46,9 @@
                              y="0.75"
                              theta="1.05"/>
               <pursuit/>
+              <arm_ee_open/>
               <waypoint x="0.3"
                         y="2.0"/>
-              <pursuit/>
             </Sequence>
             <Sequence>
               <goal_position x="0.25"
@@ -71,6 +72,8 @@
       <input_port name="y"/>
       <input_port name="z"/>
     </Action>
+    <Action ID="arm_default_pose"
+            editable="true"/>
     <Action ID="arm_ee_close"
             editable="true"/>
     <Action ID="arm_ee_open"
