@@ -92,13 +92,6 @@ rclcpp_action::GoalResponse koma::Pursuit::handle_goal(
   const rclcpp_action::GoalUUID & uuid,
   std::shared_ptr<const inrof2026_koma_type::action::Pursuit::Goal> goal)
 {
-  if (goal_handle_) {
-    RCLCPP_WARN(
-      this->get_logger(),
-      "Received a new goal request, but there is already an active goal. Rejecting.");
-    return rclcpp_action::GoalResponse::REJECT;
-  }
-  RCLCPP_INFO(this->get_logger(), "Received a new goal request. Accepting.");
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
@@ -236,7 +229,7 @@ void koma::Pursuit::control_loop()
       path_[current_waypoint_index_].pose.position.y - robot_pose_.position.y);
   }
 
-  if ((linear_goal_distance < max_reaching_distance_)) {  //&& theta_goal < max_reaching_theta) {
+  if ((linear_goal_distance < max_reaching_distance_) && theta_goal < max_reaching_theta_) {
     //goal reached
     RCLCPP_INFO(this->get_logger(), "Goal reached.");
     publish_zero_velocity();

@@ -235,7 +235,9 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
-                "model_path": weight_path
+                "model_path": weight_path,
+                "x_reach_th": 0.05,
+                "y_reach_th": 0.025,
             }
         ],
     )
@@ -250,10 +252,10 @@ def generate_launch_description():
             "initial_x": x,
             "initial_y": y,
             "initial_theta": theta,
-            "odom_noise_1": 2.0,
-            "odom_noise_2": 2.0,
-            "odom_noise_3": 0.1,
-            "odom_noise_4": 0.1,
+            "odom_noise_1": 10.0,
+            "odom_noise_2": 0.01,
+            "odom_noise_3": 1.0,
+            "odom_noise_4": 12.0,
             "resample_th": 0.9,
             "scan_step": 5,
         }],
@@ -291,7 +293,7 @@ def generate_launch_description():
             "max_linear_tolerance": 0.20,
             "max_theta_tolerance": 0.10,
             "max_reaching_distance": 0.05,
-            "max_reaching_theta": 0.10,
+            "max_reaching_theta": 0.01,
             "lookahead_distance": 0.20,
             "resampleThreshold": 0.10,
             "Kp_tan": 1.0,
@@ -300,7 +302,7 @@ def generate_launch_description():
             "Kp_normal": 1.0,
             "Ki_normal": 0.00,
             "Kd_normal": 0.00,
-            "Kp_theta": 1.0,
+            "Kp_theta": 5.0,
             "Ki_theta": 0.00,
             "Kd_theta": 0.00,
         }],
@@ -329,7 +331,8 @@ def generate_launch_description():
         executable="ball_plan",
         output="screen",
         parameters=[{
-            "shorten": 0.26,
+            "shorten": 0.28,
+            "theta_offset": math.pi/5.0,
         }],
     )
 

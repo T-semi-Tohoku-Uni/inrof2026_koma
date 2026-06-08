@@ -23,6 +23,7 @@ public:
   void path_ball_position(double x, double y);
   void arm_ee_open();
   void arm_ee_close();
+  void arm_default_pose();
 
   std::optional<inrof2026_koma_type::srv::BallPosition::Response> target_ball_position();
 
@@ -65,6 +66,7 @@ private:
   rclcpp::Client<inrof2026_koma_type::srv::PoseStamped>::SharedPtr path_ball_position_srv_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr arm_ee_open_srv_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr arm_ee_close_srv_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr arm_default_pose_srv_;
 
   // action
   rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_act_;

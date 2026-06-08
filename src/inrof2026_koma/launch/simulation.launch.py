@@ -488,7 +488,11 @@ def generate_launch_description():
         executable="mcl",
         name="mcl",
         parameters=[{
-            "map_path": os.path.join(inrof2026_koma_package_dir, "map/")
+            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
+            "odom_noise_1": 0.1,
+            "odom_noise_2": 0.1,
+            "odom_noise_3": 0.1,
+            "odom_noise_4": 0.1,
         }],
         output="screen",
         remappings=[('clock', '/world/inrof/clock')]
@@ -614,7 +618,7 @@ def generate_launch_description():
     ball_y_min = 0.60
     ball_y_max = 1.80
     for i_x in range(2):
-        for i_y in range(2):
+        for i_y in range(1):
             region_x_min = ball_x_min + (ball_x_max-ball_x_min)*i_x/2
             region_x_max = ball_x_min + (ball_x_max-ball_x_min)*(i_x+1)/2
             region_y_min = ball_y_min + (ball_y_max-ball_y_min)*i_y/4

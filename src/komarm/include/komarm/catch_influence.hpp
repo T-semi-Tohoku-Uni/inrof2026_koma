@@ -47,7 +47,9 @@ private:
   geometry_msgs::msg::PointStamped offset_point_;
   double open_command_;
   double close_command_;
-  double reach_th_;
+  double x_reach_th_;
+  double y_reach_th_;
+  double z_reach_th_;
 
   // for transform
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -75,6 +77,10 @@ private:
     std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_ee_close_srv_;
   void arm_ee_close_callback(
+    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_default_pose_srv_;
+  void arm_default_pose_callback(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
