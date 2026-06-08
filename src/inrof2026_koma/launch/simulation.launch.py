@@ -533,7 +533,7 @@ def generate_launch_description():
             "Kp_normal": 1.0,
             "Ki_normal": 0.00,
             "Kd_normal": 0.00,
-            "Kp_theta": 1.0,
+            "Kp_theta": 2.0,
             "Ki_theta": 0.00,
             "Kd_theta": 0.00,
         }],
