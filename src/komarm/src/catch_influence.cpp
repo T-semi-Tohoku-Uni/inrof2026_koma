@@ -61,7 +61,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     "arm_default_pose", std::bind(
                           &CatchInfluence::arm_default_pose_callback, this, std::placeholders::_1,
                           std::placeholders::_2));
-  
+
   arm_action_timeout_sec_ = this->declare_parameter<double>("arm_action_timeout_sec", 5.0);
 
   // Initialize action server
@@ -226,7 +226,8 @@ void CatchInfluence::control_loop()
   if (elapsed.seconds() >= arm_action_timeout_sec_) {
     RCLCPP_WARN(this->get_logger(), "Arm action timeout. Forcing success.");
 
-    std::shared_ptr<inrof2026_koma_type::action::ArmControl::Result> result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
+    std::shared_ptr<inrof2026_koma_type::action::ArmControl::Result> result_msg =
+      std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
     result_msg->success = true;
 
     goal_handle_->succeed(result_msg);

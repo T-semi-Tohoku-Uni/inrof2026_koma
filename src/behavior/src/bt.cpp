@@ -184,7 +184,7 @@ void koma::BTNode::start_path_pursuit()
     &BTNode::pursuit_feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
   send_goal_options.result_callback =
     std::bind(&BTNode::result_callback, this, std::placeholders::_1);
-  
+
   pursuit_act_->async_send_goal(goal_msg, send_goal_options);
 }
 
@@ -211,15 +211,11 @@ void koma::BTNode::pursuit_feedback_callback(
 void koma::BTNode::result_callback(
   const rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::WrappedResult result)
 {
-  if (
-    pursuit_goal_handle_ &&
-    pursuit_goal_handle_->get_goal_id() == result.goal_id)
-  {
+  if (pursuit_goal_handle_ && pursuit_goal_handle_->get_goal_id() == result.goal_id) {
     pursuit_goal_handle_.reset();
   } else {
     RCLCPP_WARN(
-      this->get_logger(),
-      "Received result for an old pursuit goal. Ignoring handle reset.");
+      this->get_logger(), "Received result for an old pursuit goal. Ignoring handle reset.");
   }
 
   if (result.code == rclcpp_action::ResultCode::SUCCEEDED) {
@@ -235,7 +231,10 @@ void koma::BTNode::result_callback(
   }
 }
 
-bool koma::BTNode::is_pursuit_running() const { return pursuit_goal_handle_ != nullptr || is_pursuit_goal_pending_.load(); }
+bool koma::BTNode::is_pursuit_running() const
+{
+  return pursuit_goal_handle_ != nullptr || is_pursuit_goal_pending_.load();
+}
 
 std::optional<inrof2026_koma_type::srv::BallPosition::Response> koma::BTNode::target_ball_position()
 {
@@ -412,18 +411,13 @@ int main(int argc, char * argv[])
   if (config_path.empty()) {
     RCLCPP_ERROR(
       ros_node->get_logger(),
-      "Parameter 'config_path' is empty. Please set config_path from launch file."
-    );
+      "Parameter 'config_path' is empty. Please set config_path from launch file.");
     rclcpp::shutdown();
     return 1;
   }
 
-  RCLCPP_INFO(
-    ros_node->get_logger(),
-    "Loading behavior tree config: %s",
-    config_path.c_str()
-  );
-  
+  RCLCPP_INFO(ros_node->get_logger(), "Loading behavior tree config: %s", config_path.c_str());
+
   factory.registerBehaviorTreeFromFile(config_path);
   BT::Tree tree = factory.createTree("main");
 
