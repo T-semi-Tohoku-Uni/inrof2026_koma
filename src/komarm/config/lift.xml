@@ -7,20 +7,27 @@
         <Sleep msec="2000"/>
         <arm_ee_open/>
         <Sleep msec="2000"/>
-        <target_ball_position x="{x}"
-                              y="{y}"
-                              z="{z}"/>
-        <arm_control x="{x}"
-                     y="{y}"
-                     z="{z}"/>
-        <arm_ee_close/>
-        <Sleep msec="2000"/>
+        <WhileDoElseBreak>
+          <target_ball_position x="{x}"
+                                y="{y}"
+                                z="{z}"/>
+          <Sequence>
+            <arm_control x="{x}"
+                         y="{y}"
+                         z="{z}"/>
+            <arm_ee_close/>
+            <Sleep msec="2000"/>
+          </Sequence>
+          <Sleep msec="100000"/>
+        </WhileDoElseBreak>
       </Sequence>
     </KeepRunningUntilFailure>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Control ID="WhileDoElseBreak"
+             editable="true"/>
     <Action ID="arm_control"
             editable="true">
       <input_port name="x"/>
