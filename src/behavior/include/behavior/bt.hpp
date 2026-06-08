@@ -70,7 +70,8 @@ private:
 
   // action
   rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_act_;
-  rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_goal_handle_;
+  rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::SharedPtr
+    pursuit_goal_handle_;
   rclcpp_action::Client<inrof2026_koma_type::action::ArmControl>::SharedPtr arm_control_act_;
 };
 }  // namespace koma
