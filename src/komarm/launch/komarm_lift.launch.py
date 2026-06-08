@@ -8,6 +8,7 @@ from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJ
 from launch_ros.actions import Node
 import launch_ros
 from pathlib import Path
+from launch.actions import ExecuteProcess
 
 import math
 
@@ -157,7 +158,7 @@ def generate_launch_description():
         executable="static_transform_publisher",
         name="static_transform_publisher",
         output="screen",
-        arguments=['0', '0', '0', '0', '0', '0', 'map', 'world'],
+        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
     )
 
     static_from_odom_to_base_link = Node(
@@ -186,6 +187,16 @@ def generate_launch_description():
         parameters=[{
             "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
         }],
+    )
+
+    pose_pub = ExecuteProcess(
+        cmd=[
+            "ros2", "topic", "pub",
+            "-r", "30",
+            "/pose",
+            "geometry_msgs/msg/Pose",
+            "{position: {x: 0.25, y: 0.25, z: 0.30}, orientation: {x: 0.0, y: 0.0, z: 0.7071068, w: 0.7071068}}",
+        ],
     )
 
     bt = Node(
@@ -220,4 +231,5 @@ def generate_launch_description():
         ball_detect,
         bt,
         ldlidar_with_mgr,
+        pose_pub
     ]) 
