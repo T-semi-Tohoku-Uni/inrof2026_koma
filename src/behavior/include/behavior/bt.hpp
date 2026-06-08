@@ -14,7 +14,7 @@ class BTNode : public rclcpp::Node
 public:
   BTNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-  bool is_pursuit_runing() const;
+  bool is_pursuit_running() const;
   bool is_arm_control_running() const;
 
   // service setter
@@ -56,7 +56,7 @@ public:
       result);
 
 private:
-  std::atomic_bool is_pursuit_running_{false};
+  std::atomic_bool is_pursuit_goal_pending_{false};
   std::atomic_bool is_arm_control_runing_{false};
 
   // service
@@ -70,6 +70,7 @@ private:
 
   // action
   rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_act_;
+  rclcpp_action::ClientGoalHandle<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_goal_handle_;
   rclcpp_action::Client<inrof2026_koma_type::action::ArmControl>::SharedPtr arm_control_act_;
 };
 }  // namespace koma

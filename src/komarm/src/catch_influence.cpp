@@ -61,6 +61,8 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     "arm_default_pose", std::bind(
                           &CatchInfluence::arm_default_pose_callback, this, std::placeholders::_1,
                           std::placeholders::_2));
+  
+  arm_action_timeout_sec_ = this->declare_parameter<double>("arm_action_timeout_sec", 5.0);
 
   // Initialize action server
   arm_control_act_ = rclcpp_action::create_server<inrof2026_koma_type::action::ArmControl>(
@@ -161,6 +163,7 @@ void koma::CatchInfluence::handle_accepted(
     goal_handle)
 {
   goal_handle_ = goal_handle;
+  arm_goal_start_time_ = this->get_clock()->now();
 
   // target ball position based odom frame. convert position based to base_link
   geometry_msgs::msg::PoseStamped target_ball_pose_odom_frame;
@@ -217,6 +220,18 @@ void CatchInfluence::control_loop()
   //pre action = action
 
   if (!goal_handle_) return;
+
+  rclcpp::Duration elapsed = this->get_clock()->now() - arm_goal_start_time_;
+  if (elapsed.seconds() >= arm_action_timeout_sec_) {
+    RCLCPP_WARN(this->get_logger(), "Arm action timeout. Forcing success.");
+
+    std::shared_ptr<inrof2026_koma_type::action::ArmControl::Result> result_msg = std::make_shared<inrof2026_koma_type::action::ArmControl::Result>();
+    result_msg->success = true;
+
+    goal_handle_->succeed(result_msg);
+    goal_handle_.reset();
+    return;
+  }
 
   if (!has_cur_joint_state_) {
     RCLCPP_WARN(this->get_logger(), "cur_joint_state is empty");
