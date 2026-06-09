@@ -7,6 +7,7 @@
 #include <behavior/arm_default_pose.hpp>
 #include <behavior/arm_ee_close.hpp>
 #include <behavior/arm_ee_open.hpp>
+#include <behavior/arm_root_pose.hpp>
 #include <behavior/bt.hpp>
 #include <behavior/path_ball_position.hpp>
 #include <behavior/path_goal_position.hpp>
@@ -14,7 +15,6 @@
 #include <behavior/pursuit.hpp>
 #include <behavior/target_ball_position.hpp>
 #include <behavior/while_do_else_break.hpp>
-#include <behavior/arm_root_pose.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
@@ -39,8 +39,7 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
   arm_ee_open_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_open");
   arm_ee_close_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_close");
   arm_default_pose_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_default_pose");
-  arm_root_pose_srv_ =
-    this->create_client<inrof2026_koma_type::srv::SetFloat64>("arm_root_pose");
+  arm_root_pose_srv_ = this->create_client<inrof2026_koma_type::srv::SetFloat64>("arm_root_pose");
 
   // action
   // server: localization/pursuit

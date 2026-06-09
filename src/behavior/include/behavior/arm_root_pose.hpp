@@ -16,4 +16,4 @@ public:
 private:
   std::shared_ptr<BTNode> ros_node_;
 };
-}
+}  // namespace koma

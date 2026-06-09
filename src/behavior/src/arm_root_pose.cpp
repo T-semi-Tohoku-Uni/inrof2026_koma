@@ -6,9 +6,7 @@ koma::ArmRootPose::ArmRootPose(
   const std::string & name, const BT::NodeConfig & config, std::shared_ptr<BTNode> ros_node)
 : BT::SyncActionNode(name, config), ros_node_(ros_node){};
 
-BT::PortsList koma::ArmRootPose::providedPorts() { 
-    return { BT::InputPort<double>("theta") };
-}
+BT::PortsList koma::ArmRootPose::providedPorts() { return {BT::InputPort<double>("theta")}; }
 
 BT::NodeStatus koma::ArmRootPose::tick()
 {

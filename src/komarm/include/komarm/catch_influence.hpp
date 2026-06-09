@@ -8,12 +8,12 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <inrof2026_koma_type/action/arm_control.hpp>
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
+#include <inrof2026_koma_type/srv/set_float64.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_srvs/srv/trigger.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <inrof2026_koma_type/srv/set_float64.hpp>
 
 using namespace std::chrono_literals;
 

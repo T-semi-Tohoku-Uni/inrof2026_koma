@@ -63,9 +63,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
                           std::placeholders::_2));
 
   arm_root_pose_srv_ = this->create_service<inrof2026_koma_type::srv::SetFloat64>(
-    "arm_root_pose", std::bind(
-                        &CatchInfluence::arm_root_pose_callback, this, std::placeholders::_1,
-                        std::placeholders::_2));
+    "arm_root_pose",
+    std::bind(
+      &CatchInfluence::arm_root_pose_callback, this, std::placeholders::_1, std::placeholders::_2));
 
   arm_action_timeout_sec_ = this->declare_parameter<double>("arm_action_timeout_sec", 5.0);
 
