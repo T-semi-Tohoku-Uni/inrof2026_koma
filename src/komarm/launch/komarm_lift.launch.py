@@ -6,25 +6,16 @@ from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, EnvironmentVariable, PathJoinSubstitution
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 import launch_ros
 from pathlib import Path
+from launch.actions import ExecuteProcess
 
-import xacro
 import math
-import random
 
 def generate_launch_description():
-    x = 0.25
-    y = 0.25
-    z = 0.30
-    theta = math.pi/2
-
-    # get each package dir
     inrof2026_koma_package_dir = get_package_share_directory("inrof2026_koma")
     simulation_package_dir = get_package_share_directory("simulation")
     komarm_package_dir = get_package_share_directory("komarm")
-    field_package_dir = get_package_share_directory("field")
     lidar_package_dir = get_package_share_directory("ldlidar_node")
 
     # libtorch path
@@ -35,67 +26,31 @@ def generate_launch_description():
     ldlidar_params = str(Path(inrof2026_koma_package_dir) / "config" / "ldlidar_settings.yaml")
     ldlidar_launch = str(Path(lidar_package_dir) / "launch" / "ldlidar_with_mgr.launch.py")
 
-    # Get workspace dir
-    ws_root = Path(komarm_package_dir).parents[3]
-    src_path = str(ws_root / 'src')
-    models_path = str(ws_root / 'src' / 'field' / 'models')
 
-    print(src_path)
+    x = 0.25
+    y = 0.25
+    z = 0.25
+    theta = math.pi/2.0
 
-    # Set env
-    models_path_env = SetEnvironmentVariable(
-        name='IGN_GAZEBO_RESOURCE_PATH',
-        value=[
-            EnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', default_value=''),
-            ':',
-            src_path,
-            ':',
-            models_path,
-        ],
-    )
-
-    libtorch_env = SetEnvironmentVariable(
-        name='LD_LIBRARY_PATH',
-        value=[
-            libtorch_lib,
-            ':',
-            EnvironmentVariable('LD_LIBRARY_PATH', default_value=''),
-        ],
-    )
-
-    # get file path
     world_file_path = os.path.join(
-        field_package_dir,
+        simulation_package_dir,
         "worlds", 
         "field.world"
     )
-    rviz_config_path = os.path.join(
-        inrof2026_koma_package_dir,
-        "config",
-        "default.rviz"
-    )
-    koma_urdf_path = os.path.join(
+    komarm_urdf_path = os.path.join(
         inrof2026_koma_package_dir,
         "inrof2026_koma_urdf",
         "urdf",
         "komarm.urdf"
     )
 
-    ball_urdf_path = os.path.join(
-        simulation_package_dir,
-        "urdf",
-        "ball.urdf"
-    )
-    lifecycle_nodes = ['map_server']
-
-
-    # Set up koma urdf path
-    with open(koma_urdf_path, "r") as infp:
+    with open(komarm_urdf_path, "r") as infp:
         robot_desc = infp.read()
     robot_desc = robot_desc.replace(
         "../meshes/",
         f"package://inrof2026_koma/inrof2026_koma_urdf/meshes/",
     )
+
 
     base_footprint_joint = """
     <link name="base_footprint"/>
@@ -147,13 +102,15 @@ def generate_launch_description():
         end_effector_link + "\n</robot>",
     )
     params = {"robot_description": robot_desc}
-    node_robot_state_publisher = Node(
+
+
+    robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
         parameters=[params]
     )
-    
+
     map_server = Node(
         package="field",
         executable="map_server",
@@ -163,39 +120,6 @@ def generate_launch_description():
                 "mesh_resource": "package://field/models/inrof_field/meshes/InrofField.dae"
             }
         ]
-    )
-
-    static_from_map_to_odom = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="static_transform_publisher",
-        output="screen",
-        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
-    )
-
-    uart_bridge = Node(
-        package="uart_bridge",
-        executable="motor",
-        output="screen",
-        parameters=[{
-            "Kp_linear": 0.1,
-            "Kp_angular": 0.05,
-            "max_linear_acceleration": 5.0,
-            "max_angular_acceleration": 10.0
-        }]
-    )
-
-    joy2vel = Node(
-        package="localization",
-        executable="joy2vel",
-        output="screen"
-    )
-
-    joy_node = Node(
-        package="joy",
-        executable="joy_node",
-        name="joy_node",
-        output="screen",
     )
 
     joint_manager = Node(
@@ -229,84 +153,32 @@ def generate_launch_description():
         ]
     )
 
+    static_from_map_to_odom = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="static_transform_publisher",
+        output="screen",
+        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+    )
+
+    static_from_odom_to_base_link = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="static_transform_publisher",
+        output="screen",
+        arguments=[str(x), str(y), str(z), str(theta), '0', '0', 'odom', 'base_footprint'],
+    )
+
     catch_influence = Node(
         package="komarm",
         executable="catch_influence",
         output="screen",
         parameters=[
             {
-                "model_path": weight_path,
-                "x_reach_th": 0.05,
-                "y_reach_th": 0.025,
+                "model_path": weight_path
             }
-        ],
+        ]
     )
-
-    mcl = Node(
-        package="localization",
-        executable="mcl",
-        name="mcl",
-        parameters=[{
-            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
-            "particle_num": 100,
-            "initial_x": x,
-            "initial_y": y,
-            "initial_theta": theta,
-            "odom_noise_1": 0.05,
-            "odom_noise_2": 0.0,
-            "odom_noise_3": 1.0,
-            "odom_noise_4": 0.0,
-            "resample_th": 0.5,
-            "scan_step": 1,
-        }],
-        output="screen",
-    )
-
-    odom_tf_broadcaster = Node(
-        package="localization",
-        executable="broadcaster",
-        output="screen",
-    )
-
-    planner = Node(
-        package="planning",
-        executable="path_plan",
-        name="path_plan",
-        output="screen",
-        parameters=[{
-            "map_path": os.path.join(inrof2026_koma_package_dir, "map/"),
-            "initial_x": x,
-            "initial_y": y,
-            "initial_z": z,
-            "initial_theta": theta
-        }],
-    )
-
-    pursuit = Node(
-        package="planning",
-        executable="pursuit",
-        name="pursuit",
-        output="screen",
-        parameters=[{
-            "max_linear_speed": 0.10,
-            "max_angular_speed": 0.7,
-            "max_linear_tolerance": 0.20,
-            "max_theta_tolerance": 0.10,
-            "max_reaching_distance": 0.05,
-            "max_reaching_theta": 0.10,
-            "lookahead_distance": 0.20,
-            "resampleThreshold": 0.10,
-            "Kp_tan": 1.0,
-            "Ki_tan": 0.0,
-            "Kd_tan": 0.0,
-            "Kp_normal": 1.0,
-            "Ki_normal": 0.00,
-            "Kd_normal": 0.00,
-            "Kp_theta": 2.0,
-            "Ki_theta": 0.00,
-            "Kd_theta": 0.00,
-        }],
-    ) 
 
     ball_detect = Node(
         package="ball_detection",
@@ -317,22 +189,22 @@ def generate_launch_description():
         }],
     )
 
+    pose_pub = ExecuteProcess(
+        cmd=[
+            "ros2", "topic", "pub",
+            "-r", "30",
+            "/pose",
+            "geometry_msgs/msg/Pose",
+            "{position: {x: 0.25, y: 0.25, z: 0.30}, orientation: {x: 0.0, y: 0.0, z: 0.7071068, w: 0.7071068}}",
+        ],
+    )
+
     bt = Node(
         package="behavior",
         executable="bt",
         output="screen",
         parameters=[{
-            "config_path": os.path.join(inrof2026_koma_package_dir, "config", "koma_bt.xml")
-        }],
-    )
-
-    path_ball_position = Node(
-        package="planning",
-        executable="ball_plan",
-        output="screen",
-        parameters=[{
-            "shorten": 0.28,
-            "theta_offset": math.pi/5.0,
+            "config_path": os.path.join(komarm_package_dir, "config", "lift.xml")
         }],
     )
 
@@ -341,24 +213,23 @@ def generate_launch_description():
         launch_arguments={"params_file": ldlidar_params}.items(),
     )
 
-
     return LaunchDescription([
-        models_path_env,
-        libtorch_env,
-        node_robot_state_publisher,
-        map_server,
-        static_from_map_to_odom,
-        catch_influence,
+        SetEnvironmentVariable(
+            name='LD_LIBRARY_PATH',
+            value=[
+                libtorch_lib,
+                ':',
+                EnvironmentVariable('LD_LIBRARY_PATH', default_value=''),
+            ],
+        ),
+        robot_state_publisher_node,
         joint_manager,
-        uart_bridge,
-        mcl,
-        planner,
-        pursuit,
-        joy2vel,
-        joy_node,
+        static_from_map_to_odom,
+        static_from_odom_to_base_link,
+        map_server,
+        catch_influence,
         ball_detect,
         bt,
-        path_ball_position,
-        odom_tf_broadcaster,
-        ldlidar_with_mgr
-    ])
+        ldlidar_with_mgr,
+        pose_pub
+    ]) 

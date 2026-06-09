@@ -92,6 +92,7 @@ rclcpp_action::GoalResponse koma::Pursuit::handle_goal(
   const rclcpp_action::GoalUUID & uuid,
   std::shared_ptr<const inrof2026_koma_type::action::Pursuit::Goal> goal)
 {
+  RCLCPP_INFO(this->get_logger(), "Received pursuit goal request");
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
@@ -99,7 +100,7 @@ rclcpp_action::CancelResponse koma::Pursuit::handle_cancel(
   const std::shared_ptr<rclcpp_action::ServerGoalHandle<inrof2026_koma_type::action::Pursuit>>
     goal_handle)
 {
-  goal_handle_.reset();
+  RCLCPP_INFO(this->get_logger(), "Received request to cancel pursuit goal");
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
@@ -108,6 +109,7 @@ void koma::Pursuit::handle_accepted(
     goal_handle)
 {
   goal_handle_ = goal_handle;
+  RCLCPP_INFO(this->get_logger(), "Pursuit goal accepted");
 }
 
 void koma::Pursuit::path_callback(const nav_msgs::msg::Path::SharedPtr msg)
@@ -123,10 +125,23 @@ void koma::Pursuit::robot_pose_callback(const geometry_msgs::msg::Pose::SharedPt
 
 void koma::Pursuit::control_loop()
 {
-  if (!goal_handle_ || goal_handle_->is_canceling()) {
+  if (!goal_handle_) {
     publish_zero_velocity();
     return;
   }
+  if (goal_handle_->is_canceling()) {
+    RCLCPP_INFO(this->get_logger(), "Goal canceled.");
+    publish_zero_velocity();
+
+    std::shared_ptr<inrof2026_koma_type::action::Pursuit::Result> result_msg =
+      std::make_shared<inrof2026_koma_type::action::Pursuit::Result>();
+    result_msg->success = false;
+
+    goal_handle_->canceled(result_msg);
+    goal_handle_.reset();
+    return;
+  }
+
   if (path_.empty()) {
     publish_zero_velocity();
     return;

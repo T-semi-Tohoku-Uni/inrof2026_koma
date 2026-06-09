@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="main">
+    <KeepRunningUntilFailure>
+      <Sequence>
+        <arm_default_pose/>
+        <Sleep msec="2000"/>
+        <arm_ee_open/>
+        <Sleep msec="2000"/>
+        <WhileDoElseBreak>
+          <target_ball_position x="{x}"
+                                y="{y}"
+                                z="{z}"/>
+          <Sequence>
+            <arm_control x="{x}"
+                         y="{y}"
+                         z="{z}"/>
+            <arm_ee_close/>
+            <Sleep msec="2000"/>
+          </Sequence>
+          <Sleep msec="100000"/>
+        </WhileDoElseBreak>
+      </Sequence>
+    </KeepRunningUntilFailure>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Control ID="WhileDoElseBreak"
+             editable="true"/>
+    <Action ID="arm_control"
+            editable="true">
+      <input_port name="x"/>
+      <input_port name="y"/>
+      <input_port name="z"/>
+    </Action>
+    <Action ID="arm_default_pose"
+            editable="true"/>
+    <Action ID="arm_ee_close"
+            editable="true"/>
+    <Action ID="arm_ee_open"
+            editable="true"/>
+    <Action ID="target_ball_position"
+            editable="true">
+      <output_port name="x"/>
+      <output_port name="y"/>
+      <output_port name="z"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>
