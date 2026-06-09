@@ -50,6 +50,9 @@ private:
   double x_reach_th_;
   double y_reach_th_;
   double z_reach_th_;
+  // arm thresholds timer
+  rclcpp::Time arm_goal_start_time_;
+  double arm_action_timeout_sec_;
 
   // for transform
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
