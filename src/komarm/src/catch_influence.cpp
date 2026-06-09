@@ -164,6 +164,7 @@ void koma::CatchInfluence::handle_accepted(
 {
   goal_handle_ = goal_handle;
   arm_goal_start_time_ = this->get_clock()->now();
+  pre_action_.position = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // target ball position based odom frame. convert position based to base_link
   geometry_msgs::msg::PoseStamped target_ball_pose_odom_frame;
