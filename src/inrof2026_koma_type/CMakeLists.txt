@@ -16,6 +16,7 @@ find_package(geometry_msgs REQUIRED)
 set(srv_files
   "srv/PoseStamped.srv"
   "srv/BallPosition.srv"
+  "srv/SetFloat64.srv"
 )
 
 set(action_files

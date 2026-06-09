@@ -14,6 +14,7 @@
 #include <behavior/pursuit.hpp>
 #include <behavior/target_ball_position.hpp>
 #include <behavior/while_do_else_break.hpp>
+#include <behavior/arm_root_pose.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
@@ -38,6 +39,8 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
   arm_ee_open_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_open");
   arm_ee_close_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_close");
   arm_default_pose_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_default_pose");
+  arm_root_pose_srv_ =
+    this->create_client<inrof2026_koma_type::srv::SetFloat64>("arm_root_pose");
 
   // action
   // server: localization/pursuit
@@ -339,6 +342,26 @@ void koma::BTNode::arm_default_pose()
   }
 }
 
+void koma::BTNode::arm_root_pose(double theta)
+{
+  while (!this->arm_root_pose_srv_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) break;
+    RCLCPP_WARN(this->get_logger(), "arm_root_pose_srv_ is not available");
+  }
+
+  std::shared_ptr<inrof2026_koma_type::srv::SetFloat64_Request> request =
+    std::make_shared<inrof2026_koma_type::srv::SetFloat64::Request>();
+  request->data = theta;
+
+  rclcpp::Client<inrof2026_koma_type::srv::SetFloat64>::FutureAndRequestId result_future =
+    arm_root_pose_srv_->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(
+      this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
+    rclcpp::FutureReturnCode::SUCCESS) {
+  }
+}
+
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -400,6 +423,12 @@ int main(int argc, char * argv[])
       return std::make_unique<koma::ArmDefaultPose>(name, config, ros_node);
     };
   factory.registerBuilder<koma::ArmDefaultPose>("arm_default_pose", builder_arm_default_pose);
+
+  BT::NodeBuilder builder_arm_root_pose =
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::ArmRootPose>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::ArmRootPose>("arm_root_pose", builder_arm_root_pose);
 
   factory.registerNodeType<koma::WhileDoElseBreakNode>("WhileDoElseBreak");
 
