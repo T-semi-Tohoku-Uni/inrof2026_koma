@@ -4,8 +4,9 @@
     <Sequence>
       <arm_default_pose/>
       <arm_ee_open/>
-      <Sleep msec="5000"/>
+      <Sleep msec="2000"/>
       <arm_ee_close/>
+      <Sleep msec="2000"/>
       <goal_position x="0.15"
                      y="0.75"
                      theta="1.57"/>
