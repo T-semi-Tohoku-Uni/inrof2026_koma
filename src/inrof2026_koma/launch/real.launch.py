@@ -179,7 +179,7 @@ def generate_launch_description():
         output="screen",
         parameters=[{
             "Kp_linear": 0.1,
-            "Kp_angular": 0.05,
+            "Kp_angular": 1.0,
             "max_linear_acceleration": 5.0,
             "max_angular_acceleration": 10.0
         }]
