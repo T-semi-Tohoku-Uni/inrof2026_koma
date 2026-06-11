@@ -336,6 +336,15 @@ def generate_launch_description():
         }],
     )
 
+    color = Node(
+        package="uart_bridge",
+        executable="color",
+        output="screen",
+        parameters=[{
+            "device_name": "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0"
+        }]
+    )
+
     ldlidar_with_mgr = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(ldlidar_launch),
         launch_arguments={"params_file": ldlidar_params}.items(),
@@ -360,5 +369,6 @@ def generate_launch_description():
         bt,
         path_ball_position,
         odom_tf_broadcaster,
-        ldlidar_with_mgr
+        ldlidar_with_mgr,
+        color
     ])
