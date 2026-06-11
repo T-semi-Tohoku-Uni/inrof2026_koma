@@ -197,8 +197,8 @@ void koma::Pursuit::control_loop()
   tf2::Matrix3x3(q_goal).getRPY(roll_goal, pitch_goal, yaw_goal);
 
   double theta_goal = yaw_goal - tf2::getYaw(robot_pose_.orientation);
-  while (theta_goal >= M_PI) theta_goal -= M_PI;
-  while (theta_goal < -M_PI) theta_goal += M_PI;
+  while (theta_goal >= M_PI) theta_goal -= 2 * M_PI;
+  while (theta_goal < -M_PI) theta_goal += 2 * M_PI;
 
   //error calculation theta
   double target_theta = yaw;
@@ -244,7 +244,7 @@ void koma::Pursuit::control_loop()
       path_[current_waypoint_index_].pose.position.y - robot_pose_.position.y);
   }
 
-  if ((linear_goal_distance < max_reaching_distance_) && theta_goal < max_reaching_theta_) {
+  if ((linear_goal_distance < max_reaching_distance_) && std::abs(theta_goal) < max_reaching_theta_) {
     //goal reached
     RCLCPP_INFO(this->get_logger(), "Goal reached.");
     publish_zero_velocity();
