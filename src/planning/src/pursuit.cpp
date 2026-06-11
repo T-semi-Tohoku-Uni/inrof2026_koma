@@ -77,6 +77,10 @@ koma::Pursuit::Pursuit(const rclcpp::NodeOptions & options) : Node("pursuit", op
   // publisher
   twist_command_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
     "twist_command", rclcpp::QoS(rclcpp::KeepLast(10)));
+  target_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+    "target_pose", rclcpp::QoS(rclcpp::KeepLast(10)));
+  goal_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+    "goal_pose", rclcpp::QoS(rclcpp::KeepLast(10)));
 
   // action server
   pursuit_action_server_ = rclcpp_action::create_server<inrof2026_koma_type::action::Pursuit>(
@@ -148,12 +152,25 @@ void koma::Pursuit::control_loop()
   }
 
   // publish goal position
-  geometry_msgs::msg::Pose target_pose;
-  target_pose.position.x = path_[current_waypoint_index_].pose.position.x;
-  target_pose.position.y = path_[current_waypoint_index_].pose.position.y;
+  geometry_msgs::msg::PoseStamped target_pose;
+  target_pose.header.frame_id = "map";
+  target_pose.header.stamp = this->get_clock()->now();
+  target_pose.pose.position.x = path_[current_waypoint_index_].pose.position.x;
+  target_pose.pose.position.y = path_[current_waypoint_index_].pose.position.y;
+  target_pose.pose.position.z = path_[current_waypoint_index_].pose.position.z;
+  target_pose.pose.orientation = path_[current_waypoint_index_].pose.orientation;
+  target_pose_pub_->publish(target_pose);
 
-  // target_pub_ ->publish(target_pose);
+  geometry_msgs::msg::PoseStamped goal_pose;
+  goal_pose.header.frame_id = "map";
+  goal_pose.header.stamp = this->get_clock()->now();
+  goal_pose.pose.position.x = path_[path_.size() - 1].pose.position.x;
+  goal_pose.pose.position.y = path_[path_.size() - 1].pose.position.y;
+  goal_pose.pose.position.z = path_[path_.size() - 1].pose.position.z;
+  goal_pose.pose.orientation = path_[path_.size() - 1].pose.orientation;
+  goal_pose_pub_->publish(goal_pose);
 
+  
   //error calculation linear
   double dx = path_[current_waypoint_index_].pose.position.x - robot_pose_.position.x;
   double dy = path_[current_waypoint_index_].pose.position.y - robot_pose_.position.y;
