@@ -37,8 +37,8 @@
               <arm_ee_close/>
               <Sleep msec="5000"/>
               <arm_default_pose/>
-              <path_ball x="1.34"
-                         y="2.00"/>
+              <waypoint x="1.34"
+                        y="2.00"/>
               <pursuit/>
               <waypoint x="0.3"
                         y="2.0"/>

@@ -95,7 +95,7 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch include libtorch weight
+install(DIRECTORY config launch include libtorch weight
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -15,7 +15,7 @@ BT::NodeStatus koma::BTPursuit::onStart()
 
 BT::NodeStatus koma::BTPursuit::onRunning()
 {
-  if (this->ros_node_->is_pursuit_runing()) {
+  if (this->ros_node_->is_pursuit_running()) {
     RCLCPP_DEBUG(this->ros_node_->get_logger(), "Pursuit is Runing");
     return BT::NodeStatus::RUNNING;
   } else {
