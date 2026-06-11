@@ -3,6 +3,7 @@
 #include <inrof2026_koma_type/action/pursuit.hpp>
 #include <inrof2026_koma_type/srv/ball_position.hpp>
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
+#include <inrof2026_koma_type/srv/set_float64.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <std_srvs/srv/trigger.hpp>
@@ -24,6 +25,7 @@ public:
   void arm_ee_open();
   void arm_ee_close();
   void arm_default_pose();
+  void arm_root_pose(double theta);
 
   std::optional<inrof2026_koma_type::srv::BallPosition::Response> target_ball_position();
 
@@ -67,6 +69,7 @@ private:
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr arm_ee_open_srv_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr arm_ee_close_srv_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr arm_default_pose_srv_;
+  rclcpp::Client<inrof2026_koma_type::srv::SetFloat64>::SharedPtr arm_root_pose_srv_;
 
   // action
   rclcpp_action::Client<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_act_;

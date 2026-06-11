@@ -62,6 +62,11 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
                           &CatchInfluence::arm_default_pose_callback, this, std::placeholders::_1,
                           std::placeholders::_2));
 
+  arm_root_pose_srv_ = this->create_service<inrof2026_koma_type::srv::SetFloat64>(
+    "arm_root_pose",
+    std::bind(
+      &CatchInfluence::arm_root_pose_callback, this, std::placeholders::_1, std::placeholders::_2));
+
   arm_action_timeout_sec_ = this->declare_parameter<double>("arm_action_timeout_sec", 5.0);
 
   // Initialize action server
@@ -125,6 +130,16 @@ void koma::CatchInfluence::arm_default_pose_callback(
   target_joint_state_.position[3] = default_position_[3];
   target_joint_state_.position[4] = default_position_[4];
   response->success = true;
+}
+
+void koma::CatchInfluence::arm_root_pose_callback(
+  const std::shared_ptr<inrof2026_koma_type::srv::SetFloat64::Request> request,
+  std::shared_ptr<inrof2026_koma_type::srv::SetFloat64::Response> response)
+{
+  // TODO: check the request data is valid
+  target_joint_state_.position[0] = request->data;
+  response->success = true;
+  RCLCPP_INFO(this->get_logger(), "arm_root_pose called with theta: %f", request->data);
 }
 
 void koma::CatchInfluence::joint_command_send_callback()
