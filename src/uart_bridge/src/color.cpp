@@ -7,7 +7,7 @@ koma::Color::Color(const rclcpp::NodeOptions & options) : Node("color_node", opt
         "device_name", "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.2"
     );
     serial_fd_ = open_serial(serial_port.c_str());
-    
+
     if (serial_fd_ < 0) {
         RCLCPP_ERROR(this->get_logger(), "Failed to open serial port. Shutting down.");
         rclcpp::shutdown();
@@ -91,8 +91,8 @@ void koma::Color::receive_color_from_serial() {
             std::size_t frame_len = std::distance(recev_buffer_.begin(), it_delim);
 
             if (frame_len == 3) {
-                uint8_t data_byte_1 = recev_buffer_[0];
-                uint8_t data_byte_2 = recev_buffer_[2];
+                uint8_t data_byte_1 = recev_buffer_[0] - 48;
+                uint8_t data_byte_2 = recev_buffer_[2] - 48;
 
                 // publish each ciolor value
                 std_msgs::msg::UInt8MultiArray msg_pub;
