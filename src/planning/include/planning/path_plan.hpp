@@ -34,6 +34,11 @@ private:
   // robot pose
   geometry_msgs::msg::Pose robot_pose_;
 
+  // path smoothing
+  std::vector<std::pair<double, double>> spline_smooth_eigen(
+    const std::vector<std::pair<double, double>> & original_path);
+  double spline_sample_parameter_;
+
   // waypoints
   // TODO: change to vector of Pose
   std::vector<std::pair<double, double>> waypoint_array_;

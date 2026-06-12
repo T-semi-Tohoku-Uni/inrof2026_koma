@@ -44,7 +44,7 @@
                            y="{y}"
                            z="{z}"/>
               <arm_ee_close/>
-              <Sleep msec="5000"/>
+              <Sleep msec="1500"/>
               <arm_default_pose/>
               <waypoint x="1.34"
                         y="2.00"/>
@@ -53,9 +53,13 @@
                         y="2.0"/>
               <goal_position x="0.15"
                              y="0.75"
-                             theta="1.05"/>
+                             theta="-1.57"/>
               <pursuit/>
-              <arm_ee_open/>
+              <arm_root_pose theta="1.57"/>
+	      <Sleep msec="1000"/>
+	      <arm_ee_open/>
+	      <Sleep msec="1000"/>
+              <arm_default_pose/>
               <waypoint x="0.3"
                         y="2.0"/>
             </Sequence>

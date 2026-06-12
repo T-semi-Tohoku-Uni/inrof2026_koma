@@ -77,6 +77,10 @@ koma::Pursuit::Pursuit(const rclcpp::NodeOptions & options) : Node("pursuit", op
   // publisher
   twist_command_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
     "twist_command", rclcpp::QoS(rclcpp::KeepLast(10)));
+  target_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+    "target_pose", rclcpp::QoS(rclcpp::KeepLast(10)));
+  goal_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+    "goal_pose", rclcpp::QoS(rclcpp::KeepLast(10)));
 
   // action server
   pursuit_action_server_ = rclcpp_action::create_server<inrof2026_koma_type::action::Pursuit>(
@@ -148,11 +152,23 @@ void koma::Pursuit::control_loop()
   }
 
   // publish goal position
-  geometry_msgs::msg::Pose target_pose;
-  target_pose.position.x = path_[current_waypoint_index_].pose.position.x;
-  target_pose.position.y = path_[current_waypoint_index_].pose.position.y;
+  geometry_msgs::msg::PoseStamped target_pose;
+  target_pose.header.frame_id = "map";
+  target_pose.header.stamp = this->get_clock()->now();
+  target_pose.pose.position.x = path_[current_waypoint_index_].pose.position.x;
+  target_pose.pose.position.y = path_[current_waypoint_index_].pose.position.y;
+  target_pose.pose.position.z = path_[current_waypoint_index_].pose.position.z;
+  target_pose.pose.orientation = path_[current_waypoint_index_].pose.orientation;
+  target_pose_pub_->publish(target_pose);
 
-  // target_pub_ ->publish(target_pose);
+  geometry_msgs::msg::PoseStamped goal_pose;
+  goal_pose.header.frame_id = "map";
+  goal_pose.header.stamp = this->get_clock()->now();
+  goal_pose.pose.position.x = path_[path_.size() - 1].pose.position.x;
+  goal_pose.pose.position.y = path_[path_.size() - 1].pose.position.y;
+  goal_pose.pose.position.z = path_[path_.size() - 1].pose.position.z;
+  goal_pose.pose.orientation = path_[path_.size() - 1].pose.orientation;
+  goal_pose_pub_->publish(goal_pose);
 
   //error calculation linear
   double dx = path_[current_waypoint_index_].pose.position.x - robot_pose_.position.x;
@@ -197,8 +213,8 @@ void koma::Pursuit::control_loop()
   tf2::Matrix3x3(q_goal).getRPY(roll_goal, pitch_goal, yaw_goal);
 
   double theta_goal = yaw_goal - tf2::getYaw(robot_pose_.orientation);
-  while (theta_goal >= M_PI) theta_goal -= M_PI;
-  while (theta_goal < -M_PI) theta_goal += M_PI;
+  while (theta_goal >= M_PI) theta_goal -= 2 * M_PI;
+  while (theta_goal < -M_PI) theta_goal += 2 * M_PI;
 
   //error calculation theta
   double target_theta = yaw;
@@ -244,7 +260,8 @@ void koma::Pursuit::control_loop()
       path_[current_waypoint_index_].pose.position.y - robot_pose_.position.y);
   }
 
-  if ((linear_goal_distance < max_reaching_distance_) && theta_goal < max_reaching_theta_) {
+  if (
+    (linear_goal_distance < max_reaching_distance_) && std::abs(theta_goal) < max_reaching_theta_) {
     //goal reached
     RCLCPP_INFO(this->get_logger(), "Goal reached.");
     publish_zero_velocity();

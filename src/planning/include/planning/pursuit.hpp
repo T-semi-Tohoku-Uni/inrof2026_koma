@@ -78,6 +78,8 @@ private:
 
   // publisher
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_command_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr target_pose_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_pub_;  // --- IGNORE ---
 
   // action server
   rclcpp_action::Server<inrof2026_koma_type::action::Pursuit>::SharedPtr pursuit_action_server_;
