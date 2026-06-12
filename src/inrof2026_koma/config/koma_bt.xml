@@ -3,7 +3,6 @@
   <BehaviorTree ID="free_ball">
     <Sequence>
       <arm_pursuit_pose/>
-      <arm_ee_open/>
       <Sleep msec="2000"/>
       <arm_ee_close/>
       <Sleep msec="2000"/>
