@@ -256,7 +256,7 @@ def generate_launch_description():
             "odom_noise_1": 0.05,
             "odom_noise_2": 0.0,
             "odom_noise_3": 1.0,
-            "odom_noise_4": 0.0,
+            "odom_noise_4": 0.001,
             "resample_th": 0.5,
             "scan_step": 1,
         }],
@@ -289,7 +289,7 @@ def generate_launch_description():
         name="pursuit",
         output="screen",
         parameters=[{
-            "max_linear_speed": 0.10,
+            "max_linear_speed": 0.20,
             "max_angular_speed": 0.7,
             "max_linear_tolerance": 0.20,
             "max_theta_tolerance": 0.10,
@@ -332,8 +332,8 @@ def generate_launch_description():
         executable="ball_plan",
         output="screen",
         parameters=[{
-            "shorten": 0.28,
-            "theta_offset": math.pi/5.0,
+            "shorten": 0.30,
+            "theta_offset": math.pi/2.0,
         }],
     )
 

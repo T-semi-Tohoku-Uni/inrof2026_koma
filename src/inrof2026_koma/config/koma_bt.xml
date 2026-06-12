@@ -28,7 +28,7 @@
       <KeepRunningUntilFailure>
         <Sequence>
           <goal_position x="1.34"
-                         y="2.00"
+                         y="2.10"
                          theta="-1.57"/>
           <pursuit/>
           <arm_ee_open/>
@@ -71,7 +71,6 @@
               <pursuit/>
               <arm_default_pose/>
               <arm_root_pose theta="1.57"/>
-              <Sleep msec="1000"/>
               <arm_ee_open/>
               <Sleep msec="1000"/>
               <arm_pursuit_pose/>
