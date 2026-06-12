@@ -2,8 +2,7 @@
 <root BTCPP_format="4">
   <BehaviorTree ID="free_ball">
     <Sequence>
-      <arm_default_pose/>
-      <arm_ee_open/>
+      <arm_pursuit_pose/>
       <Sleep msec="2000"/>
       <arm_ee_close/>
       <Sleep msec="2000"/>
@@ -11,11 +10,12 @@
                      y="0.75"
                      theta="1.57"/>
       <pursuit/>
+      <arm_default_pose/>
       <arm_root_pose theta="-1.57"/>
       <Sleep msec="1000"/>
       <arm_ee_open/>
       <Sleep msec="1000"/>
-      <arm_default_pose/>
+      <arm_pursuit_pose/>
       <waypoint x="0.3"
                 y="2.0"/>
     </Sequence>
@@ -37,6 +37,9 @@
                                   y="{y}"
                                   z="{z}"/>
             <Sequence>
+              <arm_default_pose/>
+              <arm_ee_open/>
+              <Sleep msec="1000"/>
               <path_ball x="{x}"
                          y="{y}"/>
               <pursuit/>
@@ -46,6 +49,8 @@
               <arm_ee_close/>
               <Sleep msec="1500"/>
               <arm_default_pose/>
+              <Sleep msec="1000"/>
+              <arm_pursuit_pose/>
               <waypoint x="1.34"
                         y="2.00"/>
               <pursuit/>
@@ -55,11 +60,12 @@
                              y="0.75"
                              theta="-1.57"/>
               <pursuit/>
-              <arm_root_pose theta="1.57"/>
-	      <Sleep msec="1000"/>
-	      <arm_ee_open/>
-	      <Sleep msec="1000"/>
               <arm_default_pose/>
+              <arm_root_pose theta="1.57"/>
+              <Sleep msec="1000"/>
+              <arm_ee_open/>
+              <Sleep msec="1000"/>
+              <arm_pursuit_pose/>
               <waypoint x="0.3"
                         y="2.0"/>
             </Sequence>
@@ -90,6 +96,8 @@
     <Action ID="arm_ee_close"
             editable="true"/>
     <Action ID="arm_ee_open"
+            editable="true"/>
+    <Action ID="arm_pursuit_pose"
             editable="true"/>
     <Action ID="arm_root_pose"
             editable="true">
