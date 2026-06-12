@@ -99,7 +99,7 @@ void koma::Color::receive_color_from_serial()
         // 0: none, 1: red, 2: yellow, 3: blue
         // -> 0: red, 1: yellow, 2: blue, none
         std_msgs::msg::UInt8 msg_srv;
-        msg_srv.data = (std::max(data_byte_1, data_byte_2) - 1) % 3;
+        msg_srv.data = (std::max(data_byte_1, data_byte_2) + 2) % 3;
         color_response_.color = msg_srv.data;
       }
 
