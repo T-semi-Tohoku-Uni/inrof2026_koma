@@ -96,8 +96,10 @@ void koma::Color::receive_color_from_serial()
         color_pub_->publish(msg_pub);
 
         // decide color value
+        // 0: none, 1: red, 2: yellow, 3: blue
+        // -> 0: red, 1: yellow, 2: blue, none
         std_msgs::msg::UInt8 msg_srv;
-        msg_srv.data = std::max(data_byte_1, data_byte_2);
+        msg_srv.data = (std::max(data_byte_1, data_byte_2) + 2) % 3;
         color_response_.color = msg_srv.data;
       }
 
@@ -112,6 +114,8 @@ void koma::Color::color_callback(
 {
   (void)request;
   response->color = color_response_.color;
+
+  RCLCPP_INFO(this->get_logger(), "color service called, response: %d", response->color);
 }
 
 int main(int argc, char * argv[])
