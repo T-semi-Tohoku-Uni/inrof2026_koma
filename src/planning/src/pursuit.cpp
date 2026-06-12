@@ -170,7 +170,6 @@ void koma::Pursuit::control_loop()
   goal_pose.pose.orientation = path_[path_.size() - 1].pose.orientation;
   goal_pose_pub_->publish(goal_pose);
 
-  
   //error calculation linear
   double dx = path_[current_waypoint_index_].pose.position.x - robot_pose_.position.x;
   double dy = path_[current_waypoint_index_].pose.position.y - robot_pose_.position.y;
@@ -261,7 +260,8 @@ void koma::Pursuit::control_loop()
       path_[current_waypoint_index_].pose.position.y - robot_pose_.position.y);
   }
 
-  if ((linear_goal_distance < max_reaching_distance_) && std::abs(theta_goal) < max_reaching_theta_) {
+  if (
+    (linear_goal_distance < max_reaching_distance_) && std::abs(theta_goal) < max_reaching_theta_) {
     //goal reached
     RCLCPP_INFO(this->get_logger(), "Goal reached.");
     publish_zero_velocity();

@@ -1,5 +1,5 @@
-#include <planning/path_plan.hpp>
 #include <Eigen/Dense>
+#include <planning/path_plan.hpp>
 #include <unsupported/Eigen/Splines>
 
 koma::PathPlanner::PathPlanner(const rclcpp::NodeOptions & options) : Node("path_planner", options)
@@ -37,14 +37,16 @@ koma::PathPlanner::PathPlanner(const rclcpp::NodeOptions & options) : Node("path
     std::bind(&PathPlanner::waypoint_callback, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-std::vector<std::pair<double, double>> koma::PathPlanner::spline_smooth_eigen(const std::vector<std::pair<double, double>> &original_path) {
+std::vector<std::pair<double, double>> koma::PathPlanner::spline_smooth_eigen(
+  const std::vector<std::pair<double, double>> & original_path)
+{
   using Spline2d = Eigen::Spline<double, 2>;
   using Vec2 = Eigen::Matrix<double, 2, 1>;
 
   // sampling point from original path
   std::vector<std::pair<double, double>> sampled_path;
-  for (size_t i=0; i<original_path.size(); i+=spline_sample_parameter_ ) {
-      sampled_path.push_back(original_path[i]);
+  for (size_t i = 0; i < original_path.size(); i += spline_sample_parameter_) {
+    sampled_path.push_back(original_path[i]);
   }
   sampled_path.push_back(original_path.back());
 
@@ -55,13 +57,13 @@ std::vector<std::pair<double, double>> koma::PathPlanner::spline_smooth_eigen(co
 
   Eigen::Matrix<double, 2, Eigen::Dynamic> points(2, sampled_path.size());
   for (size_t i = 0; i < sampled_path.size(); i++) {
-      points(0, i) = sampled_path[i].first;
-      points(1, i) = sampled_path[i].second;
+    points(0, i) = sampled_path[i].first;
+    points(1, i) = sampled_path[i].second;
   }
 
   Eigen::RowVectorXd u(sampled_path.size());
   for (int i = 0; i < sampled_path.size(); ++i) {
-      u(i) = static_cast<double>(i) / double(sampled_path.size() - 1);
+    u(i) = static_cast<double>(i) / double(sampled_path.size() - 1);
   }
 
   // const int degree = 3; // 3次元のspline
@@ -72,13 +74,12 @@ std::vector<std::pair<double, double>> koma::PathPlanner::spline_smooth_eigen(co
   std::vector<std::pair<double, double>> smoothed_path;
   int dense = sampled_path.size() * spline_sample_parameter_;
   for (int i = 0; i <= dense; i++) {
-      
-      double t = static_cast<double>(i) / dense; // 0..1
-      
-      Eigen::Vector2d pv = spline(t); // p(t)
+    double t = static_cast<double>(i) / dense;  // 0..1
 
-      geometry_msgs::msg::PoseStamped pose;
-      smoothed_path.push_back(std::make_pair(pv.x(), pv.y()));
+    Eigen::Vector2d pv = spline(t);  // p(t)
+
+    geometry_msgs::msg::PoseStamped pose;
+    smoothed_path.push_back(std::make_pair(pv.x(), pv.y()));
   }
 
   return smoothed_path;

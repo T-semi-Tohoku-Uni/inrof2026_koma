@@ -35,7 +35,8 @@ private:
   geometry_msgs::msg::Pose robot_pose_;
 
   // path smoothing
-  std::vector<std::pair<double, double>> spline_smooth_eigen(const std::vector<std::pair<double, double>> &original_path);
+  std::vector<std::pair<double, double>> spline_smooth_eigen(
+    const std::vector<std::pair<double, double>> & original_path);
   double spline_sample_parameter_;
 
   // waypoints
