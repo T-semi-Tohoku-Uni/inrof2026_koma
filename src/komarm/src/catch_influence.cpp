@@ -16,7 +16,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     "default_position", std::vector<double>{0.0, -1.3, 0.0, 1.57, 0.0, 0.0});
 
   pursuit_position_ = this->declare_parameter<std::vector<double>>(
-    "pursuit_position", std::vector<double>{0.0, -1.57, 0.0, -1.57, 0.0, 0.0});
+    "pursuit_position", std::vector<double>{0.0, -1.57, 0.0, -1.57, 0.0, 0.4});
 
   // joint names
   joint_names_ = this->declare_parameter<std::vector<std::string>>(
@@ -36,7 +36,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   open_command_ = this->declare_parameter<double>("open_command", -0.4);
 
-  close_command_ = this->declare_parameter<double>("close_command", 1.0);
+  close_command_ = this->declare_parameter<double>("close_command", 0.4);
 
   // initialize tf buffer
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -89,7 +89,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   // Initialize joint states and pre action
   target_joint_state_ = sensor_msgs::msg::JointState();
   target_joint_state_.name = joint_names_;
-  target_joint_state_.position = default_position_;
+  target_joint_state_.position = pursuit_position_;
 
   pre_action_ = sensor_msgs::msg::JointState();
   pre_action_.name = joint_names_;

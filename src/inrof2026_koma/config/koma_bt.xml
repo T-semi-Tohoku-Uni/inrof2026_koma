@@ -42,6 +42,7 @@
                          y="{y}"/>
               <pursuit/>
               <arm_default_pose/>
+              <arm_ee_open/>
               <Sleep msec="1000"/>
               <arm_control x="{x}"
                            y="{y}"
