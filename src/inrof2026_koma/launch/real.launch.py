@@ -238,6 +238,7 @@ def generate_launch_description():
                 "model_path": weight_path,
                 "x_reach_th": 0.05,
                 "y_reach_th": 0.025,
+                "pursuit_position": [0.0, -1.57, 0.0, -1.2, 0.0, 0.4],
             }
         ],
     )
