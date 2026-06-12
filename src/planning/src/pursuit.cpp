@@ -178,6 +178,7 @@ void koma::Pursuit::control_loop()
               path_[current_waypoint_index_].pose.position.x;
   double ty = path_[current_waypoint_index_ + 1].pose.position.y -
               path_[current_waypoint_index_].pose.position.y;
+  RCLCPP_INFO(this->get_logger(), "%ld, %d, %lf, %lf", path_.size(), current_waypoint_index_, tx, ty);
   double norm = std::hypot(tx, ty);
   if (norm > 0) {
     tx /= norm;
