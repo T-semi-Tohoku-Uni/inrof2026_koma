@@ -214,7 +214,7 @@ def generate_launch_description():
             #     "servo_2_max": math.pi,
                 "is_servo_2_reverse": True,
                 "is_servo_3_reverse": True,
-                "is_servo_4_reverse": True,
+                # "is_servo_4_reverse": True,
             # "is_servo_4_reverse": True,
 
             #     "servo_3_min": 0.0,
