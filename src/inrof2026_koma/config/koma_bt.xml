@@ -63,6 +63,8 @@
               <Sleep msec="1000"/>
               <arm_ee_open/>
               <Sleep msec="1000"/>
+              <arm_default_pose/>
+              <Sleep msec="1000"/>
               <arm_pursuit_pose/>
               <waypoint x="0.3"
                         y="2.0"/>
