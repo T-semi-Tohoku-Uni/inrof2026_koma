@@ -42,6 +42,7 @@ private:
 
   // arm settings
   std::vector<double> default_position_;
+  std::vector<double> pursuit_position_;
   std::vector<std::string> joint_names_;
   std::string end_effector_link_;
   std::string base_link_;
@@ -85,6 +86,10 @@ private:
     std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_default_pose_srv_;
   void arm_default_pose_callback(
+    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_pursuit_pose_srv_;
+  void arm_pursuit_pose_callback(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<inrof2026_koma_type::srv::SetFloat64>::SharedPtr arm_root_pose_srv_;

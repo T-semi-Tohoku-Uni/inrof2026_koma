@@ -15,6 +15,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   default_position_ = this->declare_parameter<std::vector<double>>(
     "default_position", std::vector<double>{0.0, -1.3, 0.0, 1.57, 0.0, 0.0});
 
+  pursuit_position_ = this->declare_parameter<std::vector<double>>(
+    "pursuit_position", std::vector<double>{0.0, -1.57, 0.0, -1.57, 0.0, 0.0});
+
   // joint names
   joint_names_ = this->declare_parameter<std::vector<std::string>>(
     "joint_names",
@@ -61,6 +64,12 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
     "arm_default_pose", std::bind(
                           &CatchInfluence::arm_default_pose_callback, this, std::placeholders::_1,
                           std::placeholders::_2));
+
+  // pursuit pose
+  arm_pursuit_pose_srv_ = this->create_service<std_srvs::srv::Trigger>(
+    "arm_pursuit_pose",
+    std::bind(
+      &CatchInfluence::arm_pursuit_pose_callback, this, std::placeholders::_1, std::placeholders::_2));
 
   arm_root_pose_srv_ = this->create_service<inrof2026_koma_type::srv::SetFloat64>(
     "arm_root_pose",
@@ -117,6 +126,19 @@ void koma::CatchInfluence::arm_ee_close_callback(
   std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   target_joint_state_.position[5] = close_command_;
+  response->success = true;
+}
+
+void koma::CatchInfluence::arm_pursuit_pose_callback(
+  const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  target_joint_state_.position[0] = pursuit_position_[0];
+  target_joint_state_.position[1] = pursuit_position_[1];
+  target_joint_state_.position[2] = pursuit_position_[2];
+  target_joint_state_.position[3] = pursuit_position_[3];
+  target_joint_state_.position[4] = pursuit_position_[4];
+  target_joint_state_.position[5] = pursuit_position_[5];
   response->success = true;
 }
 
