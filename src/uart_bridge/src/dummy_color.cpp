@@ -1,22 +1,15 @@
-#include <uart_bridge/dummy_color.hpp>
-
 #include <functional>
+#include <uart_bridge/dummy_color.hpp>
 
 namespace koma
 {
 
 ColorMock::ColorMock(const rclcpp::NodeOptions & options)
-: Node("color_node", options),
-  gen_(std::random_device{}()),
-  dist_(0, 2)
+: Node("color_node", options), gen_(std::random_device{}()), dist_(0, 2)
 {
   color_srv_ = this->create_service<inrof2026_koma_type::srv::Color>(
     "color",
-    std::bind(
-      &ColorMock::color_callback,
-      this,
-      std::placeholders::_1,
-      std::placeholders::_2));
+    std::bind(&ColorMock::color_callback, this, std::placeholders::_1, std::placeholders::_2));
 
   RCLCPP_INFO(this->get_logger(), "Color mock service started");
 }

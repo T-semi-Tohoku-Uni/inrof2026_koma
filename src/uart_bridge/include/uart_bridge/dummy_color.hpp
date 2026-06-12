@@ -1,10 +1,9 @@
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
 #include <inrof2026_koma_type/srv/color.hpp>
-
 #include <memory>
 #include <random>
+#include <rclcpp/rclcpp.hpp>
 
 namespace koma
 {

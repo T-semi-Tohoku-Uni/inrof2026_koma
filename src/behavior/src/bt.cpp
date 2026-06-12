@@ -10,11 +10,11 @@
 #include <behavior/arm_pursuit_pose.hpp>
 #include <behavior/arm_root_pose.hpp>
 #include <behavior/bt.hpp>
+#include <behavior/color.hpp>
 #include <behavior/path_ball_position.hpp>
 #include <behavior/path_goal_position.hpp>
 #include <behavior/path_waypoint_position.hpp>
 #include <behavior/pursuit.hpp>
-#include <behavior/color.hpp>
 #include <behavior/switch_color.hpp>
 #include <behavior/target_ball_position.hpp>
 #include <behavior/while_do_else_break.hpp>
@@ -386,7 +386,8 @@ void koma::BTNode::arm_root_pose(double theta)
   }
 }
 
-inrof2026_koma_type::srv::Color::Response koma::BTNode::color() {
+inrof2026_koma_type::srv::Color::Response koma::BTNode::color()
+{
   while (!this->color_srv_->wait_for_service(1s)) {
     if (!rclcpp::ok()) break;
     RCLCPP_WARN(this->get_logger(), "color_srv_ is not available");
@@ -401,7 +402,7 @@ inrof2026_koma_type::srv::Color::Response koma::BTNode::color() {
     rclcpp::spin_until_future_complete(
       this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
     rclcpp::FutureReturnCode::SUCCESS) {
-      return *result_future.get();
+    return *result_future.get();
   }
 
   throw std::runtime_error("Failed to get color");
@@ -486,7 +487,6 @@ int main(int argc, char * argv[])
       return std::make_unique<koma::Color>(name, config, ros_node);
     };
   factory.registerBuilder<koma::Color>("color", builder_color);
-  
 
   factory.registerNodeType<koma::WhileDoElseBreakNode>("WhileDoElseBreak");
   factory.registerNodeType<koma::SwitchColor>("SwitchColor");
