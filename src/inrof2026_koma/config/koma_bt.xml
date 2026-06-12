@@ -48,6 +48,8 @@
                            z="{z}"/>
               <arm_ee_close/>
               <Sleep msec="1500"/>
+              <arm_default_pose/>
+              <Sleep msec="1000"/>
               <arm_pursuit_pose/>
               <waypoint x="1.34"
                         y="2.00"/>
@@ -62,8 +64,6 @@
               <arm_root_pose theta="1.57"/>
               <Sleep msec="1000"/>
               <arm_ee_open/>
-              <Sleep msec="1000"/>
-              <arm_default_pose/>
               <Sleep msec="1000"/>
               <arm_pursuit_pose/>
               <waypoint x="0.3"
