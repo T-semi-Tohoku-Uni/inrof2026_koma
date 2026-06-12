@@ -48,6 +48,7 @@
                            z="{z}"/>
               <arm_ee_close/>
               <Sleep msec="1500"/>
+              <color color="{color}"/>
               <arm_default_pose/>
               <Sleep msec="1000"/>
               <arm_pursuit_pose/>
@@ -56,9 +57,17 @@
               <pursuit/>
               <waypoint x="0.3"
                         y="2.0"/>
-              <goal_position x="0.15"
-                             y="0.75"
-                             theta="-1.57"/>
+              <SwitchColor color="{color}">
+                <goal_position x="0.15"
+                               y="0.75"
+                               theta="-1.57"/>
+                <goal_position x="0.15"
+                               y="1.4"
+                               theta="-1.57"/>
+                <goal_position x="0.15"
+                               y="1.85"
+                               theta="-1.57"/>
+              </SwitchColor>
               <pursuit/>
               <arm_default_pose/>
               <arm_root_pose theta="1.57"/>
@@ -83,6 +92,10 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Control ID="SwitchColor"
+             editable="true">
+      <input_port name="color"/>
+    </Control>
     <Control ID="WhileDoElseBreak"
              editable="true"/>
     <Action ID="arm_control"
@@ -102,6 +115,10 @@
     <Action ID="arm_root_pose"
             editable="true">
       <input_port name="theta"/>
+    </Action>
+    <Action ID="color"
+            editable="true">
+      <output_port name="color"/>
     </Action>
     <Action ID="goal_position"
             editable="true">
