@@ -238,7 +238,7 @@ def generate_launch_description():
                 "model_path": weight_path,
                 "x_reach_th": 0.05,
                 "y_reach_th": 0.025,
-                "pursuit_position": [0.0, -1.57, 0.0, -1.2, 0.0, 0.4],
+                "pursuit_position": [0.0, -1.57, 0.0, -1.0, 0.0, 0.4],
             }
         ],
     )
@@ -332,8 +332,8 @@ def generate_launch_description():
         executable="ball_plan",
         output="screen",
         parameters=[{
-            "shorten": 0.30,
-            "theta_offset": math.pi/2.0,
+            "shorten": 0.28,
+            "theta_offset": math.pi/20.0,
         }],
     )
 

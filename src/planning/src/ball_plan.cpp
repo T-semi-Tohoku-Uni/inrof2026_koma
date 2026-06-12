@@ -81,6 +81,8 @@ void BallPathNode::genBallPath(
     theta = atan2(dy, dx);
   }
 
+  theta = theta + theta_offset_;
+
   //shorten path
   if (distance > shorten_) {
     goal_pose.pose.position.x -= shorten_ * ux;

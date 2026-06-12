@@ -7,7 +7,7 @@
       <arm_ee_close/>
       <Sleep msec="2000"/>
       <goal_position x="0.15"
-                     y="0.75"
+                     y="0.65"
                      theta="1.57"/>
       <pursuit/>
       <arm_default_pose/>
@@ -59,18 +59,19 @@
                         y="2.0"/>
               <SwitchColor color="{color}">
                 <goal_position x="0.15"
-                               y="0.75"
+                               y="0.60"
                                theta="-1.57"/>
                 <goal_position x="0.15"
-                               y="1.4"
+                               y="1.5"
                                theta="-1.57"/>
                 <goal_position x="0.15"
-                               y="1.85"
+                               y="2.00"
                                theta="-1.57"/>
               </SwitchColor>
               <pursuit/>
               <arm_default_pose/>
-              <arm_root_pose theta="1.57"/>
+	      <arm_root_pose theta="1.57"/>
+	      <Sleep msec="500"/>
               <arm_ee_open/>
               <Sleep msec="1000"/>
               <arm_pursuit_pose/>
