@@ -7,8 +7,8 @@
 #include <behavior/arm_default_pose.hpp>
 #include <behavior/arm_ee_close.hpp>
 #include <behavior/arm_ee_open.hpp>
-#include <behavior/arm_root_pose.hpp>
 #include <behavior/arm_pursuit_pose.hpp>
+#include <behavior/arm_root_pose.hpp>
 #include <behavior/bt.hpp>
 #include <behavior/path_ball_position.hpp>
 #include <behavior/path_goal_position.hpp>

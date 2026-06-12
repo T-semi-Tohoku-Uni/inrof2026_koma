@@ -1,6 +1,8 @@
 #include "behavior/arm_pursuit_pose.hpp"
-#include "behavior/bt.hpp"
+
 #include <rclcpp/rclcpp.hpp>
+
+#include "behavior/bt.hpp"
 
 koma::ArmPursuitPose::ArmPursuitPose(
   const std::string & name, const BT::NodeConfig & config, std::shared_ptr<BTNode> ros_node)
