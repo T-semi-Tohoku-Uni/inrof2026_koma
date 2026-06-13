@@ -12,6 +12,9 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(inrof2026_koma_type REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -41,6 +44,15 @@ target_include_directories(dummy_color PUBLIC
   $<INSTALL_INTERFACE:include>)
 install(TARGETS
   dummy_color
+  DESTINATION lib/${PROJECT_NAME})
+
+add_executable(realsense_rgb src/realsense_rgb.cpp)
+ament_target_dependencies(realsense_rgb rclcpp std_msgs OpenCV sensor_msgs cv_bridge)
+target_include_directories(realsense_rgb PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+install(TARGETS
+  realsense_rgb
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include

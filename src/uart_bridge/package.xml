@@ -13,6 +13,7 @@
   <test_depend>ament_lint_common</test_depend>
 
   <depend>inrof2026_koma_type</depend>
+  <depend>cv_bridge</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
