@@ -1,10 +1,8 @@
 #pragma once
 
+#include <opencv2/opencv.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
-
-#include <opencv2/opencv.hpp>
-
 #include <string>
 
 class RealsenseRgb : public rclcpp::Node
