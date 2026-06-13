@@ -7,11 +7,15 @@
 #include <behavior/arm_default_pose.hpp>
 #include <behavior/arm_ee_close.hpp>
 #include <behavior/arm_ee_open.hpp>
+#include <behavior/arm_pursuit_pose.hpp>
+#include <behavior/arm_root_pose.hpp>
 #include <behavior/bt.hpp>
+#include <behavior/color.hpp>
 #include <behavior/path_ball_position.hpp>
 #include <behavior/path_goal_position.hpp>
 #include <behavior/path_waypoint_position.hpp>
 #include <behavior/pursuit.hpp>
+#include <behavior/switch_color.hpp>
 #include <behavior/target_ball_position.hpp>
 #include <behavior/while_do_else_break.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -38,6 +42,10 @@ koma::BTNode::BTNode(const rclcpp::NodeOptions & options) : Node("bt_node", opti
   arm_ee_open_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_open");
   arm_ee_close_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_ee_close");
   arm_default_pose_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_default_pose");
+  arm_pursuit_pose_srv_ = this->create_client<std_srvs::srv::Trigger>("arm_pursuit_pose");
+  arm_root_pose_srv_ = this->create_client<inrof2026_koma_type::srv::SetFloat64>("arm_root_pose");
+
+  color_srv_ = this->create_client<inrof2026_koma_type::srv::Color>("color");
 
   // action
   // server: localization/pursuit
@@ -339,6 +347,67 @@ void koma::BTNode::arm_default_pose()
   }
 }
 
+void koma::BTNode::arm_pursuit_pose()
+{
+  while (!this->arm_pursuit_pose_srv_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) break;
+    RCLCPP_WARN(this->get_logger(), "arm_pursuit_pose_srv_ is not available");
+  }
+
+  std::shared_ptr<std_srvs::srv::Trigger_Request> request =
+    std::make_shared<std_srvs::srv::Trigger::Request>();
+
+  rclcpp::Client<std_srvs::srv::Trigger>::FutureAndRequestId result_future =
+    arm_pursuit_pose_srv_->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(
+      this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
+    rclcpp::FutureReturnCode::SUCCESS) {
+  }
+}
+
+void koma::BTNode::arm_root_pose(double theta)
+{
+  while (!this->arm_root_pose_srv_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) break;
+    RCLCPP_WARN(this->get_logger(), "arm_root_pose_srv_ is not available");
+  }
+
+  std::shared_ptr<inrof2026_koma_type::srv::SetFloat64_Request> request =
+    std::make_shared<inrof2026_koma_type::srv::SetFloat64::Request>();
+  request->data = theta;
+
+  rclcpp::Client<inrof2026_koma_type::srv::SetFloat64>::FutureAndRequestId result_future =
+    arm_root_pose_srv_->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(
+      this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
+    rclcpp::FutureReturnCode::SUCCESS) {
+  }
+}
+
+inrof2026_koma_type::srv::Color::Response koma::BTNode::color()
+{
+  while (!this->color_srv_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) break;
+    RCLCPP_WARN(this->get_logger(), "color_srv_ is not available");
+  }
+
+  std::shared_ptr<inrof2026_koma_type::srv::Color_Request> request =
+    std::make_shared<inrof2026_koma_type::srv::Color::Request>();
+
+  rclcpp::Client<inrof2026_koma_type::srv::Color>::FutureAndRequestId result_future =
+    color_srv_->async_send_request(request);
+  if (
+    rclcpp::spin_until_future_complete(
+      this->get_node_base_interface(), result_future, std::chrono::seconds(1)) ==
+    rclcpp::FutureReturnCode::SUCCESS) {
+    return *result_future.get();
+  }
+
+  throw std::runtime_error("Failed to get color");
+}
+
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -401,7 +470,26 @@ int main(int argc, char * argv[])
     };
   factory.registerBuilder<koma::ArmDefaultPose>("arm_default_pose", builder_arm_default_pose);
 
+  BT::NodeBuilder builder_arm_root_pose =
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::ArmRootPose>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::ArmRootPose>("arm_root_pose", builder_arm_root_pose);
+
+  BT::NodeBuilder builder_arm_pursuit_pose =
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::ArmPursuitPose>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::ArmPursuitPose>("arm_pursuit_pose", builder_arm_pursuit_pose);
+
+  BT::NodeBuilder builder_color =
+    [ros_node](const std::string & name, const BT::NodeConfiguration & config) {
+      return std::make_unique<koma::Color>(name, config, ros_node);
+    };
+  factory.registerBuilder<koma::Color>("color", builder_color);
+
   factory.registerNodeType<koma::WhileDoElseBreakNode>("WhileDoElseBreak");
+  factory.registerNodeType<koma::SwitchColor>("SwitchColor");
 
   ros_node->declare_parameter<std::string>("config_path", "");
 

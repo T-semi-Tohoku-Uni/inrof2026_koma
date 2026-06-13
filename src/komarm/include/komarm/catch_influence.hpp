@@ -8,6 +8,7 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <inrof2026_koma_type/action/arm_control.hpp>
 #include <inrof2026_koma_type/srv/pose_stamped.hpp>
+#include <inrof2026_koma_type/srv/set_float64.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
@@ -41,6 +42,7 @@ private:
 
   // arm settings
   std::vector<double> default_position_;
+  std::vector<double> pursuit_position_;
   std::vector<std::string> joint_names_;
   std::string end_effector_link_;
   std::string base_link_;
@@ -86,6 +88,14 @@ private:
   void arm_default_pose_callback(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr arm_pursuit_pose_srv_;
+  void arm_pursuit_pose_callback(
+    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+  rclcpp::Service<inrof2026_koma_type::srv::SetFloat64>::SharedPtr arm_root_pose_srv_;
+  void arm_root_pose_callback(
+    const std::shared_ptr<inrof2026_koma_type::srv::SetFloat64::Request> request,
+    std::shared_ptr<inrof2026_koma_type::srv::SetFloat64::Response> response);
 
   //action server
   rclcpp_action::Server<inrof2026_koma_type::action::ArmControl>::SharedPtr arm_control_act_;

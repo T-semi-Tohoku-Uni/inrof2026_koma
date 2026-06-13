@@ -179,7 +179,7 @@ def generate_launch_description():
         output="screen",
         parameters=[{
             "Kp_linear": 0.1,
-            "Kp_angular": 0.05,
+            "Kp_angular": 1.0,
             "max_linear_acceleration": 5.0,
             "max_angular_acceleration": 10.0
         }]
@@ -214,7 +214,7 @@ def generate_launch_description():
             #     "servo_2_max": math.pi,
                 "is_servo_2_reverse": True,
                 "is_servo_3_reverse": True,
-                "is_servo_4_reverse": True,
+                # "is_servo_4_reverse": True,
             # "is_servo_4_reverse": True,
 
             #     "servo_3_min": 0.0,
@@ -238,6 +238,7 @@ def generate_launch_description():
                 "model_path": weight_path,
                 "x_reach_th": 0.05,
                 "y_reach_th": 0.025,
+                "pursuit_position": [0.0, -1.57, 0.0, -1.0, 0.0, 0.4],
             }
         ],
     )
@@ -255,7 +256,7 @@ def generate_launch_description():
             "odom_noise_1": 0.05,
             "odom_noise_2": 0.0,
             "odom_noise_3": 1.0,
-            "odom_noise_4": 0.0,
+            "odom_noise_4": 0.001,
             "resample_th": 0.5,
             "scan_step": 1,
         }],
@@ -288,7 +289,7 @@ def generate_launch_description():
         name="pursuit",
         output="screen",
         parameters=[{
-            "max_linear_speed": 0.10,
+            "max_linear_speed": 0.20,
             "max_angular_speed": 0.7,
             "max_linear_tolerance": 0.20,
             "max_theta_tolerance": 0.10,
@@ -332,8 +333,17 @@ def generate_launch_description():
         output="screen",
         parameters=[{
             "shorten": 0.28,
-            "theta_offset": math.pi/5.0,
+            "theta_offset": math.pi/20.0,
         }],
+    )
+
+    color = Node(
+        package="uart_bridge",
+        executable="color",
+        output="screen",
+        parameters=[{
+            "device_name": "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0"
+        }]
     )
 
     ldlidar_with_mgr = IncludeLaunchDescription(
@@ -360,5 +370,6 @@ def generate_launch_description():
         bt,
         path_ball_position,
         odom_tf_broadcaster,
-        ldlidar_with_mgr
+        ldlidar_with_mgr,
+        color
     ])

@@ -29,6 +29,10 @@ add_library(bt_lib SHARED
   src/arm_ee_close.cpp
   src/arm_control.cpp
   src/arm_default_pose.cpp
+  src/arm_root_pose.cpp
+  src/arm_pursuit_pose.cpp
+  src/color.cpp
+  src/switch_color.cpp
 )
 target_include_directories(bt_lib
   PUBLIC

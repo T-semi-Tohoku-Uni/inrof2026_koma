@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(inrof2026_koma_type REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -22,6 +23,24 @@ target_include_directories(motor PUBLIC
   $<INSTALL_INTERFACE:include>)
 install(TARGETS
   motor
+  DESTINATION lib/${PROJECT_NAME})
+
+add_executable(color src/color.cpp)
+ament_target_dependencies(color rclcpp std_msgs inrof2026_koma_type)
+target_include_directories(color PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+install(TARGETS
+  color
+  DESTINATION lib/${PROJECT_NAME})
+
+add_executable(dummy_color src/dummy_color.cpp)
+ament_target_dependencies(dummy_color rclcpp std_msgs inrof2026_koma_type)
+target_include_directories(dummy_color PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+install(TARGETS
+  dummy_color
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include

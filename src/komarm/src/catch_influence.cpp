@@ -15,6 +15,9 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   default_position_ = this->declare_parameter<std::vector<double>>(
     "default_position", std::vector<double>{0.0, -1.3, 0.0, 1.57, 0.0, 0.0});
 
+  pursuit_position_ = this->declare_parameter<std::vector<double>>(
+    "pursuit_position", std::vector<double>{0.0, -1.57, 0.0, -1.57, 0.0, 0.4});
+
   // joint names
   joint_names_ = this->declare_parameter<std::vector<std::string>>(
     "joint_names",
@@ -33,7 +36,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
 
   open_command_ = this->declare_parameter<double>("open_command", -0.4);
 
-  close_command_ = this->declare_parameter<double>("close_command", 1.0);
+  close_command_ = this->declare_parameter<double>("close_command", 0.4);
 
   // initialize tf buffer
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -62,6 +65,17 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
                           &CatchInfluence::arm_default_pose_callback, this, std::placeholders::_1,
                           std::placeholders::_2));
 
+  // pursuit pose
+  arm_pursuit_pose_srv_ = this->create_service<std_srvs::srv::Trigger>(
+    "arm_pursuit_pose", std::bind(
+                          &CatchInfluence::arm_pursuit_pose_callback, this, std::placeholders::_1,
+                          std::placeholders::_2));
+
+  arm_root_pose_srv_ = this->create_service<inrof2026_koma_type::srv::SetFloat64>(
+    "arm_root_pose",
+    std::bind(
+      &CatchInfluence::arm_root_pose_callback, this, std::placeholders::_1, std::placeholders::_2));
+
   arm_action_timeout_sec_ = this->declare_parameter<double>("arm_action_timeout_sec", 5.0);
 
   // Initialize action server
@@ -75,7 +89,7 @@ CatchInfluence::CatchInfluence(const rclcpp::NodeOptions & options)
   // Initialize joint states and pre action
   target_joint_state_ = sensor_msgs::msg::JointState();
   target_joint_state_.name = joint_names_;
-  target_joint_state_.position = default_position_;
+  target_joint_state_.position = pursuit_position_;
 
   pre_action_ = sensor_msgs::msg::JointState();
   pre_action_.name = joint_names_;
@@ -115,6 +129,19 @@ void koma::CatchInfluence::arm_ee_close_callback(
   response->success = true;
 }
 
+void koma::CatchInfluence::arm_pursuit_pose_callback(
+  const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  target_joint_state_.position[0] = pursuit_position_[0];
+  target_joint_state_.position[1] = pursuit_position_[1];
+  target_joint_state_.position[2] = pursuit_position_[2];
+  target_joint_state_.position[3] = pursuit_position_[3];
+  target_joint_state_.position[4] = pursuit_position_[4];
+  target_joint_state_.position[5] = pursuit_position_[5];
+  response->success = true;
+}
+
 void koma::CatchInfluence::arm_default_pose_callback(
   const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   std::shared_ptr<std_srvs::srv::Trigger::Response> response)
@@ -125,6 +152,16 @@ void koma::CatchInfluence::arm_default_pose_callback(
   target_joint_state_.position[3] = default_position_[3];
   target_joint_state_.position[4] = default_position_[4];
   response->success = true;
+}
+
+void koma::CatchInfluence::arm_root_pose_callback(
+  const std::shared_ptr<inrof2026_koma_type::srv::SetFloat64::Request> request,
+  std::shared_ptr<inrof2026_koma_type::srv::SetFloat64::Response> response)
+{
+  // TODO: check the request data is valid
+  target_joint_state_.position[0] = request->data;
+  response->success = true;
+  RCLCPP_INFO(this->get_logger(), "arm_root_pose called with theta: %f", request->data);
 }
 
 void koma::CatchInfluence::joint_command_send_callback()

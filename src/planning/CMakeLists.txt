@@ -17,6 +17,7 @@ find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(inrof2026_koma_type REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(Eigen3 REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -30,6 +31,7 @@ ament_target_dependencies(path_plan
   tf2
   tf2_geometry_msgs
   OpenCV
+  Eigen3
 )
 target_link_libraries(path_plan
   ${YAML_CPP_LIBRARIES}

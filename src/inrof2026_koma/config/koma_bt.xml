@@ -2,11 +2,20 @@
 <root BTCPP_format="4">
   <BehaviorTree ID="free_ball">
     <Sequence>
-      <Sleep msec="5000"/>
+      <arm_pursuit_pose/>
+      <Sleep msec="2000"/>
+      <arm_ee_close/>
+      <Sleep msec="2000"/>
       <goal_position x="0.15"
-                     y="0.75"
-                     theta="1.05"/>
+                     y="0.65"
+                     theta="1.57"/>
       <pursuit/>
+      <arm_default_pose/>
+      <arm_root_pose theta="-1.57"/>
+      <Sleep msec="1000"/>
+      <arm_ee_open/>
+      <Sleep msec="1000"/>
+      <arm_pursuit_pose/>
       <waypoint x="0.3"
                 y="2.0"/>
     </Sequence>
@@ -19,7 +28,7 @@
       <KeepRunningUntilFailure>
         <Sequence>
           <goal_position x="1.34"
-                         y="2.00"
+                         y="2.10"
                          theta="-1.57"/>
           <pursuit/>
           <arm_ee_open/>
@@ -28,6 +37,9 @@
                                   y="{y}"
                                   z="{z}"/>
             <Sequence>
+              <arm_default_pose/>
+              <arm_ee_open/>
+              <Sleep msec="1000"/>
               <path_ball x="{x}"
                          y="{y}"/>
               <pursuit/>
@@ -35,18 +47,34 @@
                            y="{y}"
                            z="{z}"/>
               <arm_ee_close/>
-              <Sleep msec="5000"/>
+              <Sleep msec="1500"/>
+              <color color="{color}"/>
               <arm_default_pose/>
+              <Sleep msec="1000"/>
+              <arm_pursuit_pose/>
               <waypoint x="1.34"
                         y="2.00"/>
               <pursuit/>
               <waypoint x="0.3"
                         y="2.0"/>
-              <goal_position x="0.15"
-                             y="0.75"
-                             theta="1.05"/>
+              <SwitchColor color="{color}">
+                <goal_position x="0.15"
+                               y="0.60"
+                               theta="-1.57"/>
+                <goal_position x="0.15"
+                               y="1.5"
+                               theta="-1.57"/>
+                <goal_position x="0.15"
+                               y="2.00"
+                               theta="-1.57"/>
+              </SwitchColor>
               <pursuit/>
+              <arm_default_pose/>
+	      <arm_root_pose theta="1.57"/>
+	      <Sleep msec="500"/>
               <arm_ee_open/>
+              <Sleep msec="1000"/>
+              <arm_pursuit_pose/>
               <waypoint x="0.3"
                         y="2.0"/>
             </Sequence>
@@ -64,6 +92,10 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Control ID="SwitchColor"
+             editable="true">
+      <input_port name="color"/>
+    </Control>
     <Control ID="WhileDoElseBreak"
              editable="true"/>
     <Action ID="arm_control"
@@ -78,6 +110,16 @@
             editable="true"/>
     <Action ID="arm_ee_open"
             editable="true"/>
+    <Action ID="arm_pursuit_pose"
+            editable="true"/>
+    <Action ID="arm_root_pose"
+            editable="true">
+      <input_port name="theta"/>
+    </Action>
+    <Action ID="color"
+            editable="true">
+      <output_port name="color"/>
+    </Action>
     <Action ID="goal_position"
             editable="true">
       <input_port name="x"/>
