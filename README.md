@@ -1,6 +1,18 @@
 # inrof2026_koma
 
+# ロボット
+知能ロボコン2026に出場しました．
+
+![robot](images/robot_1.jpg)
+![robot](images/robot_2.jpg)
+
 # 環境構築
+```bash
+cd
+git clone git@github.com:T-semi-Tohoku-Uni/inrof2026_koma.git
+cd inrof2026_koma
+```
+
 必要なライブラリのダウンロード
 ```bash
 sudo apt update
@@ -14,6 +26,13 @@ commitメッセージのフォーマット設定
 ```bash
 chmod a+x .githooks/*
 git config --local core.hooksPath .githooks
+```
+
+```bash
+sudo apt-get install python3-rosdep
+sudo rosdep init
+rosdep update
+rosdep install --from-paths src -y --ignore-src
 ```
 
 ## プログラムのフォーマット設定
@@ -39,6 +58,17 @@ rm -rf lib.linux-aarch64-cpython-310.zip
 ## ビルド
 ```
 colcon build --symlink-install
+```
+## シミュレーションの実行
+```bash
+source install/setup.zsh
+ros2 launch inrof2026_koma simulation.launch.py
+```
+
+## 実機での実行
+```bash
+source install/setup.zsh
+ros2 launch inrof2026_koma real.launch.py
 ```
 
 ## 別端末でrvizのみ表示したい場合
