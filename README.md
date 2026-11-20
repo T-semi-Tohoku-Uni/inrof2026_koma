@@ -6,6 +6,11 @@
 ![robot](images/robot_1.jpg)
 ![robot](images/robot_2.jpg)
 
+# 解説スライド
+機構からソフトまで簡単に解説したスライドです．
+
+[![解説スライドの表紙](images/slide-preview.jpg)](slide/inrof2026_koma_github.pdf)
+
 # 環境構築
 ```bash
 cd
